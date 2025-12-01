@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - SEO Health Checker</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tailwind.css">
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/profile.js"></script>
+</head>
+<body class="bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <a href="index.html" class="text-xl font-bold text-blue-600">SEO Health Checker</a>
+        <div id="api-connection-status" class="status-indicator status-connecting ml-4">
+          <span class="status-dot"></span>
+          <span class="status-text">API: Connecting...</span>
+        </div>
+      </div>
+      <nav>
+        <ul class="flex space-x-6">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="history.html" class="nav-link">History</a></li>
+          <li><a href="profile.html" class="nav-link active">Profile</a></li>
+          <li><button id="sign-out-btn" class="nav-link text-red-500">Sign Out</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h1 class="text-2xl font-bold mb-6">User Profile</h1>
+      
+      <!-- Profile Information -->
+      <div id="profile-info" class="mb-8">
+        <div class="animate-pulse">
+          <div class="h-8 bg-gray-200 rounded w-25 mb-2"></div>
+          <div class="h-4 bg-gray-200 rounded w-33"></div>
+        </div>
+      </div>
+      
+      <!-- API Key Configuration -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4">API Key Configuration</h2>
+        <p class="mb-4 text-gray-700">
+          Configure your API keys to enable advanced scanning features. These keys will be used instead of the default system keys.
+        </p>
+        
+        <form id="api-key-form" class="space-y-4">
+          <div class="form-group">
+            <label for="psi-api-key" class="form-label">Google PageSpeed Insights API Key</label>
+            <input type="text" id="psi-api-key" class="form-input" placeholder="Enter your PageSpeed Insights API key">
+            <p class="text-sm text-gray-500">Used for performance and SEO analysis</p>
+          </div>
+          
+          <div class="form-group">
+            <label for="whoapi-key" class="form-label">WhoAPI Key</label>
+            <input type="text" id="whoapi-key" class="form-input" placeholder="Enter your WhoAPI key">
+            <p class="text-sm text-gray-500">Used for domain information and WHOIS data</p>
+          </div>
+          
+          <div class="form-group">
+            <label for="safe-browsing-api-key" class="form-label">Google Safe Browsing API Key</label>
+            <input type="text" id="safe-browsing-api-key" class="form-input" placeholder="Enter your Safe Browsing API key">
+            <p class="text-sm text-gray-500">Used to check for security issues</p>
+          </div>
+          
+          <div id="api-key-message" class="my-2"></div>
+          
+          <button type="submit" class="btn btn-primary">Save API Keys</button>
+        </form>
+      </div>
+      
+      <!-- API Status -->
+      <div id="api-status" class="mb-8">
+        <h3 class="text-lg font-bold mb-2">API Service Status</h3>
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+          <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+          <div class="h-4 bg-gray-200 rounded w-full"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-6">
+    <div class="container mx-auto px-4">
+      <p class="text-center">© 2023 SEO Health Checker - All Rights Reserved</p>
+    </div>
+  </footer>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full absolute top-50 left-50 transform">
+      <div class="flex items-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
+        <p id="loading-message" class="text-lg">Loading...</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Error Message -->
+  <div id="error-container" class="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded shadow-lg z-50 hidden">
+    <p id="error-message">Error message here</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the API connection status check
+      seoApi.checkApiConnection();
+      
+      // Initialize auth listeners
+      if (typeof initAuth === 'function') {
+        initAuth();
+      }
+    });
+  </script>
+</body>
+</html>

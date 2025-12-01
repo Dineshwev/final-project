@@ -1,0 +1,52 @@
+// src/config/firebase.ts
+import { initializeApp, FirebaseApp } from "firebase/app";
+import { getAuth, Auth } from "firebase/auth";
+
+// Simplified Firebase configuration - just what we need for auth
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+};
+
+let app: FirebaseApp;
+let auth: Auth;
+
+// Check if we have all required Firebase config values
+const hasValidFirebaseConfig = 
+  process.env.REACT_APP_FIREBASE_API_KEY && 
+  process.env.REACT_APP_FIREBASE_AUTH_DOMAIN &&
+  process.env.REACT_APP_FIREBASE_PROJECT_ID;
+
+try {
+  if (hasValidFirebaseConfig) {
+    console.log('✅ Firebase config loaded');
+    
+    // Initialize Firebase
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    
+    console.log('✅ Firebase Auth initialized successfully');
+  } else {
+    console.warn('⚠️ Firebase configuration missing. Auth features disabled.');
+    throw new Error('Missing Firebase configuration');
+  }
+} catch (error: any) {
+  console.error('❌ Error initializing Firebase:', error.message);
+  
+  // Provide mock objects to prevent errors elsewhere in the code
+  app = {} as FirebaseApp;
+  auth = { 
+    currentUser: null, 
+    onAuthStateChanged: (callback: any) => {
+      callback(null);
+      return () => {};
+    } 
+  } as unknown as Auth;
+}
+
+export { app, auth };
+export default auth;

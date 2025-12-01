@@ -1,0 +1,55 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html"
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#f0f7ff',
+          100: '#e0effe',
+          200: '#bae0fd',
+          300: '#7dc1fc',
+          400: '#3898f9',
+          500: '#0072f5',
+          600: '#005ad1',
+          700: '#0047ab',
+          800: '#003c8c',
+          900: '#003474',
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.5s ease-out',
+        'gradient': 'gradient 8s linear infinite',
+      },
+      keyframes: {
+        'fade-in': {
+          'from': {
+            opacity: '0',
+            transform: 'translateY(20px)',
+          },
+          'to': {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        gradient: {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center',
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center',
+          },
+        },
+      },
+    },
+  },
+  plugins: [],
+};
+}
+}

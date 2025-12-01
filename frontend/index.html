@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Environment Variables -->
+  <meta name="env-FIREBASE_API_KEY" content="AIzaSyDzmruvMQyw1GwqcEKdMz2OPVRPM50P-Wc">
+  <meta name="env-FIREBASE_APP_ID" content="1:679671394769:web:0d0fe45b4d9b862df0b0f0">
+  <meta name="env-FIREBASE_AUTH_DOMAIN" content="health-4c77c.firebaseapp.com">
+  <meta name="env-FIREBASE_DATABASE_URL" content="https://health-4c77c-default-rtdb.firebaseio.com">
+  <meta name="env-FIREBASE_MEASUREMENT_ID" content="G-YG2DTK0VCZ">
+  <meta name="env-FIREBASE_MESSAGING_SENDER_ID" content="679671394769">
+  <meta name="env-FIREBASE_PROJECT_ID" content="health-4c77c">
+  <meta name="env-FIREBASE_STORAGE_BUCKET" content="health-4c77c.firebasestorage.app">
+  <meta name="env-PAGE_SPEED_INSIGHTS_API_KEY" content="AIzaSyDt-L4nZ3Npg9gl8kArMR_kgOiIX_atwQw">
+  <meta name="env-SAFE_BROWSING_API_KEY" content="AIzaSyACR3qU3ou_Vz6XvW4jRFV40r7XCLF3SOU">
+  <meta name="env-WHOAPI_KEY" content="f468a984e13b3971389ea4743fe93eeb">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Healthy SEO | Advanced Website Health Analyzer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="index.html" class="logo">
+        <i class="fas fa-chart-line"></i>
+        <span>Healthy SEO</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link active">Home</a></li>
+          <li><a href="history.html" class="nav-link">History</a></li>
+          <li><a href="settings.html" class="nav-link">Settings</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+        </ul>
+      </nav>
+
+      <!-- Auth Status - Show for logged out users -->
+      <div class="auth-status">
+        <a href="login.html" class="btn btn-outline">Login</a>
+        <a href="register.html" class="btn btn-primary">Sign Up</a>
+      </div>
+
+      <!-- User Menu - Show for logged in users -->
+      <div class="auth-menu user-menu hidden">
+        <button class="auth-menu-toggle">
+          <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="User">
+          <span class="user-name">John Doe</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+
+        <div class="auth-menu-dropdown">
+          <a href="profile.html" class="auth-menu-item">
+            <i class="fas fa-user"></i>
+            <span>My Profile</span>
+          </a>
+          <a href="history.html" class="auth-menu-item">
+            <i class="fas fa-history"></i>
+            <span>Scan History</span>
+          </a>
+          <a href="settings.html" class="auth-menu-item">
+            <i class="fas fa-gear"></i>
+            <span>Settings</span>
+          </a>
+          <a href="#" class="auth-menu-item logout-button">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+
+      <div id="api-connection-status" class="status-indicator status-checking">
+        <span class="status-dot"></span>
+        <span class="status-text">API: Checking...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Comprehensive SEO Analysis & Website Health Check</h1>
+        <p class="hero-subtitle">Get detailed insights into your website's SEO performance, security, and accessibility.
+        </p>
+
+        <div class="hero-form">
+          <form id="scan-form">
+            <div class="scan-input-group">
+              <input type="url" id="urlInput" class="form-input"
+                placeholder="Enter website URL (e.g., https://example.com)" required>
+              <button type="submit" class="btn btn-primary" id="scanBtn">
+                <i class="fas fa-search" id="scanBtnIcon"></i> <span id="scanBtnText">Analyze Website</span>
+              </button>
+            </div>
+            <div id="scan-options" class="scan-options">
+              <div class="form-check">
+                <input type="checkbox" id="deep-crawl" class="form-check-input">
+                <label for="deep-crawl" class="form-check-label">Deep crawl (analyzes multiple pages)</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" id="include-security" class="form-check-input" checked>
+                <label for="include-security" class="form-check-label">Security analysis</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" id="include-backlinks" class="form-check-input">
+                <label for="include-backlinks" class="form-check-label">Backlink analysis</label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div id="scan-status" class="hidden">
+          <div class="scan-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">Starting analysis...</div>
+          </div>
+        </div>
+
+        <div class="api-status-container">
+          <div id="apiErrorContainer" class="api-error-container" style="display: none;">
+            <div class="api-error-message">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span id="apiErrorText">Error connecting to API</span>
+            </div>
+            <button id="retryButton" class="btn btn-sm">Retry Connection</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Comprehensive Website Analysis</h2>
+      <p class="section-subtitle">Our tool analyzes multiple aspects of your website to provide actionable insights.</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-magnifying-glass-chart"></i>
+          </div>
+          <h3 class="feature-title">SEO Analysis</h3>
+          <p class="feature-description">
+            Analyze on-page SEO factors including meta tags, headings, content quality, keyword usage, and more.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-gauge-high"></i>
+          </div>
+          <h3 class="feature-title">Performance Metrics</h3>
+          <p class="feature-description">
+            Measure Core Web Vitals, page speed, and other performance metrics that impact user experience and rankings.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-shield-halved"></i>
+          </div>
+          <h3 class="feature-title">Security Assessment</h3>
+          <p class="feature-description">
+            Check for security vulnerabilities, SSL configuration, and security headers that protect your site.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-universal-access"></i>
+          </div>
+          <h3 class="feature-title">Accessibility</h3>
+          <p class="feature-description">
+            Evaluate your site's accessibility compliance with WCAG standards and find opportunities for improvement.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-mobile-screen"></i>
+          </div>
+          <h3 class="feature-title">Mobile Friendliness</h3>
+          <p class="feature-description">
+            Test how well your site performs on mobile devices and identify responsive design issues.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-link"></i>
+          </div>
+          <h3 class="feature-title">Backlink Analysis</h3>
+          <p class="feature-description">
+            Examine your site's backlink profile, domain authority, and referring domains.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-share-nodes"></i>
+          </div>
+          <h3 class="feature-title">Open Graph Validator</h3>
+          <p class="feature-description">
+            Validate and optimize your Open Graph meta tags for perfect social media sharing previews.
+          </p>
+          <a href="og-validator.html" class="btn btn-sm btn-primary" style="margin-top: 1rem; display: inline-block;">
+            <i class="fas fa-arrow-right"></i> Try Now
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">Get comprehensive insights in just three simple steps</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Enter Your URL</h3>
+            <p>Simply enter your website URL in the form above to begin the analysis process.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Automated Analysis</h3>
+            <p>Our system crawls your website and performs comprehensive analysis across multiple factors.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Get Detailed Report</h3>
+            <p>Receive a detailed report with actionable insights to improve your website's performance.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="main-content">
+      <div class="main-column">
+
+        <div class="score-card">
+          <div class="score-header">
+            <h2>Overall Health Score</h2>
+            <div class="status-indicator status-good" id="scoreStatus">
+              <div class="status-dot"></div>
+              <span>Good</span>
+            </div>
+          </div>
+          <div class="score-content">
+            <div class="score-ring">
+              <div class="score-circle">
+                <div class="score-inner" id="scoreValue">—</div>
+              </div>
+            </div>
+            <div class="score-text">
+              <h3 id="scoreText">No scan performed yet</h3>
+              <p id="scoreDescription">Enter a URL and click "Scan Website" to begin analysis</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-card">
+          <div class="results-header">
+            <h2>Detailed Analysis</h2>
+            <button class="btn btn-ghost" id="exportBtn">
+              <i class="fas fa-download"></i> Export Report
+            </button>
+          </div>
+          <div class="tabs">
+            <button class="tab active" data-tab="onpage">On-Page SEO</button>
+            <button class="tab" data-tab="technical">Technical</button>
+            <button class="tab" data-tab="performance">Performance</button>
+            <button class="tab" data-tab="recommendations">Recommendations</button>
+            <button class="tab" data-tab="details">Raw Data</button>
+          </div>
+
+          <div class="tab-content active" id="onpage">
+            <div class="metric-grid">
+              <div class="metric-card" id="titleCard">
+                <div class="metric-header">
+                  <div class="metric-title">Page Title</div>
+                  <div class="metric-value" id="titleValue">—</div>
+                </div>
+                <div class="metric-description" id="titleDescription">Optimal: 50-60 characters</div>
+              </div>
+              <div class="metric-card" id="metaDescCard">
+                <div class="metric-header">
+                  <div class="metric-title">Meta Description</div>
+                  <div class="metric-value" id="metaDescValue">—</div>
+                </div>
+                <div class="metric-description" id="metaDescDescription">Optimal: 120-155 characters</div>
+              </div>
+              <div class="metric-card" id="h1Card">
+                <div class="metric-header">
+                  <div class="metric-title">H1 Headings</div>
+                  <div class="metric-value" id="h1Value">—</div>
+                </div>
+                <div class="metric-description">Ideal: 1 per page</div>
+              </div>
+              <div class="metric-card" id="imagesCard">
+                <div class="metric-header">
+                  <div class="metric-title">Images with Alt Text</div>
+                  <div class="metric-value" id="imagesValue">—</div>
+                </div>
+                <div class="metric-description">All images should have descriptive alt text</div>
+              </div>
+              <div class="metric-card" id="wordCountCard">
+                <div class="metric-header">
+                  <div class="metric-title">Word Count</div>
+                  <div class="metric-value" id="wordCountValue">—</div>
+                </div>
+                <div class="metric-description">Minimum 300 words recommended</div>
+              </div>
+              <div class="metric-card" id="canonicalCard">
+                <div class="metric-header">
+                  <div class="metric-title">Canonical URL</div>
+                  <div class="metric-value" id="canonicalValue">—</div>
+                </div>
+                <div class="metric-description">Helps prevent duplicate content</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="technical">
+            <div class="metric-grid">
+              <div class="metric-card" id="httpsCard">
+                <div class="metric-header">
+                  <div class="metric-title">HTTPS</div>
+                  <div class="metric-value" id="httpsValue">—</div>
+                </div>
+                <div class="metric-description">Secure connection required</div>
+              </div>
+              <div class="metric-card" id="robotsCard">
+                <div class="metric-header">
+                  <div class="metric-title">Robots.txt</div>
+                  <div class="metric-value" id="robotsValue">—</div>
+                </div>
+                <div class="metric-description">Instructions for search engine crawlers</div>
+              </div>
+              <div class="metric-card" id="sitemapCard">
+                <div class="metric-header">
+                  <div class="metric-title">Sitemap.xml</div>
+                  <div class="metric-value" id="sitemapValue">—</div>
+                </div>
+                <div class="metric-description">Helps search engines index your site</div>
+              </div>
+              <div class="metric-card" id="viewportCard">
+                <div class="metric-header">
+                  <div class="metric-title">Viewport Meta Tag</div>
+                  <div class="metric-value" id="viewportValue">—</div>
+                </div>
+                <div class="metric-description">Required for mobile responsiveness</div>
+              </div>
+              <div class="metric-card" id="gaCard">
+                <div class="metric-header">
+                  <div class="metric-title">Google Analytics</div>
+                  <div class="metric-value" id="gaValue">—</div>
+                </div>
+                <div class="metric-description">Website analytics tracking</div>
+              </div>
+              <div class="metric-card" id="linksCard">
+                <div class="metric-header">
+                  <div class="metric-title">Internal Links</div>
+                  <div class="metric-value" id="linksValue">—</div>
+                </div>
+                <div class="metric-description" id="linksDescription">Internal vs external links</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="performance">
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-title">Largest Contentful Paint</div>
+                  <div class="metric-value">—</div>
+                </div>
+                <div class="metric-description">Good: ≤2.5s</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-title">First Input Delay</div>
+                  <div class="metric-value">—</div>
+                </div>
+                <div class="metric-description">Good: ≤100ms</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-title">Cumulative Layout Shift</div>
+                  <div class="metric-value">—</div>
+                </div>
+                <div class="metric-description">Good: ≤0.1</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-title">First Contentful Paint</div>
+                  <div class="metric-value">—</div>
+                </div>
+                <div class="metric-description">Good: ≤1.8s</div>
+              </div>
+            </div>
+            <div class="premium-banner" style="margin-top: 20px;">
+              <div class="premium-badge">PRO</div>
+              <div class="premium-text">Performance metrics require server-side processing. Upgrade to enable Core Web
+                Vitals analysis.</div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="recommendations">
+            <div class="recommendations-list" id="recommendationsList">
+              <div class="recommendation success">
+                <div class="recommendation-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="recommendation-content">
+                  <div class="recommendation-title">No critical issues detected</div>
+                  <div class="recommendation-description">Your website appears to be in good health. Continue monitoring
+                    for optimal performance.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="details">
+            <pre id="rawOutput"
+              style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-sm); overflow: auto; font-size: 13px; color: var(--text-secondary);">No scan data available. Run a scan to see raw output.</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="sidebar-card">
+          <h3>Advanced Features</h3>
+          <div class="features-list">
+            <div class="feature">
+              <div class="feature-icon">
+                <i class="fas fa-tachometer-alt"></i>
+              </div>
+              <div class="feature-text">
+                <h4>Performance Metrics</h4>
+                <p>Core Web Vitals and loading times</p>
+              </div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">
+                <i class="fas fa-mobile-alt"></i>
+              </div>
+              <div class="feature-text">
+                <h4>Mobile Optimization</h4>
+                <p>Mobile-friendly and responsive checks</p>
+              </div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">
+                <i class="fas fa-search"></i>
+              </div>
+              <div class="feature-text">
+                <h4>Keyword Analysis</h4>
+                <p>Content optimization suggestions</p>
+              </div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <div class="feature-text">
+                <h4>Competitor Tracking</h4>
+                <p>Compare with industry benchmarks</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pricing-card">
+          <div class="pricing-content">
+            <div class="pricing-header">
+              <h3>Healthy SEO Pro</h3>
+              <p>Unlock advanced analytics and monitoring</p>
+            </div>
+            <div class="price">$29<span class="price-period">/month</span></div>
+            <div class="pricing-features">
+              <div class="pricing-feature">
+                <i class="fas fa-check"></i>
+                <span>Unlimited website scans</span>
+              </div>
+              <div class="pricing-feature">
+                <i class="fas fa-check"></i>
+                <span>Core Web Vitals analysis</span>
+              </div>
+              <div class="pricing-feature">
+                <i class="fas fa-check"></i>
+                <span>Competitor tracking</span>
+              </div>
+              <div class="pricing-feature">
+                <i class="fas fa-check"></i>
+                <span>Automated weekly reports</span>
+              </div>
+              <div class="pricing-feature">
+                <i class="fas fa-check"></i>
+                <span>Priority support</span>
+              </div>
+            </div>
+            <button class="btn" style="background: white; color: var(--accent-primary); width: 100%;">
+              Upgrade Now
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>Recent Scans</h3>
+          <div class="features-list">
+            <div class="feature">
+              <div class="feature-icon">
+                <i class="fas fa-globe"></i>
+              </div>
+              <div class="feature-text">
+                <h4>example.com</h4>
+                <p>Score: 92 • 2 days ago</p>
+              </div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">
+                <i class="fas fa-globe"></i>
+              </div>
+              <div class="feature-text">
+                <h4>demo-site.org</h4>
+                <p>Score: 78 • 1 week ago</p>
+              </div>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">
+                <i class="fas fa-globe"></i>
+              </div>
+              <div class="feature-text">
+                <h4>test-page.net</h4>
+                <p>Score: 85 • 2 weeks ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <i class="fas fa-chart-line"></i> Healthy SEO
+        </div>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="contact.html">Contact</a>
+        </div>
+        <div class="footer-copyright">
+          &copy; 2025 Healthy SEO. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/firebase-auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/scan.js"></script>
+</body>
+
+</html>

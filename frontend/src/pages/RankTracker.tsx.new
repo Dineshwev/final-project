@@ -1,0 +1,243 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../config/firebase.js';
+import ErrorBoundary from '../components/ErrorBoundary';
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3003/api';
+
+interface KeywordRow { 
+  id: number; 
+  url: string; 
+  keyword: string; 
+  last_position: number|null; 
+  created_at: string; 
+  updated_at: string; 
+}
+
+const RankTrackerContent: React.FC = () => {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const [url, setUrl] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [keywords, setKeywords] = useState<KeywordRow[]>([]);
+  const [kwPage, setKwPage] = useState(1);
+  const [kwPageSize] = useState(20);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string|null>(null);
+
+  const getAuthHeader = async (): Promise<HeadersInit> => {
+    const token = await auth.currentUser?.getIdToken();
+    return {
+      'Authorization': token ? `Bearer ${token}` : '',
+      'Content-Type': 'application/json'
+    };
+  };
+
+  const loadKeywords = useCallback(async (page = kwPage) => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({ 
+        page: String(page), 
+        pageSize: String(kwPageSize)
+      });
+      
+      const res = await fetch(`${API_BASE}/rank-tracker?${params.toString()}`, {
+        headers: await getAuthHeader()
+      });
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          navigate('/login');
+          return;
+        }
+        throw new Error('Failed to load keywords');
+      }
+
+      const json = await res.json();
+      if (json.status === 'success') {
+        setKeywords(json.items || json.data || []);
+        setKwPage(json.page || page);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to load keywords');
+    }
+  }, [kwPageSize, kwPage, currentUser, navigate]);
+
+  useEffect(() => { 
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+    loadKeywords(); 
+  }, [currentUser, loadKeywords, navigate]);
+
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/rank-tracker`, {
+        method: 'POST',
+        headers: await getAuthHeader(),
+        body: JSON.stringify({ url, keyword })
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          navigate('/login');
+          return;
+        }
+        throw new Error('Failed to add keyword');
+      }
+
+      setUrl('');
+      setKeyword('');
+      await loadKeywords(1);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to add keyword');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function remove(id: number) {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/rank-tracker/${id}`, {
+        method: 'DELETE',
+        headers: await getAuthHeader()
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          navigate('/login');
+          return;
+        }
+        throw new Error('Failed to remove keyword');
+      }
+
+      await loadKeywords();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to remove keyword');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!currentUser) {
+    return null;
+  }
+
+  return (
+    <div className='min-h-screen bg-gradient-to-br from-indigo-50 via-white to-sky-50 py-10 px-4'>
+      <div className='max-w-7xl mx-auto space-y-8'>
+        <div className='bg-white p-6 rounded-2xl shadow'>
+          <h1 className='text-2xl font-bold mb-4'>Rank Tracker</h1>
+          <form onSubmit={add} className='grid md:grid-cols-3 gap-3'>
+            <input
+              required
+              type='url'
+              value={url}
+              onChange={e => setUrl(e.target.value)}
+              placeholder='https://example.com/page'
+              className='px-4 py-3 rounded-lg border'
+              disabled={loading}
+            />
+            <input
+              required
+              value={keyword}
+              onChange={e => setKeyword(e.target.value)}
+              placeholder='target keyword'
+              className='px-4 py-3 rounded-lg border'
+              disabled={loading}
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className='px-5 py-3 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50'
+            >
+              {loading ? 'Adding...' : 'Add Keyword'}
+            </button>
+          </form>
+          {error && (
+            <div className='mt-4 p-4 bg-red-50 border border-red-200 rounded-lg'>
+              <p className='text-sm text-red-600'>{error}</p>
+            </div>
+          )}
+        </div>
+
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          </div>
+        )}
+
+        {keywords.length > 0 ? (
+          <div className='bg-white p-6 rounded-2xl shadow overflow-x-auto'>
+            <table className='min-w-full'>
+              <thead>
+                <tr className='border-b'>
+                  <th className='text-left py-3 px-4'>Keyword</th>
+                  <th className='text-left py-3 px-4'>URL</th>
+                  <th className='text-right py-3 px-4'>Position</th>
+                  <th className='text-right py-3 px-4'>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {keywords.map(kw => (
+                  <tr key={kw.id} className='border-b hover:bg-gray-50'>
+                    <td className='py-3 px-4'>{kw.keyword}</td>
+                    <td className='py-3 px-4 text-gray-600'>{kw.url}</td>
+                    <td className='py-3 px-4 text-right'>
+                      {kw.last_position === null ? '-' : kw.last_position}
+                    </td>
+                    <td className='py-3 px-4 text-right'>
+                      <button
+                        onClick={() => remove(kw.id)}
+                        className='text-red-600 hover:text-red-800'
+                        disabled={loading}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : !loading && (
+          <div className='text-center py-8 text-gray-500'>
+            No keywords tracked yet. Add your first keyword above.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const RankTracker: React.FC = () => (
+  <ErrorBoundary>
+    <RankTrackerContent />
+  </ErrorBoundary>
+);
+
+export default RankTracker;
