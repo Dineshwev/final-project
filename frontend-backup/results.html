@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan Results | Healthy SEO</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="index.html" class="logo">
+        <i class="fas fa-chart-line"></i>
+        <span>Healthy SEO</span>
+      </a>
+      
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="history.html" class="nav-link">History</a></li>
+          <li><a href="settings.html" class="nav-link">Settings</a></li>
+        </ul>
+      </nav>
+      
+      <div class="auth-menu">
+        <button class="auth-menu-toggle">
+          <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="User">
+          <span class="user-name">John Doe</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        
+        <div class="auth-menu-dropdown">
+          <a href="profile.html" class="auth-menu-item">
+            <i class="fas fa-user"></i>
+            <span>My Profile</span>
+          </a>
+          <a href="settings.html" class="auth-menu-item">
+            <i class="fas fa-gear"></i>
+            <span>Settings</span>
+          </a>
+          <a href="#" class="auth-menu-item logout-button">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container" style="padding-top: 40px; padding-bottom: 60px;" id="results-page">
+    <div class="flex justify-between items-center mb-4">
+      <h1>Scan Results</h1>
+      <div id="api-connection-status" class="status-indicator">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <span class="status-text">Checking API connection...</span>
+      </div>
+    </div>
+    
+    <div id="results-loading" class="text-center py-5">
+      <div class="spinner"></div>
+      <p class="mt-3">Loading scan results...</p>
+    </div>
+    
+    <div id="results-error" class="alert alert-error hidden"></div>
+    
+    <div id="results-container" class="hidden">
+      <div class="results-header mb-4">
+        <div class="results-title">
+          <h2 id="results-url" class="results-url">example.com</h2>
+          <span id="results-date" class="results-date">Scanned on Oct 16, 2025 at 10:30 AM</span>
+        </div>
+        
+        <div class="results-actions">
+          <button id="export-button" class="btn btn-outline">
+            <i class="fas fa-download"></i> Export PDF
+          </button>
+          <button id="share-button" class="btn btn-outline">
+            <i class="fas fa-share-nodes"></i> Share
+          </button>
+          <button id="rescan-button" class="btn btn-primary">
+            <i class="fas fa-rotate"></i> Rescan
+          </button>
+        </div>
+      </div>
+      
+      <!-- Score Overview -->
+      <div id="results-overview" class="results-overview">
+        <!-- Score cards will be dynamically added here -->
+      </div>
+      
+      <!-- Results Tabs -->
+      <div class="results-tabs">
+        <button class="results-tab active" data-tab="overview">
+          <i class="fas fa-home"></i> Overview
+        </button>
+        <button class="results-tab" data-tab="seo">
+          <i class="fas fa-magnifying-glass-chart"></i> SEO
+        </button>
+        <button class="results-tab" data-tab="performance">
+          <i class="fas fa-gauge-high"></i> Performance
+        </button>
+        <button class="results-tab" data-tab="security">
+          <i class="fas fa-shield-halved"></i> Security
+        </button>
+        <button class="results-tab" data-tab="accessibility">
+          <i class="fas fa-universal-access"></i> Accessibility
+        </button>
+      </div>
+      
+      <!-- Tab Content -->
+      <div class="results-tab-content" id="overview-tab">
+        <div id="overview-content"></div>
+      </div>
+      
+      <div class="results-tab-content hidden" id="seo-tab">
+        <div id="seo-content"></div>
+      </div>
+      
+      <div class="results-tab-content hidden" id="performance-tab">
+        <div id="performance-content"></div>
+      </div>
+      
+      <div class="results-tab-content hidden" id="security-tab">
+        <div id="security-content"></div>
+      </div>
+      
+      <div class="results-tab-content hidden" id="accessibility-tab">
+        <div id="accessibility-content"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <i class="fas fa-chart-line"></i> Healthy SEO
+        </div>
+        <div class="footer-links">
+          <a href="#">About</a>
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+          <a href="#">Contact</a>
+        </div>
+        <div class="footer-copyright">
+          &copy; 2025 Healthy SEO. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/pages/results.js"></script>
+</body>
+</html>

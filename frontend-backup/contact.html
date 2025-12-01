@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us | Healthy SEO</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="index.html" class="logo">
+        <i class="fas fa-chart-line"></i>
+        <span>Healthy SEO</span>
+      </a>
+      
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="history.html" class="nav-link">History</a></li>
+          <li><a href="settings.html" class="nav-link">Settings</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+        </ul>
+      </nav>
+      
+      <!-- Auth Status - Show for logged out users -->
+      <div class="auth-status">
+        <a href="login.html" class="btn btn-outline">Login</a>
+        <a href="register.html" class="btn btn-primary">Sign Up</a>
+      </div>
+      
+      <!-- User Menu - Show for logged in users -->
+      <div class="auth-menu user-menu hidden">
+        <button class="auth-menu-toggle">
+          <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="User">
+          <span class="user-name">John Doe</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        
+        <div class="auth-menu-dropdown">
+          <a href="profile.html" class="auth-menu-item">
+            <i class="fas fa-user"></i>
+            <span>My Profile</span>
+          </a>
+          <a href="history.html" class="auth-menu-item">
+            <i class="fas fa-history"></i>
+            <span>Scan History</span>
+          </a>
+          <a href="settings.html" class="auth-menu-item">
+            <i class="fas fa-gear"></i>
+            <span>Settings</span>
+          </a>
+          <a href="#" class="auth-menu-item logout-button">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <section class="page-content">
+    <div class="container">
+      <div class="content-wrapper">
+        <div class="page-header">
+          <h1>Contact Us</h1>
+          <p>Have questions or feedback? We'd love to hear from you!</p>
+        </div>
+        
+        <div class="contact-container">
+          <div class="contact-info">
+            <div class="contact-card">
+              <div class="contact-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <h3>Email Us</h3>
+              <p>Our support team is available to help with any questions.</p>
+              <a href="mailto:support@healthyseo.com" class="contact-link">support@healthyseo.com</a>
+            </div>
+            
+            <div class="contact-card">
+              <div class="contact-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <h3>Call Us</h3>
+              <p>Available Monday to Friday, 9am to 5pm EST.</p>
+              <a href="tel:+18005551234" class="contact-link">+1 (800) 555-1234</a>
+            </div>
+            
+            <div class="contact-card">
+              <div class="contact-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <h3>Visit Us</h3>
+              <p>Our office is located in the heart of the city.</p>
+              <address class="contact-address">
+                123 SEO Street<br>
+                Suite 456<br>
+                New York, NY 10001<br>
+                United States
+              </address>
+            </div>
+          </div>
+          
+          <div class="contact-form-container">
+            <h2>Send Us a Message</h2>
+            <p>Fill out the form below and we'll get back to you as soon as possible.</p>
+            
+            <form id="contactForm" class="contact-form">
+              <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your full name">
+              </div>
+              
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email address">
+              </div>
+              
+              <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" required placeholder="What is this regarding?">
+              </div>
+              
+              <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="6" required placeholder="How can we help you?"></textarea>
+              </div>
+              
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="privacy-consent" name="privacy-consent" required>
+                <label for="privacy-consent">I agree to the <a href="privacy.html">Privacy Policy</a> and consent to having this website store my submitted information.</label>
+              </div>
+              
+              <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+            </form>
+            
+            <div id="formSuccess" class="form-success hidden">
+              <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <h3>Message Sent!</h3>
+              <p>Thank you for contacting us. We'll respond to your message as soon as possible.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="faq-section">
+          <h2>Frequently Asked Questions</h2>
+          
+          <div class="faq-container">
+            <div class="faq-item">
+              <div class="faq-question">
+                <h3>How quickly can I expect a response?</h3>
+                <div class="faq-toggle">
+                  <i class="fas fa-plus"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <p>We strive to respond to all inquiries within 24 hours during business days. For urgent matters, please call our support number for immediate assistance.</p>
+              </div>
+            </div>
+            
+            <div class="faq-item">
+              <div class="faq-question">
+                <h3>Do you offer customer support on weekends?</h3>
+                <div class="faq-toggle">
+                  <i class="fas fa-plus"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <p>Our email support team monitors messages during limited hours on weekends. For premium customers, we offer 24/7 support via our dedicated support portal.</p>
+              </div>
+            </div>
+            
+            <div class="faq-item">
+              <div class="faq-question">
+                <h3>How do I request a refund?</h3>
+                <div class="faq-toggle">
+                  <i class="fas fa-plus"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <p>Refund requests should be submitted via email to billing@healthyseo.com with your account details and reason for the refund. Please review our refund policy in our Terms of Service for eligibility criteria.</p>
+              </div>
+            </div>
+            
+            <div class="faq-item">
+              <div class="faq-question">
+                <h3>Can I schedule a consultation call?</h3>
+                <div class="faq-toggle">
+                  <i class="fas fa-plus"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <p>Yes! We offer free 30-minute consultation calls for potential customers. Please use our contact form to request a consultation and mention your preferred date and time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <i class="fas fa-chart-line"></i> Healthy SEO
+        </div>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="contact.html">Contact</a>
+        </div>
+        <div class="footer-copyright">
+          &copy; 2025 Healthy SEO. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Simple form handling script
+    document.addEventListener('DOMContentLoaded', () => {
+      const contactForm = document.getElementById('contactForm');
+      const formSuccess = document.getElementById('formSuccess');
+      
+      if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          
+          // In a real application, you would send the form data to your server here
+          // For demo purposes, we'll just show the success message
+          contactForm.classList.add('hidden');
+          formSuccess.classList.remove('hidden');
+        });
+      }
+      
+      // FAQ toggle functionality
+      const faqItems = document.querySelectorAll('.faq-item');
+      
+      faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', () => {
+          item.classList.toggle('active');
+          
+          const icon = item.querySelector('.faq-toggle i');
+          if (item.classList.contains('active')) {
+            icon.classList.replace('fa-plus', 'fa-minus');
+          } else {
+            icon.classList.replace('fa-minus', 'fa-plus');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

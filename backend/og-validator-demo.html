@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Graph Meta Tags Validator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="url"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .status-badge.valid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.invalid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-item .label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tag-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .tag-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .tag-name {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .tag-value {
+            color: #666;
+            word-break: break-word;
+        }
+
+        .message-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .message-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .message-item.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .message-item.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .message-item.recommendation {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .debug-tools {
+            display: grid;
+            gap: 10px;
+        }
+
+        .debug-link {
+            display: block;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .debug-link:hover {
+            background: #e9ecef;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Open Graph Validator</h1>
+            <p>Validate and optimize your Open Graph meta tags for social media sharing</p>
+        </div>
+
+        <div class="card">
+            <div class="input-group">
+                <input type="url" id="urlInput" placeholder="Enter URL to validate (e.g., https://github.com)"
+                    value="https://github.com">
+                <button id="validateBtn" onclick="validateURL()">Validate</button>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing Open Graph tags...</p>
+            </div>
+
+            <div id="results" class="results">
+                <!-- Results will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3003/api/og-validator';
+
+        async function validateURL() {
+            const urlInput = document.getElementById('urlInput');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const validateBtn = document.getElementById('validateBtn');
+
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            // Reset UI
+            loading.style.display = 'block';
+            results.classList.remove('show');
+            validateBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                const { success, data, error } = await response.json();
+
+                if (!success) {
+                    throw new Error(error || 'Validation failed');
+                }
+
+                displayResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                results.innerHTML = `
+                    <div class="message-item error">
+                        <span class="icon">❌</span>
+                        <div>
+                            <strong>Error:</strong> ${error.message}
+                        </div>
+                    </div>
+                `;
+                results.classList.add('show');
+            } finally {
+                loading.style.display = 'none';
+                validateBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            const results = document.getElementById('results');
+
+            let html = `
+                <div class="status-badge ${data.isValid ? 'valid' : 'invalid'}">
+                    ${data.isValid ? '✅ Valid' : '❌ Invalid'}
+                </div>
+
+                <div class="summary">
+                    <div class="summary-item">
+                        <div class="label">Total Tags</div>
+                        <div class="value">${data.summary.totalTags}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Required Tags</div>
+                        <div class="value">${data.summary.requiredTagsPresent}/${data.summary.requiredTagsTotal}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Errors</div>
+                        <div class="value">${data.summary.errorsCount}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Warnings</div>
+                        <div class="value">${data.summary.warningsCount}</div>
+                    </div>
+                </div>
+            `;
+
+            // Display Tags
+            if (Object.keys(data.tags).length > 0) {
+                html += `
+                    <div class="section">
+                        <div class="section-title">📝 Open Graph Tags</div>
+                        <div class="tag-list">
+                `;
+
+                for (const [key, value] of Object.entries(data.tags)) {
+                    html += `
+                        <div class="tag-item">
+                            <div class="tag-name">og:${key}</div>
+                            <div class="tag-value">${escapeHtml(value)}</div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+
+                // Display image preview
+                if (data.tags.image && data.imageValidation?.valid) {
+                    html += `
+                        <div class="section">
+                            <div class="section-title">🖼️ Image Preview</div>
+                            <div class="image-preview">
+                                <strong>Dimensions:</strong> ${data.imageValidation.width}x${data.imageValidation.height}px<br>
+                                <strong>Aspect Ratio:</strong> ${data.imageValidation.aspectRatio}:1<br>
+                                <strong>Status:</strong> ${data.imageValidation.isRecommendedSize ? '✅ Recommended size' : '⚠️ Not recommended size'}
+                                <img src="${escapeHtml(data.tags.image)}" alt="OG Image Preview">
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Display Errors
+            if (data.errors.length > 0) {
+                html += `
+                    <div class="section">
+                        <div class="section-title">❌ Errors</div>
+                        <div class="message-list">
+                `;
+
+                data.errors.forEach(error => {
+                    html += `
+                        <div class="message-item error">
+                            <span class="icon">❌</span>
+                            <div>${escapeHtml(error)}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Display Warnings
+            if (data.warnings.length > 0) {
+                html += `
+                    <div class="section">
+                        <div class="section-title">⚠️ Warnings</div>
+                        <div class="message-list">
+                `;
+
+                data.warnings.forEach(warning => {
+                    html += `
+                        <div class="message-item warning">
+                            <span class="icon">⚠️</span>
+                            <div>${escapeHtml(warning)}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Display Recommendations
+            if (data.recommendations.length > 0) {
+                html += `
+                    <div class="section">
+                        <div class="section-title">💡 Recommendations</div>
+                        <div class="message-list">
+                `;
+
+                data.recommendations.forEach(rec => {
+                    html += `
+                        <div class="message-item recommendation">
+                            <span class="icon">💡</span>
+                            <div>${escapeHtml(rec)}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Display Debug Tools
+            html += `
+                <div class="section">
+                    <div class="section-title">🔧 Debug Tools</div>
+                    <div class="debug-tools">
+                        <a href="${data.debugTools.facebook}" target="_blank" class="debug-link">
+                            📘 Facebook Sharing Debugger →
+                        </a>
+                        <a href="${data.debugTools.linkedin}" target="_blank" class="debug-link">
+                            💼 LinkedIn Post Inspector →
+                        </a>
+                        <a href="${data.debugTools.twitter}" target="_blank" class="debug-link">
+                            🐦 Twitter Card Validator →
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            results.innerHTML = html;
+            results.classList.add('show');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Allow Enter key to trigger validation
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                validateURL();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || root.child('admins').child(auth.uid).exists())",
+        ".write": "auth != null && auth.uid === $userId",
+        
+        "profile": {
+          ".validate": "newData.hasChildren(['email', 'createdAt'])"
+        },
+        
+        "apiKeys": {
+          ".validate": "newData.hasChildren(['whoapi', 'pagespeed', 'safebrowsing'])"
+        }
+      }
+    },
+    
+    "scans": {
+      ".indexOn": ["userId", "timestamp", "domain"],
+      "$scanId": {
+        ".read": "auth != null && (data.child('userId').val() === auth.uid || root.child('admins').child(auth.uid).exists())",
+        ".write": "auth != null && (data.child('userId').val() === auth.uid || !data.exists())",
+        
+        "userId": {
+          ".validate": "newData.val() === auth.uid"
+        },
+        "timestamp": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "domain": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        }
+      }
+    },
+    
+    "reports": {
+      ".indexOn": ["userId", "scanId", "timestamp"],
+      "$reportId": {
+        ".read": "auth != null && (data.child('userId').val() === auth.uid || root.child('admins').child(auth.uid).exists())",
+        ".write": "auth != null && (data.child('userId').val() === auth.uid || !data.exists())",
+        
+        "userId": {
+          ".validate": "newData.val() === auth.uid"
+        },
+        "scanId": {
+          ".validate": "newData.isString()"
+        },
+        "timestamp": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        }
+      }
+    },
+    
+    "settings": {
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId",
+        
+        "notifications": {
+          "email": {
+            ".validate": "newData.isBoolean()"
+          },
+          "push": {
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "scanFrequency": {
+          ".validate": "newData.isString() && newData.val().matches(/^(daily|weekly|monthly)$/)"
+        }
+      }
+    },
+    
+    "admins": {
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+      }
+    }
+  }
+}
