@@ -46,6 +46,7 @@ import PinterestRichPinValidator from "./pages/PinterestRichPinValidator";
 import AccessibilityChecker from "./pages/AccessibilityChecker";
 import ToxicBacklinkDetector from "./pages/ToxicBacklinkDetector";
 import DuplicateContentDetector from "./pages/DuplicateContentDetector";
+import RefundPolicy from "./pages/RefundPolicy";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -392,6 +393,16 @@ function AnimatedRoutes() {
                 <Checkout />
               </Page>
             </ProtectedRoute>
+          }
+        />
+
+        {/* Refund Policy Page - Public */}
+        <Route
+          path="/refund-policy"
+          element={
+            <Page>
+              <RefundPolicy />
+            </Page>
           }
         />
 

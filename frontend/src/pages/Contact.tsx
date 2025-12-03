@@ -251,6 +251,28 @@ const Contact: React.FC = () => {
                   </p>
                 </div>
               </motion.div>
+              <motion.div variants={fadeIn} className="flex items-start">
+                <div className="flex-shrink-0 mt-1">
+                  <FaUser className="text-blue-600 dark:text-blue-400 w-5 h-5" />
+                </div>
+                <div className="ml-4 text-slate-900 dark:text-white">
+                  <h3 className="font-medium mb-1">Client ID</h3>
+                  <p className="text-slate-700 dark:text-white/80 break-all">
+                    1000.9BIMMKZ87YX1HFCMX5C3QWUXY7G8BH
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div variants={fadeIn} className="flex items-start">
+                <div className="flex-shrink-0 mt-1">
+                  <FaUser className="text-blue-600 dark:text-blue-400 w-5 h-5" />
+                </div>
+                <div className="ml-4 text-slate-900 dark:text-white">
+                  <h3 className="font-medium mb-1">Client Secret</h3>
+                  <p className="text-slate-700 dark:text-white/80 break-all">
+                    da693c766bf7f6462a70264e074731d064578cf695
+                  </p>
+                </div>
+              </motion.div>
             </div>
           </Card>
 
