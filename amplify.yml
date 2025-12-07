@@ -1,20 +1,18 @@
 version: 1
-applications:
-  - frontend:
-      phases:
-        preBuild:
-          commands:
-            - cd frontend
-            - npm install --legacy-peer-deps
-        build:
-          commands:
-            - cd frontend
-            - npm run build
-      artifacts:
-        baseDirectory: frontend/build
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - frontend/node_modules/**/*
-    appRoot: .
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend
+        - npm install --legacy-peer-deps
+    build:
+      commands:
+        - cd frontend
+        - npm run build
+  artifacts:
+    baseDirectory: frontend/build
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend/node_modules/**/*
