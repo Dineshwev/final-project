@@ -4,26 +4,17 @@ import { body, validationResult } from "express-validator";
 
 const router = express.Router();
 
-// Configure nodemailer transporter using SMTP settings from .env
+// Configure nodemailer transporter using ZeptoMail SMTP
 const createTransporter = () => {
-  console.log("Creating transporter with:", {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    user: process.env.SMTP_USER ? "configured" : "missing",
-    pass: process.env.SMTP_PASS ? "configured" : "missing",
-    from: process.env.SMTP_FROM,
-  });
+  console.log("Creating ZeptoMail transporter");
 
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT),
+    host: "smtp.zeptomail.in",
+    port: 587,
     secure: false, // Use TLS (STARTTLS)
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false, // For development, accept self-signed certs
+      user: "emailapikey",
+      pass: "Zoho-enczapikey PHtE6r0LQujtjTV890JVt/e+EMaiYIss+75uK1REs9pADfABTU0A/tEokDOx/kwqVKMURvTOnYho4u/KsL+GcWjqNTpKW2qyqK3sx/VYSPOZsbq6x00at1UadUDbXITrdNJo0yHWuN2X",
     },
     debug: true, // Enable debug logs
     logger: true, // Enable logger
@@ -60,7 +51,7 @@ router.post(
 
       // Email to admin (you receive the message)
       const adminMailOptions = {
-        from: process.env.SMTP_FROM,
+        from: '"Example Team" <noreply@healthyseo.tech>',
         to: process.env.CONTACT_EMAIL || "contact@healthyseo.tech", // Your contact email
         replyTo: email, // User's email for easy reply
         subject: `Contact Form: ${subject}`,
@@ -100,7 +91,7 @@ router.post(
 
       // Email to user (confirmation)
       const userMailOptions = {
-        from: process.env.SMTP_FROM,
+        from: '"SEO Health Analyzer Team" <noreply@healthyseo.tech>',
         to: email,
         subject: "We received your message - SEO Health Analyzer",
         html: `
