@@ -1,6 +1,8 @@
 {
   "name": "seo-analyzer",
   "version": "1.0.0",
+  "type": "module",
+
   "description": "SEO analysis and monitoring tool",
   "main": "backend/server.js",
   "scripts": {
@@ -33,7 +35,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  
 }
+
 
 
