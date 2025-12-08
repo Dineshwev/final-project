@@ -7,7 +7,7 @@
     "start": "node backend/server.js",
     "dev": "node --watch backend/server.js",
     "test": "jest"
-    "type": "module",
+    
 
   },
   "dependencies": {
@@ -35,4 +35,5 @@
   "license": "ISC",
   "type": "module"
 }
+
 
