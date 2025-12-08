@@ -1,12 +1,16 @@
 {
   "name": "seo-analyzer",
   "version": "1.0.0",
+  "type": "module",
+
   "description": "SEO analysis and monitoring tool",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
     "dev": "node --watch backend/server.js",
     "test": "jest"
+    
+
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -17,6 +21,7 @@
     "node-cron": "^3.0.3",
     "puppeteer": "^21.5.2",
     "validator": "^13.11.0"
+    
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
@@ -30,5 +35,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  
 }
+
+
+
