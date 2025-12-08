@@ -27,6 +27,7 @@ const createWrappedIcon = (IconComponent: any) => {
 export const FaTwitter = createWrappedIcon(FaIcons.FaTwitter);
 export const FaFacebook = createWrappedIcon(FaIcons.FaFacebook);
 export const FaLinkedin = createWrappedIcon(FaIcons.FaLinkedin);
+export const FaInstagram = createWrappedIcon(FaIcons.FaInstagram);
 export const FaGithub = createWrappedIcon(FaIcons.FaGithub);
 export const FaChartLine = createWrappedIcon(FaIcons.FaChartLine);
 export const FaChevronDown = createWrappedIcon(FaIcons.FaChevronDown);

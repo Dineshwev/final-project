@@ -8,6 +8,7 @@ import {
   FaEnvelope,
   FaUser,
   FaClock,
+  FaInstagram,
 } from "../components/Icons";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import PageContainer from "../components/PageContainer";
@@ -249,6 +250,23 @@ const Contact: React.FC = () => {
                   <p className="text-slate-700 dark:text-white/80">
                     contact@healthyseo.tech
                   </p>
+                </div>
+              </motion.div>
+
+              <motion.div variants={fadeIn} className="flex items-start">
+                <div className="flex-shrink-0 mt-1">
+                  <FaInstagram className="text-blue-600 dark:text-blue-400 w-5 h-5" />
+                </div>
+                <div className="ml-4 text-slate-900 dark:text-white">
+                  <h3 className="font-medium mb-1">Instagram</h3>
+                  <a 
+                    href="https://instagram.com/healthyseo.tech" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-slate-700 dark:text-white/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                  >
+                    @healthyseo.tech
+                  </a>
                 </div>
               </motion.div>
               <motion.div variants={fadeIn} className="flex items-start">

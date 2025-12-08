@@ -1,7 +1,7 @@
 // src/components/Footer.tsx
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaEnvelope } from "../components/Icons";
+import { FaEnvelope, FaInstagram } from "../components/Icons";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -24,6 +24,17 @@ const Footer: React.FC = () => {
                 className="text-gray-400 hover:text-white"
               >
                 contact@healthyseo.tech
+              </a>
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <FaInstagram className="text-gray-400" size={20} />
+              <a
+                href="https://instagram.com/healthyseo.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white"
+              >
+                @healthyseo.tech
               </a>
             </div>
           </div>
