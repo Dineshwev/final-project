@@ -56,17 +56,31 @@ export default function Dashboard() {
 
       console.log("Scan response from Dashboard:", response);
 
+      // Check if the request was successful and has proper data structure
+      if (!response.success) {
+        console.error("Scan API request failed:", response.error || "Unknown error");
+        setScanError(response.error?.message || "Failed to start scan. Please try again.");
+        setScanLoading(false);
+        return;
+      }
+
       // Backend returns nested structure: { success, data: { status, data: { scanId } } }
       // After wrapResponse: { success, data: { scanId, url, status } }
       const scanId = response.data?.scanId || response.data?.data?.scanId;
 
-      if (response.success && scanId) {
-        console.log("Scan started with scanId:", scanId);
-        console.log("Polling for scan completion...");
+      if (!scanId) {
+        console.error("No scanId found in response.data:", response.data);
+        setScanError("Failed to get scan ID from server. Please try again.");
+        setScanLoading(false);
+        return;
+      }
+
+      console.log("Scan started with scanId:", scanId);
+      console.log("Polling for scan completion...");
 
         // Poll for scan completion before redirecting
         const API_BASE =
-          process.env.REACT_APP_API_BASE_URL || "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
+          process.env.REACT_APP_API_BASE_URL || "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
         const maxPolls = 30; // 30 seconds max
         let pollCount = 0;
 
@@ -109,12 +123,6 @@ export default function Dashboard() {
         // If we've exhausted polls, navigate anyway (Results page will handle polling)
         console.log("Max polls reached, navigating to results page");
         navigate(`/results/${scanId}`);
-      } else {
-        console.error("Scan failed:", response);
-        console.error("No scanId found in response.data:", response.data);
-        setScanError("Failed to scan website. Please try again.");
-        setScanLoading(false);
-      }
     } catch (error) {
       setScanError("Invalid URL format");
       setScanLoading(false);

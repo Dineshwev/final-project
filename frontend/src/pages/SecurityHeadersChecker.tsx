@@ -20,7 +20,7 @@ const SecurityHeadersChecker: React.FC = () => {
   const [report, setReport] = useState<SecurityReport | null>(null);
 
   const API_BASE_URL =
-    process.env.REACT_APP_API_BASE_URL || "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
+    process.env.REACT_APP_API_BASE_URL || "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
 
   const handleCheck = async () => {
     if (!url.trim()) {

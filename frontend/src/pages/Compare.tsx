@@ -18,7 +18,7 @@ import {
 } from "../utils/animations";
 
 const API_BASE =
-  process.env.REACT_APP_API_BASE_URL || "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
+  process.env.REACT_APP_API_BASE_URL || "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
 
 const ComparePage: React.FC = () => {
   const [urls, setUrls] = useState<string[]>(["", ""]);

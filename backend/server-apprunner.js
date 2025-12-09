@@ -9,14 +9,25 @@ const PORT = 3002;
 
 // Create HTTP server using built-in module
 const server = http.createServer((req, res) => {
-  // Parse URL
+  // Parse URL and extract clean pathname (without query parameters)
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
+  const query = parsedUrl.query;
   const method = req.method;
 
   // Set CORS headers for cross-origin requests
-  // Allow specific origin: healthyseo.tech
-  res.setHeader('Access-Control-Allow-Origin', 'https://www.healthyseo.tech');
+  // Allow specific origin: healthyseo.tech and AWS App Runner domains
+  const allowedOrigins = [
+    'https://www.healthyseo.tech',
+    'https://healthyseo.tech',
+    'https://irpwi5mww.ap-southeast-2.awsapprunner.com',
+    'https://inrpws5mww.ap-southeast-2.awsapprunner.com'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   
   // Allow specific HTTP methods
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -33,6 +44,9 @@ const server = http.createServer((req, res) => {
 
   // Set content type
   res.setHeader('Content-Type', 'application/json');
+
+  // Log incoming requests for debugging
+  console.log(`${method} ${path} ${query ? '?' + new URLSearchParams(query).toString() : ''}`);
 
   // Handle root path
   if (path === '/' && method === 'GET') {
@@ -122,17 +136,33 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Handle scan POST requests
+  // Handle scan POST requests (need to parse body)
   if (path === '/api/scan' && method === 'POST') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      success: true,
-      data: {
-        scanId: 'mock-scan-' + Date.now(),
-        status: 'initiated',
-        message: 'Scan started successfully'
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        const scanData = body ? JSON.parse(body) : {};
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          data: {
+            scanId: 'mock-scan-' + Date.now(),
+            status: 'initiated',
+            message: 'Scan started successfully',
+            url: scanData.url || 'unknown'
+          }
+        }));
+      } catch (error) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: false,
+          error: 'Invalid JSON in request body'
+        }));
       }
-    }));
+    });
     return;
   }
 

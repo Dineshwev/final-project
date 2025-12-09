@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api/duplicate-content";
+const API_BASE_URL = "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api/duplicate-content";
 
 // Interfaces
 export interface PageInfo {
