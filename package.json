@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "description": "SEO analysis and monitoring tool",
-  "main": "backend/server.js",
+  "main": "backend/server-apprunner.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "node --watch backend/server.js",
+    "start": "cd backend && node server-apprunner.js",
+    "dev": "cd backend && node --watch server-apprunner.js",
     "test": "jest"
   },
   "dependencies": {

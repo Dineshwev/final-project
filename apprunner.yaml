@@ -6,10 +6,12 @@ build:
       - echo "Installing backend dependencies..."
       - cd backend
       - npm install --production
-      - echo "Backend build completed"
+      - echo "Backend build completed successfully"
+      - echo "Available files:"
+      - ls -la
 run:
   runtime-version: 18.x
-  command: cd backend && npm run start:apprunner
+  command: chmod +x start-backend.sh && ./start-backend.sh
   network:
     port: 3002
     env: PORT
