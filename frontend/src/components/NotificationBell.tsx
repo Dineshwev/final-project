@@ -54,9 +54,15 @@ const NotificationBell: React.FC = () => {
       const userId = user?.uid || "demo-user";
       const API_BASE_URL =
         process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
+      
+      console.log(`🔔 NotificationBell: Making request to ${API_BASE_URL}/alerts/unread-count`);
+      
       const response = await fetch(
         `${API_BASE_URL}/alerts/unread-count?userId=${userId}`
       );
+      
+      console.log(`🔔 NotificationBell: Response status ${response.status}`);
+      
       const data = await response.json();
 
       if (data.success) {

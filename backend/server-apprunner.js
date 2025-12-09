@@ -45,7 +45,10 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
   // Log incoming requests for debugging
-  console.log(`${method} ${path} ${query ? '?' + new URLSearchParams(query).toString() : ''}`);
+  console.log(`📥 ${new Date().toISOString()} - ${method} ${path}`);
+  if (query && Object.keys(query).length > 0) {
+    console.log(`📋 Query params:`, query);
+  }
 
   // Handle root path
   if (path === '/' && method === 'GET') {
@@ -177,23 +180,52 @@ const server = http.createServer((req, res) => {
 
   // Handle any other API endpoints with generic response
   if (path.startsWith('/api/') && method === 'GET') {
+    console.log(`🔧 Generic API handler for: ${path}`);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'ok',
       message: 'API endpoint available',
       path: path,
+      method: method,
+      timestamp: new Date().toISOString(),
       data: []
     }));
     return;
   }
 
+  // Handle test endpoint for debugging
+  if (path === '/api/test' && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'success',
+      message: 'Test endpoint working!',
+      timestamp: new Date().toISOString(),
+      server: 'AWS App Runner',
+      version: '2.0.0'
+    }));
+    return;
+  }
+
   // 404 for all other routes
+  console.log(`❌ 404 - Route not found: ${method} ${path}`);
+  console.log(`📋 Available routes: GET /, GET /health, GET /api/status, GET /api/alerts/unread-count, GET /api/history/recent, GET /api/user/api-keys, GET /api/scan, POST /api/scan`);
   res.writeHead(404);
   res.end(JSON.stringify({
     status: 'error',
     message: 'Endpoint not found',
     path: path,
-    method: method
+    method: method,
+    timestamp: new Date().toISOString(),
+    availableRoutes: [
+      'GET /',
+      'GET /health', 
+      'GET /api/status',
+      'GET /api/alerts/unread-count',
+      'GET /api/history/recent',
+      'GET /api/user/api-keys',
+      'GET /api/scan',
+      'POST /api/scan'
+    ]
   }));
 });
 
