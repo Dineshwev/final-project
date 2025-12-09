@@ -111,29 +111,32 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
                       Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({ orderId: createData.orderId }),
-                }
-              );
+                  }
+                );
 
-              const captureData = await captureResponse.json();
+                const captureData = await captureResponse.json();
 
-              if (captureData.success) {
-                setSuccess(true);
-                if (onSuccess) {
-                  onSuccess(captureData);
+                if (captureData.success) {
+                  setSuccess(true);
+                  if (onSuccess) {
+                    onSuccess(captureData);
+                  }
+                } else {
+                  if (onCancel) {
+                    onCancel();
+                  }
                 }
-              } else {
+              } catch (captureError) {
+                console.error("Error capturing payment:", captureError);
                 if (onCancel) {
                   onCancel();
                 }
               }
-            } catch (captureError) {
-              console.error("Error capturing payment:", captureError);
-              if (onCancel) {
-                onCancel();
-              }
-            }
 
-            setLoading(false);
+              setLoading(false);
+            }
+          } catch (error) {
+            console.error("Error checking window status:", error);
           }
         }, 1000);
 
