@@ -52,7 +52,7 @@ const Contact: React.FC = () => {
     setSubmitResult(null);
 
     try {
-      const response = await fetch((process.env.REACT_APP_API_BASE_URL || "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api") + "/contact", {
+      const response = await fetch((process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api") + "/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

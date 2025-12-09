@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const API_BASE =
-  process.env.REACT_APP_API_BASE_URL || "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
+  process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
 
 const LinkChecker: React.FC = () => {
   const [url, setUrl] = useState("");

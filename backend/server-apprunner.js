@@ -20,7 +20,6 @@ const server = http.createServer((req, res) => {
   const allowedOrigins = [
     'https://www.healthyseo.tech',
     'https://healthyseo.tech',
-    'https://irpwi5mww.ap-southeast-2.awsapprunner.com',
     'https://inrpws5mww.ap-southeast-2.awsapprunner.com'
   ];
   

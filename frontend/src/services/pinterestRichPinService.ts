@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
+const API_BASE_URL = "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
 
 // Rich Pin Types
 export interface RichPinType {

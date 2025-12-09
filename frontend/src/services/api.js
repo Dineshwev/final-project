@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create an axios instance with the base URL from environment variables
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'https://irpwi5mww.ap-southeast-2.awsapprunner.com/api',
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'https://inrpws5mww.ap-southeast-2.awsapprunner.com/api',
   headers: {
     'Content-Type': 'application/json',
   },

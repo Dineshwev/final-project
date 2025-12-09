@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
+  process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
 
 export interface OGTag {
   [key: string]: string;

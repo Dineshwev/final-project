@@ -5,7 +5,7 @@
 
 // API Configuration
 const OG_VALIDATOR_API = `${
-  window.API_BASE_URL || "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api"
+  window.API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api"
 }/og-validator`;
 
 /**

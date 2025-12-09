@@ -84,7 +84,7 @@ export default function Dashboard() {
 
         // Poll for scan completion before redirecting
         const API_BASE =
-          process.env.REACT_APP_API_BASE_URL || "https://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
+          process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
         const maxPolls = 30; // 30 seconds max
         let pollCount = 0;
 
