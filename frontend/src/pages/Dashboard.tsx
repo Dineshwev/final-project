@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import { Skeleton } from "components/ui/skeleton";
 import { useDashboardMetrics } from "../hooks/useDashboardMetrics";
+import { useMobileOptimization } from "../hooks/useMobileOptimization";
 import { Link, useNavigate } from "react-router-dom";
 import Sparkline from "components/Sparkline";
 import Ripple from "components/ui/Ripple";
@@ -21,6 +22,7 @@ import apiService from "../services/api";
 
 export default function Dashboard() {
   const { loading, formatted } = useDashboardMetrics();
+  const { shouldReduceBackgroundEffects } = useMobileOptimization();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [scanUrl, setScanUrl] = useState("");
@@ -120,69 +122,21 @@ export default function Dashboard() {
   };
   return (
     <div className="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 min-h-screen overflow-hidden">
-      {/* Premium animated mesh background */}
+      {/* Optimized background - reduced for mobile performance */}
       <div className="pointer-events-none absolute inset-0 z-0">
-        <motion.div
-          className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(30, 64, 175, 0.3) 0%, transparent 70%)",
-            filter: "blur(80px)",
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute top-40 -right-40 w-[700px] h-[700px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%)",
-            filter: "blur(80px)",
-          }}
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.35, 0.2],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        {!shouldReduceBackgroundEffects && (
+          <>
+            <div className="bg-gradient-blur-1" />
+            <div className="bg-gradient-blur-2" />
+            <div className="bg-gradient-blur-3" />
+          </>
+        )}
       </div>
 
       {/* Content */}
       <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-12 sm:pb-16">
         <div className="mb-6 sm:mb-8 lg:mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
+          <div className="fade-in-fast">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 Welcome back, {displayName}!
@@ -192,15 +146,10 @@ export default function Dashboard() {
             <p className="text-slate-300 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6">
               Monitor and optimize your website's SEO performance in real-time
             </p>
-          </motion.div>
+          </div>
 
           {/* Quick Scan Form - Premium Dark */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 hover:border-white/20 transition-all mt-4 sm:mt-6"
-          >
+          <div className="fade-in-delayed bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 hover:border-white/20 transition-all mt-4 sm:mt-6">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 sm:gap-3">
                 <div className="p-2 sm:p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
@@ -263,25 +212,17 @@ export default function Dashboard() {
               </div>
             </form>
             {scanError && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 backdrop-blur-sm"
-              >
+              <div className="fade-in-fast mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 backdrop-blur-sm">
                 <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-red-300 font-medium">{scanError}</p>
-              </motion.div>
+              </div>
             )}
-          </motion.div>
+          </div>
         </div>
 
         {/* Stats Grid - Premium Dark */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 lg:mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
+          <div className="fade-in-stagger-1">
             <Card className="group relative shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 hover:border-purple-500/50 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               <CardHeader>
@@ -302,11 +243,9 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.05 }}
+          </div>
+          <div className="fade-in-stagger-1"
+            style={{ animationDelay: '0.35s' }}
           >
             <Card className="group relative shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 hover:border-purple-500/50 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -365,11 +304,9 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+          </div>
+          <div className="fade-in-stagger-1"
+            style={{ animationDelay: '0.3s' }}
           >
             <Card className="group relative shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 hover:border-emerald-500/50 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -426,11 +363,9 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.15 }}
+          </div>
+          <div className="fade-in-stagger-1"
+            style={{ animationDelay: '0.4s' }}
           >
             <Card className="group relative shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 hover:border-cyan-500/50 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -457,15 +392,10 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         </div>
         {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="rounded-2xl p-4 sm:p-6 md:p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 text-white shadow-2xl relative overflow-hidden mb-6 sm:mb-8 lg:mb-10"
-        >
+        <div className="fade-in-delayed rounded-2xl p-4 sm:p-6 md:p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 text-white shadow-2xl relative overflow-hidden mb-6 sm:mb-8 lg:mb-10">
           <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-cyan-500/20"></div>
           <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 relative z-10 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
             Quick Actions
@@ -681,15 +611,10 @@ export default function Dashboard() {
               </Ripple>
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Feature Highlights */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
+        <div className="fade-in-delayed grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="group relative shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 hover:border-blue-500/50 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="relative z-10">
@@ -743,7 +668,7 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </main>
     </div>
   );
