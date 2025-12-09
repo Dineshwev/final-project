@@ -1,5 +1,6 @@
 // AWS App Runner Conformant Server - Port 3002
 // Using built-in Node.js modules only for App Runner deployment
+// Deploy timestamp: 2025-12-09T17:40:00Z - Force redeploy with all API routes
 
 import http from 'http';
 import url from 'url';
@@ -49,6 +50,8 @@ const server = http.createServer((req, res) => {
   if (query && Object.keys(query).length > 0) {
     console.log(`📋 Query params:`, query);
   }
+  console.log(`🔍 Full URL: ${req.url}`);
+  console.log(`🌐 Origin: ${req.headers.origin}`);
 
   // Handle root path
   if (path === '/' && method === 'GET') {

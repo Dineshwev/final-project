@@ -47,10 +47,15 @@ window.FeatureCollector = new FeatureCollector();
 // Auto-initialize with default settings to prevent deprecated warnings
 if (typeof window !== 'undefined') {
   // Use modern single object parameter instead of deprecated multiple parameters
-  window.FeatureCollector.initialize({
-    autoStart: true,
-    enableLogging: false
-  });
+  try {
+    window.FeatureCollector.initialize({
+      autoStart: true,
+      enableLogging: false
+    });
+    console.log('✅ FeatureCollector initialized successfully');
+  } catch (e) {
+    console.warn('FeatureCollector initialization issue:', e);
+  }
 }
 
 // Main function for backward compatibility
