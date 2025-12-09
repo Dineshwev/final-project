@@ -71,23 +71,46 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
 
         setProcessing(true);
 
-        // Poll for payment completion
-        const checkInterval = setInterval(async () => {
-          if (paypalWindow.closed) {
+        // Set up postMessage listener for secure communication
+        const handleMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+          
+          if (event.data.type === 'PAYPAL_PAYMENT_COMPLETE') {
             clearInterval(checkInterval);
             setProcessing(false);
+            window.removeEventListener('message', handleMessage);
+            
+            // Handle payment completion
+            if (event.data.success) {
+              onSuccess(event.data);
+            } else {
+              setError('Payment was cancelled or failed');
+            }
+            return;
+          }
+        };
+        
+        window.addEventListener('message', handleMessage);
+        
+        // Poll for payment completion with postMessage fallback
+        const checkInterval = setInterval(async () => {
+          try {
+            if (paypalWindow.closed) {
+              clearInterval(checkInterval);
+              setProcessing(false);
+              window.removeEventListener('message', handleMessage);
 
-            // Check if payment was completed
-            try {
-              const captureResponse = await fetch(
-                "http://localhost:3003/api/payment/capture-order",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({ orderId: createData.orderId }),
+              // Check if payment was completed
+              try {
+                const captureResponse = await fetch(
+                  "http://localhost:3003/api/payment/capture-order",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ orderId: createData.orderId }),
                 }
               );
 
@@ -117,6 +140,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
         // Timeout after 10 minutes
         setTimeout(() => {
           clearInterval(checkInterval);
+          window.removeEventListener('message', handleMessage);
           if (paypalWindow && !paypalWindow.closed) {
             paypalWindow.close();
           }

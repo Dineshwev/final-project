@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
+    <title>Payment Popup Test</title>
+</head>
+<body>
+    <h1>Payment Complete</h1>
+    <script>
+        // Notify parent window of completion using postMessage
+        if (window.opener) {
+            window.opener.postMessage({
+                type: 'PAYPAL_PAYMENT_COMPLETE',
+                success: true,
+                orderId: 'test-order-123'
+            }, window.location.origin);
+            window.close();
+        }
+    </script>
+</body>
+</html>
