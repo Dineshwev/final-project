@@ -83,30 +83,35 @@ const Navigation = () => {
 
   return (
     <nav className="bg-slate-900/95 backdrop-blur-xl border-b border-white/10 shadow-2xl sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-3 group">
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                <div className="relative bg-gradient-to-br from-blue-500 via-purple-500 to-cyan-500 rounded-xl p-2 transform transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-xl">
-                  <ChartBarIcon className="h-6 w-6 text-white" />
+                <div className="relative bg-gradient-to-br from-blue-500 via-purple-500 to-cyan-500 rounded-xl p-1.5 sm:p-2 transform transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-xl">
+                  <ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-white font-bold text-xl tracking-tight leading-none">
+              <div className="flex flex-col hidden xs:flex">
+                <span className="text-white font-bold text-lg sm:text-xl tracking-tight leading-none">
                   SEO Health
                 </span>
-                <span className="text-xs text-cyan-400 font-medium">
+                <span className="text-xs text-cyan-400 font-medium hidden sm:block">
                   Professional Analytics
+                </span>
+              </div>
+              <div className="flex xs:hidden">
+                <span className="text-white font-bold text-lg tracking-tight">
+                  SEO
                 </span>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-1">
             {/* Main Nav Links */}
             {mainNavLinks.map((link) => {
               const Icon = link.icon;
@@ -115,14 +120,15 @@ const Navigation = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  className={`flex items-center space-x-1.5 px-3 xl:px-4 py-2 xl:py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                     active
                       ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-lg shadow-blue-500/40"
                       : "text-slate-300 hover:bg-white/10 hover:text-white backdrop-blur-sm"
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span>{link.label}</span>
+                  <Icon className="h-4 w-4 xl:h-5 xl:w-5" />
+                  <span className="hidden xl:inline">{link.label}</span>
+                  <span className="xl:hidden text-xs">{link.label}</span>
                 </Link>
               );
             })}
@@ -131,16 +137,17 @@ const Navigation = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setFeaturesOpen(!featuresOpen)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                className={`flex items-center space-x-1.5 px-3 xl:px-4 py-2 xl:py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                   featureLinks.some((f) => isActive(f.path))
                     ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-lg shadow-blue-500/40"
                     : "text-slate-300 hover:bg-white/10 hover:text-white backdrop-blur-sm"
                 }`}
               >
-                <SparklesIcon className="h-5 w-5" />
-                <span>Features</span>
+                <SparklesIcon className="h-4 w-4 xl:h-5 xl:w-5" />
+                <span className="hidden xl:inline">Features</span>
+                <span className="xl:hidden text-xs">Features</span>
                 <ChevronDownIcon
-                  className={`h-4 w-4 transition-transform ${
+                  className={`h-3 w-3 xl:h-4 xl:w-4 transition-transform ${
                     featuresOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -181,20 +188,20 @@ const Navigation = () => {
           </div>
 
           {/* Right side controls */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3">
             {/* Notification Bell */}
             <NotificationBell />
 
             {/* Profile Link */}
             <Link
               to="/profile"
-              className="group relative flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-gradient-to-r hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 transition-all duration-300 border border-white/20 hover:border-transparent shadow-lg hover:shadow-xl"
+              className="group relative flex items-center gap-2 xl:gap-3 px-3 xl:px-4 py-2 xl:py-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-gradient-to-r hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 transition-all duration-300 border border-white/20 hover:border-transparent shadow-lg hover:shadow-xl"
               aria-label="Profile"
             >
               <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white/20 group-hover:ring-white/50 transition-all shadow-md">
+                <div className="w-8 h-8 xl:w-9 xl:h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white/20 group-hover:ring-white/50 transition-all shadow-md">
                   <svg
-                    className="w-5 h-5 text-white"
+                    className="w-4 h-4 xl:w-5 xl:h-5 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -207,19 +214,20 @@ const Navigation = () => {
                     />
                   </svg>
                 </div>
-                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900 animate-pulse shadow-sm"></span>
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 xl:w-3 xl:h-3 bg-emerald-400 rounded-full border-2 border-slate-900 animate-pulse shadow-sm"></span>
               </div>
-              <span className="text-white group-hover:text-white font-semibold text-sm transition-colors">
+              <span className="text-white group-hover:text-white font-semibold text-sm xl:text-base transition-colors hidden xl:inline">
                 Profile
               </span>
             </Link>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-all backdrop-blur-sm"
+              className="text-white hover:bg-white/20 p-2.5 rounded-lg transition-all backdrop-blur-sm touch-manipulation"
+              aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? (
                 <XMarkIcon className="h-6 w-6" />
@@ -233,8 +241,8 @@ const Navigation = () => {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-slate-900/98 backdrop-blur-xl border-t border-white/10">
-          <div className="px-2 pt-2 pb-3 space-y-1">
+        <div className="lg:hidden bg-slate-900/98 backdrop-blur-xl border-t border-white/10 max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="px-3 pt-3 pb-4 space-y-2">
             {/* Main Nav Links */}
             {mainNavLinks.map((link) => {
               const Icon = link.icon;
@@ -244,10 +252,10 @@ const Navigation = () => {
                   key={link.path}
                   to={link.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-xl text-base font-medium ${
+                  className={`flex items-center space-x-3 px-4 py-3.5 rounded-xl text-base font-medium touch-manipulation ${
                     active
                       ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-lg"
-                      : "text-slate-300 hover:bg-white/10 hover:text-white"
+                      : "text-slate-300 hover:bg-white/10 hover:text-white active:bg-white/20"
                   }`}
                 >
                   <Icon className="h-5 w-5" />

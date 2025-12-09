@@ -18,7 +18,7 @@ export function Card({ className, ...props }: CardProps) {
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={twMerge("p-4 border-b border-gray-100 dark:border-gray-800", className)}
+      className={twMerge("p-3 sm:p-4 border-b border-gray-100 dark:border-gray-800", className)}
       {...props}
     />
   );
@@ -27,7 +27,7 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 export function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={twMerge("text-sm font-semibold leading-none tracking-tight", className)}
+      className={twMerge("text-sm sm:text-base font-semibold leading-none tracking-tight", className)}
       {...props}
     >
       {children}
@@ -37,13 +37,13 @@ export function CardTitle({ className, children, ...props }: React.HTMLAttribute
 
 export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={twMerge("p-4 pt-2", className)} {...props} />
+    <div className={twMerge("p-3 sm:p-4 pt-2", className)} {...props} />
   );
 }
 
 export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={twMerge("p-4 border-t border-gray-100 dark:border-gray-800", className)} {...props} />
+    <div className={twMerge("p-3 sm:p-4 border-t border-gray-100 dark:border-gray-800", className)} {...props} />
   );
 }
 

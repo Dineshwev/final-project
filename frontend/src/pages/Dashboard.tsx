@@ -176,20 +176,20 @@ export default function Dashboard() {
       </div>
 
       {/* Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-        <div className="mb-10">
+      <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-12 sm:pb-16">
+        <div className="mb-6 sm:mb-8 lg:mb-10">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-3">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 Welcome back, {displayName}!
               </span>{" "}
               <span className="inline-block animate-wave">👋</span>
             </h1>
-            <p className="text-slate-300 text-lg mb-6">
+            <p className="text-slate-300 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6">
               Monitor and optimize your website's SEO performance in real-time
             </p>
           </motion.div>
@@ -199,19 +199,19 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6 md:p-8 hover:border-white/20 transition-all mt-6"
+            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 hover:border-white/20 transition-all mt-4 sm:mt-6"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                  <Search className="w-6 h-6 text-white" />
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                <div className="p-2 sm:p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                 </div>
-                Quick Website Scan
+                <span className="text-sm sm:text-base lg:text-xl">Quick Website Scan</span>
               </h2>
             </div>
             <form
               onSubmit={handleQuickScan}
-              className="flex flex-col sm:flex-row gap-3"
+              className="flex flex-col gap-3 sm:gap-4"
             >
               <div className="flex-1">
                 <input
@@ -219,46 +219,48 @@ export default function Dashboard() {
                   value={scanUrl}
                   onChange={(e) => setScanUrl(e.target.value)}
                   placeholder="Enter website URL (e.g., https://example.com)"
-                  className="w-full px-5 py-3.5 rounded-xl border-2 border-white/10 bg-slate-900/50 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:bg-slate-900/70 transition-all backdrop-blur-sm"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl border-2 border-white/10 bg-slate-900/50 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:bg-slate-900/70 transition-all backdrop-blur-sm text-sm sm:text-base touch-manipulation"
                   disabled={scanLoading}
                 />
               </div>
-              <button
-                type="submit"
-                disabled={scanLoading || !scanUrl.trim()}
-                className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-500 hover:to-purple-500 hover:shadow-lg hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 min-w-[160px] shadow-lg hover:-translate-y-0.5"
-              >
-                {scanLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Scanning...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-5 h-5" />
-                    Analyze Now
-                  </>
-                )}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="submit"
+                  disabled={scanLoading || !scanUrl.trim()}
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-500 hover:to-purple-500 hover:shadow-lg hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 min-h-[48px] sm:min-w-[160px] shadow-lg hover:-translate-y-0.5 touch-manipulation text-sm sm:text-base"
+                >
+                  {scanLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Scanning...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>Analyze Now</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
             {scanError && (
               <motion.div
@@ -274,7 +276,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid - Premium Dark */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 lg:mb-10">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -462,29 +464,29 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="rounded-2xl p-6 md:p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 text-white shadow-2xl relative overflow-hidden mb-10"
+          className="rounded-2xl p-4 sm:p-6 md:p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 text-white shadow-2xl relative overflow-hidden mb-6 sm:mb-8 lg:mb-10"
         >
           <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-cyan-500/20"></div>
-          <h2 className="text-2xl font-bold mb-6 relative z-10 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 relative z-10 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 relative z-10">
             <Link to="/scan" className="block">
-              <Ripple className="relative group rounded-xl bg-white/10 backdrop-blur border border-white/20 p-5 hover:shadow-[0_0_0_2px_rgba(255,255,255,0.2),0_10px_25px_-5px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:-translate-y-0.5">
+              <Ripple className="relative group rounded-xl bg-white/10 backdrop-blur border border-white/20 p-4 sm:p-5 hover:shadow-[0_0_0_2px_rgba(255,255,255,0.2),0_10px_25px_-5px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:-translate-y-0.5 touch-manipulation min-h-[72px] sm:min-h-[80px]">
                 <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gradient-to-br from-white/10 to-transparent"></div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Search className="w-5 h-5 animate-icon-pulse" />
+                <div className="flex items-center justify-between h-full">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <Search className="w-4 h-4 sm:w-5 sm:h-5 animate-icon-pulse" />
                     </div>
-                    <div>
-                      <div className="font-semibold">Start New Scan</div>
-                      <div className="text-xs text-white/80">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-sm sm:text-base truncate">Start New Scan</div>
+                      <div className="text-xs sm:text-sm text-white/80 truncate">
                         Analyze a new URL
                       </div>
                     </div>
                   </div>
-                  <div className="text-white/70">→</div>
+                  <div className="text-white/70 flex-shrink-0 ml-2">→</div>
                 </div>
               </Ripple>
             </Link>

@@ -70,9 +70,9 @@ const Input: React.FC<InputProps> = ({
           autoComplete={autoComplete}
           className={`
             w-full
-            px-4 py-3
-            ${icon && iconPosition === "left" ? "pl-12" : ""}
-            ${icon && iconPosition === "right" ? "pr-12" : ""}
+            px-3 py-2.5 sm:px-4 sm:py-3
+            ${icon && iconPosition === "left" ? "pl-10 sm:pl-12" : ""}
+            ${icon && iconPosition === "right" ? "pr-10 sm:pr-12" : ""}
             rounded-xl
             border-2
             ${
@@ -86,6 +86,9 @@ const Input: React.FC<InputProps> = ({
             focus:outline-none focus:ring-2 focus:ring-offset-0
             disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-300
+            text-sm sm:text-base
+            min-h-[44px] sm:min-h-[48px]
+            touch-manipulation
           `}
         />
 

@@ -29,6 +29,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import awsServerlessExpress from "aws-serverless-express";
 
 // Import routes
 import seoRoutes from "./routes/seo.js";
@@ -264,26 +265,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Remove app.listen()
 
-  // Start the scheduler service for automatic rescans
-  schedulerService.start();
-  console.log("Automatic scan scheduler initialized");
-});
+const server = awsServerlessExpress.createServer(app);
 
-// Graceful shutdown handling
-process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received: closing scheduler");
-  schedulerService.stop();
-  process.exit(0);
-});
-
-process.on("SIGINT", () => {
-  console.log("SIGINT signal received: closing scheduler");
-  schedulerService.stop();
-  process.exit(0);
-});
-
-export default app;
+export const handler = (event, context) => {
+  return awsServerlessExpress.proxy(server, event, context);
+};

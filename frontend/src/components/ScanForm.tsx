@@ -67,33 +67,33 @@ const ScanForm: React.FC<ScanFormProps> = ({ className = "" }) => {
     <div className={`scan-form ${className}`}>
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col space-y-4">
-          <div className="flex flex-col sm:flex-row shadow-2xl rounded-2xl overflow-hidden border-2 border-white/30">
+          <div className="flex flex-col shadow-2xl rounded-2xl overflow-hidden border-2 border-white/30">
             <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <FaSearch className="h-5 w-5 text-white/60" />
+              <div className="absolute inset-y-0 left-0 pl-4 sm:pl-5 flex items-center pointer-events-none">
+                <FaSearch className="h-4 w-4 sm:h-5 sm:w-5 text-white/60" />
               </div>
               <input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Enter website URL (e.g., https://example.com)"
-                className="flex-grow w-full px-5 py-5 pl-12 bg-white/95 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all duration-300 font-medium border-0"
+                className="flex-grow w-full px-4 py-4 sm:px-5 sm:py-5 pl-10 sm:pl-12 bg-white/95 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all duration-300 font-medium border-0 text-sm sm:text-base min-h-[52px] sm:min-h-[60px] touch-manipulation"
                 required
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className={`px-8 py-5 text-white font-bold text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] ${
+              className={`px-6 py-4 sm:px-8 sm:py-5 text-white font-bold text-base sm:text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] min-h-[52px] sm:min-h-[60px] touch-manipulation ${
                 loading
                   ? "bg-blue-500 cursor-wait"
                   : "bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-lg hover:shadow-xl"
               } focus:outline-none focus:ring-4 focus:ring-blue-400/50`}
             >
               {loading ? (
-                <div className="flex items-center">
+                <div className="flex items-center justify-center">
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
