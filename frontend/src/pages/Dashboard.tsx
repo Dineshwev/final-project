@@ -59,7 +59,11 @@ export default function Dashboard() {
       // Check if the request was successful and has proper data structure
       if (!response.success) {
         console.error("Scan API request failed:", response.error || "Unknown error");
-        setScanError(response.error?.message || "Failed to start scan. Please try again.");
+        setScanError(
+          typeof response.error === 'string' 
+            ? response.error 
+            : (response.error as any)?.message || "Failed to start scan. Please try again."
+        );
         setScanLoading(false);
         return;
       }
