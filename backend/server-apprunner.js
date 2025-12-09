@@ -76,7 +76,84 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
       success: true,
-      count: 5 
+      count: 0 
+    }));
+    return;
+  }
+
+  // Handle user API keys endpoint
+  if (path === '/api/user/api-keys' && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      data: {
+        apiKey: 'mock-key-123',
+        isActive: true
+      }
+    }));
+    return;
+  }
+
+  // Handle history recent endpoint
+  if (path === '/api/history/recent' && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      data: {
+        history: [],
+        totalCount: 0,
+        currentPage: 1
+      }
+    }));
+    return;
+  }
+
+  // Handle scan endpoint
+  if (path === '/api/scan' && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      data: {
+        scanId: 'mock-scan-123',
+        status: 'ready',
+        message: 'Scan service available'
+      }
+    }));
+    return;
+  }
+
+  // Handle scan POST requests
+  if (path === '/api/scan' && method === 'POST') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      data: {
+        scanId: 'mock-scan-' + Date.now(),
+        status: 'initiated',
+        message: 'Scan started successfully'
+      }
+    }));
+    return;
+  }
+
+  // Handle alerts general endpoint
+  if (path.startsWith('/api/alerts') && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      data: []
+    }));
+    return;
+  }
+
+  // Handle any other API endpoints with generic response
+  if (path.startsWith('/api/') && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'ok',
+      message: 'API endpoint available',
+      path: path,
+      data: []
     }));
     return;
   }
