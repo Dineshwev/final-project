@@ -15,13 +15,18 @@ const server = http.createServer((req, res) => {
   const method = req.method;
 
   // Set CORS headers for cross-origin requests
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  // Allow specific origin: healthyseo.tech
+  res.setHeader('Access-Control-Allow-Origin', 'https://www.healthyseo.tech');
+  
+  // Allow specific HTTP methods
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  
+  // Allow specific headers (including Authorization for tokens)
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle preflight OPTIONS request
   if (method === 'OPTIONS') {
-    res.writeHead(200);
+    res.writeHead(204); // 204: No Content, but headers sent
     res.end();
     return;
   }
@@ -62,6 +67,16 @@ const server = http.createServer((req, res) => {
       version: '1.0.0',
       environment: 'production',
       port: PORT
+    }));
+    return;
+  }
+
+  // Handle alerts unread count endpoint
+  if (path === '/api/alerts/unread-count' && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ 
+      success: true,
+      count: 5 
     }));
     return;
   }

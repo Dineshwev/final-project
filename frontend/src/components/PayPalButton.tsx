@@ -82,7 +82,9 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
             
             // Handle payment completion
             if (event.data.success) {
-              onSuccess(event.data);
+              if (onSuccess) {
+                onSuccess(event.data);
+              }
             } else {
               setError('Payment was cancelled or failed');
             }
