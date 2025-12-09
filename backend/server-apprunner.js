@@ -1,0 +1,110 @@
+// AWS App Runner Conformant Server - Port 3002
+// Using built-in Node.js modules only for App Runner deployment
+
+import http from 'http';
+import url from 'url';
+
+// Explicitly set port to 3002 for AWS App Runner
+const PORT = 3002;
+
+// Create HTTP server using built-in module
+const server = http.createServer((req, res) => {
+  // Parse URL
+  const parsedUrl = url.parse(req.url, true);
+  const path = parsedUrl.pathname;
+  const method = req.method;
+
+  // Set CORS headers for cross-origin requests
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+
+  // Handle preflight OPTIONS request
+  if (method === 'OPTIONS') {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
+
+  // Set content type
+  res.setHeader('Content-Type', 'application/json');
+
+  // Handle root path
+  if (path === '/' && method === 'GET') {
+    res.writeHead(200);
+    res.end(JSON.stringify({
+      status: 'success',
+      message: 'Server running on App Runner port 3002!',
+      port: PORT,
+      timestamp: new Date().toISOString()
+    }));
+    return;
+  }
+
+  // Handle health check endpoint for App Runner
+  if (path === '/health' && method === 'GET') {
+    res.writeHead(200);
+    res.end(JSON.stringify({
+      status: 'healthy',
+      port: PORT,
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString()
+    }));
+    return;
+  }
+
+  // Handle API status endpoint
+  if (path === '/api/status' && method === 'GET') {
+    res.writeHead(200);
+    res.end(JSON.stringify({
+      status: 'success',
+      message: 'API server running on App Runner port 3002!',
+      version: '1.0.0',
+      environment: 'production',
+      port: PORT
+    }));
+    return;
+  }
+
+  // 404 for all other routes
+  res.writeHead(404);
+  res.end(JSON.stringify({
+    status: 'error',
+    message: 'Endpoint not found',
+    path: path,
+    method: method
+  }));
+});
+
+// Error handling
+server.on('error', (err) => {
+  console.error('Server error:', err);
+  process.exit(1);
+});
+
+// Start server on port 3002
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ App Runner server running on port ${PORT}`);
+  console.log(`🌐 Server accessible at http://0.0.0.0:${PORT}`);
+  console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
+  console.log(`🔧 API status: http://0.0.0.0:${PORT}/api/status`);
+});
+
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
+  console.log('📴 Received SIGTERM, shutting down gracefully');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('📴 Received SIGINT, shutting down gracefully');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+export default server;

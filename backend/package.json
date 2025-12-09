@@ -9,7 +9,9 @@
   },
   "scripts": {
     "start": "node server.js",
+    "start:apprunner": "node server-apprunner.js",
     "dev": "node --watch server.js",
+    "dev:apprunner": "node --watch server-apprunner.js",
     "test": "node --test tests/seoService.test.mjs",
     "scan": "node cli/scan.js",
     "db:init": "node db/init.js"
