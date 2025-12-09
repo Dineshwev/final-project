@@ -1,7 +1,7 @@
 // API integration for the frontend
 
 // Base API URL - update this to your production API URL when deployed
-const API_BASE_URL = 'http://localhost:3003/api';
+const API_BASE_URL = 'http://irpwi5mww.ap-southeast-2.awsapprunner.com/api';
 console.log('API_BASE_URL is set to:', API_BASE_URL);
 
 // Export functions to global scope for use in HTML script tags

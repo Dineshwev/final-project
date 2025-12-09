@@ -15,7 +15,7 @@ import {
 } from "../components/Icons";
 
 const API_BASE =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:3002/api";
+  process.env.REACT_APP_API_BASE_URL || "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
 
 // Define interfaces for the result data
 interface SeoIssue {

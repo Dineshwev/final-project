@@ -39,7 +39,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
 
       // Create PayPal order
       const createResponse = await fetch(
-        "http://localhost:3003/api/payment/create-order",
+        "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api/payment/create-order",
         {
           method: "POST",
           headers: {
@@ -103,7 +103,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
               // Check if payment was completed
               try {
                 const captureResponse = await fetch(
-                  "http://localhost:3003/api/payment/capture-order",
+                  "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api/payment/capture-order",
                   {
                     method: "POST",
                     headers: {

@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:3002/api";
+const API_BASE_URL = "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api";
 
 // WCAG Level Information
 export interface WCAGLevel {

@@ -5,7 +5,7 @@
 
 // API Configuration
 const OG_VALIDATOR_API = `${
-  window.API_BASE_URL || "http://localhost:3003/api"
+  window.API_BASE_URL || "http://irpwi5mww.ap-southeast-2.awsapprunner.com/api"
 }/og-validator`;
 
 /**

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3003/api';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://irpwi5mww.ap-southeast-2.awsapprunner.com/api';
 
 interface KeywordRow { id:number; url:string; keyword:string; last_position:number|null; created_at:string; updated_at:string; }
 interface HistoryRow { id:number; keyword_id:number; position:number|null; fetched_at:string; }
