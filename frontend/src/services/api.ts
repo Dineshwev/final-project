@@ -18,12 +18,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response wrapper to ensure consistent format
+// Response wrapper to ensure consistent format with 404 fallback
 const wrapResponse = async (apiCall: Promise<any>) => {
   try {
     const response = await apiCall;
     return { success: true, data: response.data };
-  } catch (error) {
+  } catch (error: any) {
+    console.warn('API Error:', error.message);
+    
+    // Handle 404 errors gracefully
+    if (error.response?.status === 404) {
+      console.log('API endpoint not found, providing fallback response');
+      return { 
+        success: false, 
+        error: 'Endpoint not available', 
+        fallback: true,
+        data: null 
+      };
+    }
+    
     return { success: false, error };
   }
 };

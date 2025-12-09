@@ -63,10 +63,19 @@ const NotificationBell: React.FC = () => {
       
       console.log(`🔔 NotificationBell: Response status ${response.status}`);
       
+      if (response.status === 404) {
+        console.log('🔔 NotificationBell: API endpoint not found, using fallback');
+        setUnreadCount(0);
+        return;
+      }
+      
       const data = await response.json();
 
       if (data.success) {
-        setUnreadCount(data.count);
+        setUnreadCount(data.count || 0);
+      } else {
+        console.warn('🔔 NotificationBell: API returned unsuccessful response');
+        setUnreadCount(0);
       }
     } catch (error) {
       console.error("Error loading unread count:", error);
@@ -82,10 +91,20 @@ const NotificationBell: React.FC = () => {
       const response = await fetch(
         `${API_BASE_URL}/alerts?userId=${userId}&limit=10&isRead=false`
       );
+      
+      if (response.status === 404) {
+        console.log('🔔 Recent alerts: API endpoint not found, using empty array');
+        setAlerts([]);
+        setLoading(false);
+        return;
+      }
+      
       const data = await response.json();
 
       if (data.success) {
-        setAlerts(data.data);
+        setAlerts(data.data || []);
+      } else {
+        setAlerts([]);
       }
     } catch (error) {
       console.error("Error loading recent alerts:", error);
