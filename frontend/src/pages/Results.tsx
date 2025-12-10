@@ -305,14 +305,6 @@ const ResultsPage: React.FC = () => {
   // Ensure all data structures exist with safe defaults
   const seoIssues = results.seoIssues || [];
   const securityChecks = results.securityChecks || [];
-  const keywords = results.keywords || [];
-  const metrics = results.metrics || {
-    loadTime: 0,
-    pageSize: 0,
-    requests: 0,
-    mobileScore: 0,
-    desktopScore: 0,
-  };
 
   // Calculate stats
   const issueStats = {
