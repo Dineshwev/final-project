@@ -22,6 +22,7 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -38,6 +39,10 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!termsAccepted) {
+      return setError("You must agree to the Terms of Service and Privacy Policy");
+    }
 
     if (password !== confirmPassword) {
       return setError("Passwords do not match");
@@ -203,31 +208,47 @@ const Register: React.FC = () => {
           />
 
           {/* Terms Checkbox */}
-          <label className="flex items-start cursor-pointer group">
-            <input
-              type="checkbox"
-              id="terms"
-              name="terms"
-              required
-              className="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
-            />
-            <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">
-              I agree to the{" "}
-              <Link
-                to="/terms"
-                className="text-indigo-600 hover:text-indigo-700 hover:underline font-medium"
-              >
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link
-                to="/privacy"
-                className="text-indigo-600 hover:text-indigo-700 hover:underline font-medium"
-              >
-                Privacy Policy
-              </Link>
-            </span>
-          </label>
+          <div className="space-y-2">
+            <label className="flex items-start gap-3 cursor-pointer group p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  name="terms"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  required
+                  className="w-5 h-5 text-indigo-600 border-2 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 bg-white dark:bg-gray-700 cursor-pointer transition-all duration-200"
+                />
+                {termsAccepted && (
+                  <CheckCircleIcon className="absolute top-0 left-0 w-5 h-5 text-indigo-600 pointer-events-none" />
+                )}
+              </div>
+              <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed select-none">
+                I agree to the{" "}
+                <Link
+                  to="/terms"
+                  className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline font-medium transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link
+                  to="/privacy"
+                  className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline font-medium transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Privacy Policy
+                </Link>
+              </span>
+            </label>
+            {!termsAccepted && error === "You must agree to the Terms of Service and Privacy Policy" && (
+              <p className="text-sm text-red-600 dark:text-red-400 ml-8">
+                Please accept the terms to continue
+              </p>
+            )}
+          </div>
 
           {/* Submit Button */}
           <Button
@@ -236,7 +257,7 @@ const Register: React.FC = () => {
             size="lg"
             fullWidth
             loading={loading}
-            disabled={googleLoading}
+            disabled={googleLoading || !termsAccepted}
             icon={<CheckCircleIcon className="w-5 h-5" />}
             iconPosition="left"
           >
