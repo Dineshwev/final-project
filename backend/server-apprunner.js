@@ -211,7 +211,20 @@ const server = http.createServer((req, res) => {
 
   // 404 for all other routes
   console.log(`❌ 404 - Route not found: ${method} ${path}`);
-  console.log(`📋 Available routes: GET /, GET /health, GET /api/status, GET /api/alerts/unread-count, GET /api/history/recent, GET /api/user/api-keys, GET /api/scan, POST /api/scan`);
+  console.log(`🔍 Request details:`);
+  console.log(`   - Method: ${method}`);
+  console.log(`   - Path: ${path}`);
+  console.log(`   - Full URL: ${req.url}`);
+  console.log(`   - Headers:`, req.headers);
+  console.log(`📋 Available routes:`);
+  console.log(`   - GET /`);
+  console.log(`   - GET /health`);
+  console.log(`   - GET /api/status`);
+  console.log(`   - GET /api/alerts/unread-count`);
+  console.log(`   - GET /api/history/recent`);
+  console.log(`   - GET /api/user/api-keys`);
+  console.log(`   - GET /api/scan`);
+  console.log(`   - POST /api/scan`);
   res.writeHead(404);
   res.end(JSON.stringify({
     status: 'error',
@@ -244,6 +257,13 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 Server accessible at http://0.0.0.0:${PORT}`);
   console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
   console.log(`🔧 API status: http://0.0.0.0:${PORT}/api/status`);
+  console.log(`📋 Available API endpoints:`);
+  console.log(`   ✅ GET /api/alerts/unread-count`);
+  console.log(`   ✅ GET /api/history/recent`);
+  console.log(`   ✅ GET /api/user/api-keys`);
+  console.log(`   ✅ GET /api/scan`);
+  console.log(`   ✅ POST /api/scan`);
+  console.log(`🚀 All API routes registered successfully!`);
 });
 
 // Graceful shutdown handling
