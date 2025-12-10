@@ -17,11 +17,11 @@ console.log('📁 Script directory:', __dirname);
 let backendServer;
 try {
   // Import the actual backend server
-  const backendPath = path.join(__dirname, 'backend', 'server-apprunner.js');
+  const backendPath = path.join(__dirname, 'backend', 'server.js');
   console.log('📂 Attempting to load backend from:', backendPath);
   
   // Import and start the backend server
-  const { default: server } = await import('./backend/server-apprunner.js');
+  const { default: server } = await import('./backend/server.js');
   console.log('✅ Backend server imported successfully');
   
 } catch (error) {

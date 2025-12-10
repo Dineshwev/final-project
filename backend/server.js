@@ -2,8 +2,8 @@
 // Using built-in Node.js modules only for App Runner deployment
 // Deploy timestamp: 2025-12-10T05:10:00Z - FORCE REDEPLOY with /api/get-alerts endpoint
 
-import http from 'http';
-import url from 'url';
+const http = require('http');
+const url = require('url');
 
 // Explicitly set port to 3002 for AWS App Runner
 const PORT = 3002;
@@ -344,5 +344,3 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
-
-export default server;
