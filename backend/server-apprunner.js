@@ -137,30 +137,46 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Handle scan POST requests (need to parse body)
+  // Scan POST route with immediate mock success
   if (pathname === '/api/scan' && method === 'POST') {
+    console.log('🔍 POST /api/scan endpoint accessed - processing mock scan request');
+    
+    // Read the request body (optional for mock, but good practice to handle data)
     let body = '';
     req.on('data', chunk => {
-      body += chunk.toString();
+      body += chunk.toString(); 
     });
+
     req.on('end', () => {
+      console.log('📥 Received POST body:', body || '(empty)');
+      
       try {
         const scanData = body ? JSON.parse(body) : {};
+        console.log('✅ Parsed scan data:', scanData);
+        
+        // Send 200 OK response immediately after receiving the request body
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: true,
+        const mockResponse = { 
+          success: true, 
+          scanId: 'mock-scan-id-' + Date.now(),
+          message: 'Mock scan started successfully',
           data: {
             scanId: 'mock-scan-' + Date.now(),
             status: 'initiated',
-            message: 'Scan started successfully',
-            url: scanData.url || 'unknown'
+            url: scanData.url || 'unknown',
+            timestamp: new Date().toISOString()
           }
-        }));
+        };
+        
+        console.log('📤 Sending mock response:', mockResponse);
+        res.end(JSON.stringify(mockResponse));
       } catch (error) {
+        console.error('❌ Error parsing POST body:', error.message);
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           success: false,
-          error: 'Invalid JSON in request body'
+          error: 'Invalid JSON in request body',
+          message: error.message
         }));
       }
     });
