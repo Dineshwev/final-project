@@ -1,6 +1,6 @@
 // AWS App Runner Conformant Server - Port 3002
 // Using built-in Node.js modules only for App Runner deployment
-// Deploy timestamp: 2025-12-09T17:40:00Z - Force redeploy with all API routes
+// Deploy timestamp: 2025-12-10T05:10:00Z - FORCE REDEPLOY with /api/get-alerts endpoint
 
 import http from 'http';
 import url from 'url';
