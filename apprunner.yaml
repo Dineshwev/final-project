@@ -3,20 +3,16 @@ runtime: nodejs18
 build:
   commands:
     build:
-      - echo "🔍 Current directory contents:"
+      - echo "🔍 Root directory contents:"
       - ls -la
-      - echo "📂 Moving to backend directory..."
-      - cd backend
-      - echo "📋 Backend directory contents:"
-      - ls -la
-      - echo "📦 Installing backend dependencies..."
+      - echo "📦 Installing root dependencies..."
       - npm install --production
-      - echo "✅ Backend build completed successfully"
-      - echo "🔍 Checking server file exists:"
-      - ls -la server-apprunner.js
+      - echo "📂 Backend directory exists:"
+      - ls -la backend/
+      - echo "✅ Build completed successfully"
 run:
   runtime-version: 18.x
-  command: cd backend && node server-apprunner.js
+  command: npm start
   network:
     port: 3002
     env: PORT
