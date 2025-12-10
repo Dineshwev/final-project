@@ -17,19 +17,8 @@ const server = http.createServer((req, res) => {
   const method = req.method;
 
   // Set CORS headers for cross-origin requests
-  // Allow specific origin: healthyseo.tech and AWS App Runner domains
-  const allowedOrigins = [
-    'https://www.healthyseo.tech',
-    'https://healthyseo.tech',
-    'https://inrpws5mww.ap-southeast-2.awsapprunner.com'
-  ];
-  
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://www.healthyseo.tech');
-  }
+  // Temporarily allow all origins for debugging authentication issues
+  res.setHeader('Access-Control-Allow-Origin', '*');
   
   // Allow specific HTTP methods
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -64,6 +53,72 @@ const server = http.createServer((req, res) => {
       port: PORT,
       timestamp: new Date().toISOString()
     }));
+    return;
+  }
+
+  // Handle mock auth login endpoint for debugging
+  if (pathname === '/api/auth/login' && method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        const userData = JSON.parse(body);
+        // Mock successful login response
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Login successful',
+          user: {
+            id: 'mock-user-123',
+            email: userData.email || 'user@example.com',
+            name: 'Mock User',
+            verified: true
+          },
+          token: 'mock-jwt-token-' + Date.now()
+        }));
+      } catch (error) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: false,
+          message: 'Invalid request data'
+        }));
+      }
+    });
+    return;
+  }
+
+  // Handle mock auth login endpoint for debugging
+  if (pathname === '/api/auth/login' && method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        const userData = JSON.parse(body);
+        // Mock successful login response
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Login successful',
+          user: {
+            id: 'mock-user-123',
+            email: userData.email || 'user@example.com',
+            name: 'Mock User',
+            verified: true
+          },
+          token: 'mock-jwt-token-' + Date.now()
+        }));
+      } catch (error) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: false,
+          message: 'Invalid request data'
+        }));
+      }
+    });
     return;
   }
 
