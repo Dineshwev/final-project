@@ -10,24 +10,26 @@ const PORT = 3002;
 
 // Create HTTP server using built-in module
 const server = http.createServer((req, res) => {
-  // Parse URL and extract clean pathname (without query parameters)
-  const parsedUrl = url.parse(req.url, true);
-  let pathname = parsedUrl.pathname; // Clean path without query string
+  // Extract Pathname (without Query) and aggressively clean it for strict comparison
+  const pathname = parsedUrl.pathname;
   const query = parsedUrl.query;
   const method = req.method;
-
-  // START PATH CLEANUP FOR ROBUSTNESS
-  // Remove potential trailing slash (e.g., /api/scan/ -> /api/scan)
-  if (pathname.length > 1 && pathname.endsWith('/')) {
-    pathname = pathname.slice(0, -1);
+  
+  // START AGGRESSIVE PATH CLEANUP
+  let cleanPath = pathname;
+  
+  // 1. Remove Trailing Slash (e.g., /api/scan/ -> /api/scan)
+  if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
+    cleanPath = cleanPath.slice(0, -1);
   }
-  // Convert to lowercase to ignore case issues
-  pathname = pathname.toLowerCase();
-  // END PATH CLEANUP
+  // 2. Convert to Lowercase for case insensitivity
+  cleanPath = cleanPath.toLowerCase();
+  // END AGGRESSIVE PATH CLEANUP
 
-  // START UNIVERSAL CORS FIX (Temporary for debugging)
+  // START UNIVERSAL CORS FIX (Aggressive Debugging Mode)
+  // This allows ALL origins (*) to rule out CORS as the cause of 404s.
   res.setHeader('Access-Control-Allow-Origin', '*'); 
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle OPTIONS pre-flight request first.
@@ -42,7 +44,7 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
   // Log incoming requests for debugging
-  console.log(`📥 ${new Date().toISOString()} - ${method} ${pathname}`);
+  console.log(`📥 ${new Date().toISOString()} - ${method} ${pathname} -> ${cleanPath}`);
   if (query && Object.keys(query).length > 0) {
     console.log(`📋 Query params:`, query);
   }
@@ -50,7 +52,7 @@ const server = http.createServer((req, res) => {
   console.log(`🌐 Origin: ${req.headers.origin}`);
 
   // Handle root path
-  if (pathname === '/' && method === 'GET') {
+  if (cleanPath === '/' && method === 'GET') {
     res.writeHead(200);
     res.end(JSON.stringify({
       status: 'success',
@@ -62,7 +64,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle health check endpoint for App Runner
-  if (pathname === '/health' && method === 'GET') {
+  if (cleanPath === '/health' && method === 'GET') {
     res.writeHead(200);
     res.end(JSON.stringify({
       status: 'healthy',
@@ -74,7 +76,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle API status endpoint
-  if (pathname === '/api/status' && method === 'GET') {
+  if (cleanPath === '/api/status' && method === 'GET') {
     res.writeHead(200);
     res.end(JSON.stringify({
       status: 'success',
@@ -87,7 +89,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle alerts unread count endpoint
-  if (pathname === '/api/alerts/unread-count' && method === 'GET') {
+  if (cleanPath === '/api/alerts/unread-count' && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
       success: true,
@@ -97,7 +99,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle user API keys endpoint
-  if (pathname === '/api/user/api-keys' && method === 'GET') {
+  if (cleanPath === '/api/user/api-keys' && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       success: true,
@@ -110,7 +112,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle history recent endpoint
-  if (pathname === '/api/history/recent' && method === 'GET') {
+  if (cleanPath === '/api/history/recent' && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       success: true,
@@ -124,7 +126,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle scan endpoint
-  if (pathname === '/api/scan' && method === 'GET') {
+  if (cleanPath === '/api/scan' && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       success: true,
@@ -138,7 +140,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Scan POST route with immediate mock success
-  if (pathname === '/api/scan' && method === 'POST') {
+  if (cleanPath === '/api/scan' && method === 'POST') {
     console.log('🔍 POST /api/scan endpoint accessed - processing mock scan request');
     
     // Read the request body (optional for mock, but good practice to handle data)
@@ -184,7 +186,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle specific get-alerts endpoint (what the frontend calls)
-  if (pathname === '/api/get-alerts' && method === 'GET') {
+  if (cleanPath === '/api/get-alerts' && method === 'GET') {
     console.log('🚨 GET-ALERTS endpoint accessed');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
@@ -215,7 +217,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle history endpoint (what the frontend calls)
-  if (pathname === '/api/history' && method === 'GET') {
+  if (cleanPath === '/api/history' && method === 'GET') {
     console.log('📊 HISTORY endpoint accessed');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
@@ -244,7 +246,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle alerts general endpoint
-  if (pathname.startsWith('/api/alerts') && method === 'GET') {
+  if (cleanPath.startsWith('/api/alerts') && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       success: true,
@@ -254,8 +256,8 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle any other API endpoints with generic response
-  if (pathname.startsWith('/api/') && method === 'GET') {
-    console.log(`🔧 Generic API handler for: ${pathname}`);
+  if (cleanPath.startsWith('/api/') && method === 'GET') {
+    console.log(`🔧 Generic API handler for: ${cleanPath}`);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'ok',
@@ -269,7 +271,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Handle test endpoint for debugging
-  if (pathname === '/api/test' && method === 'GET') {
+  if (cleanPath === '/api/test' && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'success',
@@ -282,10 +284,11 @@ const server = http.createServer((req, res) => {
   }
 
   // 404 for all other routes
-  console.log(`❌ 404 - Route not found: ${method} ${pathname}`);
+  console.log(`❌ 404 - Route not found: ${method} ${cleanPath} (original: ${pathname})`);
   console.log(`🔍 Request details:`);
   console.log(`   - Method: ${method}`);
-  console.log(`   - Path: ${pathname}`);
+  console.log(`   - Clean Path: ${cleanPath}`);
+  console.log(`   - Original Path: ${pathname}`);
   console.log(`   - Full URL: ${req.url}`);
   console.log(`   - Headers:`, req.headers);
   console.log(`📋 Available routes:`);
@@ -301,7 +304,8 @@ const server = http.createServer((req, res) => {
   res.end(JSON.stringify({
     status: 'error',
     message: 'Endpoint not found',
-    path: pathname,
+    cleanPath: cleanPath,
+    originalPath: pathname,
     method: method,
     timestamp: new Date().toISOString(),
     availableRoutes: [
