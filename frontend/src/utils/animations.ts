@@ -525,7 +525,7 @@ export const scrollToElement = (element: HTMLElement, offset: number = 0) => {
   });
 };
 
-export default {
+const animations = {
   // Framer Motion
   pageVariants,
   fadeIn,
@@ -560,3 +560,5 @@ export default {
   isInViewport,
   scrollToElement,
 };
+
+export default animations;

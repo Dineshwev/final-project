@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import {
   CheckCircle,
   XCircle,
-  AlertTriangle,
   Download,
   Loader,
   ExternalLink,
@@ -15,16 +14,13 @@ import {
 import {
   runAccessibilityAudit,
   exportAsJSON,
-  getScoreColor,
   getScoreBgGradient,
   getImpactColor,
   getImpactBgColor,
   getImpactIcon,
   getWCAGLevelColor,
-  formatWCAGCriterion,
   truncateHTML,
   type AuditResult,
-  type AuditReport,
   type Violation,
 } from "../services/accessibilityService";
 

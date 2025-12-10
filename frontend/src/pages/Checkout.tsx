@@ -1,5 +1,5 @@
 // src/pages/Checkout.tsx - Payment Checkout Page with PayPal Integration
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -8,7 +8,7 @@ import {
   CreditCardIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { FaCreditCard, FaLock } from "../components/Icons";
+import { FaLock } from "../components/Icons";
 import PageContainer from "../components/PageContainer";
 import Card from "../components/Card";
 import Button from "../components/Button";
@@ -16,7 +16,6 @@ import Badge from "../components/Badge";
 import PayPalButton from "../components/PayPalButton";
 import {
   fadeIn,
-  slideUp,
   staggerContainer,
   staggerItem,
 } from "../utils/animations";

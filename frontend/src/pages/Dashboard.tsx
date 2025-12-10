@@ -10,7 +10,6 @@ import {
   TrendingDown,
   AlertCircle,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { Skeleton } from "components/ui/skeleton";
 import { useDashboardMetrics } from "../hooks/useDashboardMetrics";
 import { useMobileOptimization } from "../hooks/useMobileOptimization";

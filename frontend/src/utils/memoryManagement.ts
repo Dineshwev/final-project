@@ -137,7 +137,7 @@ export const forceGarbageCollection = (): void => {
   }
 };
 
-export default {
+const memoryManagement = {
   debounce,
   throttle,
   createLazyImage,
@@ -147,3 +147,5 @@ export default {
   getMemoryUsage,
   forceGarbageCollection,
 };
+
+export default memoryManagement;

@@ -8,7 +8,6 @@ import {
   onAuthStateChanged,
   User,
   GoogleAuthProvider,
-  signInWithRedirect,
   signInWithPopup,
   getRedirectResult,
 } from "firebase/auth";

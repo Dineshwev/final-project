@@ -9,7 +9,6 @@ import {
   Search,
   FileText,
   Info,
-  TrendingUp,
   Link as LinkIcon,
   BarChart3,
   CheckCircle,
@@ -23,13 +22,11 @@ import {
   downloadDisavowFile,
   exportReportAsJSON,
   getToxicityColor,
-  getToxicityBgColor,
   getCategoryColor,
   getRecommendationColor,
   formatNumber,
   truncateUrl,
   type AnalysisReport,
-  type ToxicBacklink,
 } from "../services/toxicBacklinkService";
 
 const ToxicBacklinkDetector: React.FC = () => {

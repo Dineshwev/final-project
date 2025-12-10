@@ -4,8 +4,6 @@ import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import PageContainer from "../components/PageContainer";
 import Card from "../components/Card";
 import {
-  fadeIn,
-  slideUp,
   staggerContainer,
   staggerItem,
 } from "../utils/animations";

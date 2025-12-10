@@ -13,7 +13,6 @@ import {
   Network,
   ChevronDown,
   ChevronUp,
-  Eye,
   Maximize2,
   Minimize2,
 } from "lucide-react";
@@ -22,13 +21,11 @@ import {
   exportAsJSON,
   convertToNetworkGraph,
   getSimilarityColor,
-  getSimilarityBgColor,
   getClusterTypeColor,
   getPriorityColor,
   truncateUrl,
   estimateCrawlTime,
   type AnalysisReport,
-  type DuplicateCluster,
 } from "../services/duplicateContentService";
 import NetworkGraph from "../components/NetworkGraph";
 

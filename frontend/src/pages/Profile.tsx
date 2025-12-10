@@ -523,14 +523,14 @@ const Profile: React.FC = () => {
     logout: () => Promise<{ success: boolean }>;
   };
   const { apiKeys, updateApiKeys } = useApi();
-  const [userProfile, setUserProfile] = useState({
+  const userProfile = {
     displayName: user?.displayName || "",
     email: user?.email || "",
     photoURL: user?.photoURL || "",
     createdAt: user?.metadata?.creationTime
       ? new Date(user.metadata.creationTime)
       : null,
-  });
+  };
 
   const [scanHistory, setScanHistory] = useState<any[]>([]);
   const [totalScans, setTotalScans] = useState(0);

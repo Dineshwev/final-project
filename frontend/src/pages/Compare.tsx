@@ -12,7 +12,6 @@ import Badge from "../components/Badge";
 import { FaPlus, FaChartBar } from "../components/Icons";
 import {
   fadeIn,
-  slideUp,
   staggerContainer,
   staggerItem,
 } from "../utils/animations";

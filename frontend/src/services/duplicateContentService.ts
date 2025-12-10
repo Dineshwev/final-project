@@ -335,7 +335,7 @@ export function estimateCrawlTime(maxPages: number): string {
   return `~${minutes} minute${minutes > 1 ? "s" : ""}`;
 }
 
-export default {
+const duplicateContentService = {
   analyzeDuplicateContent,
   comparePages,
   generateDiff,
@@ -350,3 +350,5 @@ export default {
   formatNumber,
   estimateCrawlTime,
 };
+
+export default duplicateContentService;

@@ -362,7 +362,7 @@ const OGValidator: React.FC = () => {
                     <div className="text-center">
                       <img
                         src={results.tags.image}
-                        alt="OG Image Preview"
+                        alt="OG Preview"
                         className="max-w-full max-h-96 rounded-lg shadow-md mx-auto"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";

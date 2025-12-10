@@ -19,7 +19,6 @@ import Loading from "../components/Loading";
 import Badge from "../components/Badge";
 import {
   fadeIn,
-  slideUp,
   staggerContainer,
   staggerItem,
 } from "../utils/animations";
