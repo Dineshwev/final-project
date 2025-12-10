@@ -53,6 +53,62 @@ try {
       return;
     }
     
+    if (path === '/api/get-alerts') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        alerts: [
+          {
+            id: 1,
+            type: 'broken_link',
+            severity: 'high',
+            message: 'Broken internal link detected: /old-page-url',
+            url: 'https://example.com/contact',
+            detected_at: '2024-01-15T10:30:00Z',
+            status: 'active'
+          },
+          {
+            id: 2,
+            type: 'missing_meta',
+            severity: 'medium',
+            message: 'Missing meta description on homepage',
+            url: 'https://example.com/',
+            detected_at: '2024-01-15T09:45:00Z',
+            status: 'active'
+          }
+        ],
+        total: 2,
+        timestamp: new Date().toISOString()
+      }));
+      return;
+    }
+
+    if (path === '/api/history') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        scans: [
+          {
+            id: 'scan_123',
+            url: 'https://example.com',
+            date: '2024-01-15T08:00:00Z',
+            score: 85,
+            issues_found: 3,
+            status: 'completed'
+          },
+          {
+            id: 'scan_122',
+            url: 'https://example.com',
+            date: '2024-01-14T08:00:00Z',
+            score: 82,
+            issues_found: 5,
+            status: 'completed'
+          }
+        ],
+        total: 2,
+        timestamp: new Date().toISOString()
+      }));
+      return;
+    }
+
     if (path === '/api/status') {
       res.writeHead(200);
       res.end(JSON.stringify({ 
@@ -101,7 +157,7 @@ try {
     res.end(JSON.stringify({ 
       error: 'Not found', 
       path: path,
-      availableRoutes: ['/health', '/api/status', '/api/alerts/unread-count', '/api/history/recent', '/api/user/api-keys', '/api/scan']
+      availableRoutes: ['/health', '/api/status', '/api/get-alerts', '/api/history', '/api/alerts/unread-count', '/api/history/recent', '/api/user/api-keys', '/api/scan']
     }));
   });
   
@@ -111,6 +167,8 @@ try {
     console.log(`🌐 Available endpoints:`);
     console.log(`   - GET /health`);
     console.log(`   - GET /api/status`);
+    console.log(`   - GET /api/get-alerts`);
+    console.log(`   - GET /api/history`);
     console.log(`   - GET /api/alerts/unread-count`);
     console.log(`   - GET /api/history/recent`);
     console.log(`   - GET /api/user/api-keys`);
