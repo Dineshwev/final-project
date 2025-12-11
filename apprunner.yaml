@@ -1,21 +1,19 @@
-# apprunner.yaml (AWS App Runner Configuration)
+# AWS App Runner Configuration - Ultra Minimal (Zero Dependencies)
 version: 1.0
 
 runtime: nodejs18
 
 build:
   commands:
-    # Install dependencies in backend folder
-    - npm install --prefix backend --production
-    # Clean npm cache to reduce deployment size  
-    - npm cache clean --force
-
+    # No dependencies needed - using Node.js built-ins only
+    - echo "Using zero-dependency server for maximum compatibility"
+    - ls -la backend/
+    
 run:
-  # Use the App Runner specific server
-  command: node backend/server-apprunner.js
+  runtime-version: "18"
+  command: node backend/server-minimal.js
   network:
     port: 3002
-    env_port: PORT
   env:
     - name: NODE_ENV
       value: production
@@ -25,4 +23,4 @@ run:
 healthcheck:
   path: /health
   protocol: HTTP
-  port: 3002
+  timeout: 10
