@@ -1,0 +1,90 @@
+# AWS App Runner Ignore File
+# Exclude files and folders that are not needed for deployment
+
+# Development files
+frontend/
+frontend-backup/
+.git/
+.vs/
+*.md
+*.ps1
+*.sh
+
+# Documentation files  
+CHANGE_DETECTION_ALERTS_SYSTEM.md
+CITATION_TRACKER_*.md
+COMPARE_FEATURE.md
+COMPONENT_QUICK_REFERENCE.md
+COMPREHENSIVE_FIXES_SUMMARY.md
+CONTACT_FORM_SETUP.md
+CONTENT_ANALYSIS_FEATURE.md
+CURRENCY_DEBUG_GUIDE.md
+CURRENCY_FIX_TESTING.md
+DASHBOARD_PREMIUM_COMPLETE.md
+DEPLOYMENT_URGENT.md
+DUPLICATE_CONTENT_DETECTOR.md
+FINAL_RESOLUTION_SUMMARY.md
+FIREBASE_GOOGLE_OAUTH_FIX.md
+GLOBAL_CURRENCY_SUPPORT.md
+GMB_*.md
+GOOGLE_MY_BUSINESS_*.md
+IMPLEMENTATION_SUMMARY.md
+INTERACTIVE_CHARTS_FEATURE.md
+MULTI_LANGUAGE_SEO_*.md
+NAVIGATION_PROFILE_IMPROVEMENTS.md
+NETWORK_VISUALIZATION_*.md
+OG_VALIDATOR_*.md
+PAYPAL_INTEGRATION_COMPLETE.md
+PINTEREST_RICH_PINS_*.md
+PREMIUM_REDESIGN_COMPLETE.md
+PRICING_PAGE_IMPLEMENTATION.md
+PROBLEM_SOLVED_COMPLETE.md
+PROFESSIONAL_*.md
+QUICK_FIX_GUIDE.md
+QUICK_START.md
+READABILITY_*.md
+README.md
+RESULTS_PAGE_FIX.md
+SCAN_RESULTS_FEATURE.md
+SCORE_*.md
+SECURITY_HEADERS_*.md
+SPEED_OPTIMIZATION_COMPLETE.md
+TESTING_GUIDE.md
+TOXIC_BACKLINK_DETECTOR.md
+TWITTER_CARD_VALIDATOR_COMPLETE.md
+UI_*.md
+
+# Build and development tools
+convert-to-dark-theme.ps1
+start-backend.sh
+start-servers.ps1
+
+# Test files and examples in backend
+backend/test-*.js
+backend/example-*.js
+backend/tests/
+backend/examples/
+backend/temp/
+backend/cli/
+backend/scripts/
+backend/assets/
+backend/.env.example
+backend/auth.sh
+backend/convert-to-*.sh
+backend/convert-to-*.ps1
+backend/get-google-token.*
+backend/*README.md
+backend/*.md
+
+# Firebase and news (not needed for API)
+firebase/
+news/
+amplify.yml
+
+# Node modules will be installed during build
+node_modules/
+backend/node_modules/
+
+# Package lock files (will regenerate)
+package-lock.json
+backend/package-lock.json

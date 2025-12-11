@@ -1,6 +1,7 @@
 {
   "name": "seo-health-checker-api",
   "version": "1.0.0",
+  "type": "module",
   "description": "API for Website SEO & Health Checker",
   "main": "server.js",
   "engines": {
