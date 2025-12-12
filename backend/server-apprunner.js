@@ -2,8 +2,8 @@
 // Using built-in Node.js modules only for App Runner deployment
 // Deploy timestamp: 2025-12-10T05:10:00Z - FORCE REDEPLOY with /api/get-alerts endpoint
 
-import http from 'http';
-import url from 'url';
+import { createServer } from 'http';
+import { parse as parseUrl } from 'url';
 
 // Explicitly set port to 3002 for AWS App Runner
 const PORT = process.env.PORT || 3002;
@@ -94,9 +94,9 @@ function generateDynamicScanData(scanId) {
 }
 
 // Create HTTP server using built-in module
-const server = http.createServer((req, res) => {
+const server = createServer((req, res) => {
   // Parse URL and extract clean pathname (without query parameters)
-  const parsedUrl = url.parse(req.url, true);
+  const parsedUrl = parseUrl(req.url, true);
   const pathname = parsedUrl.pathname;
   const query = parsedUrl.query;
   const method = req.method;

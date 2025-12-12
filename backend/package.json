@@ -8,7 +8,8 @@
     "node": ">=18.0.0 <=25.0.0"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node server-apprunner.js",
+    "start:local": "node server.js", 
     "start:apprunner": "node server-apprunner.js",
     "dev": "node --watch server.js",
     "dev:apprunner": "node --watch server-apprunner.js",
