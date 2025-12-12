@@ -53,7 +53,7 @@ const NotificationBell: React.FC = () => {
     try {
       const userId = user?.uid || "demo-user";
       const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
+        process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
       
       console.log(`🔔 NotificationBell: Making request to ${API_BASE_URL}/alerts/unread-count`);
       
@@ -87,7 +87,7 @@ const NotificationBell: React.FC = () => {
       setLoading(true);
       const userId = user?.uid || "demo-user";
       const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
+        process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
       const response = await fetch(
         `${API_BASE_URL}/alerts?userId=${userId}&limit=10&isRead=false`
       );
@@ -117,7 +117,7 @@ const NotificationBell: React.FC = () => {
     try {
       const userId = user?.uid || "demo-user";
       const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
+        process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
       await fetch(`${API_BASE_URL}/alerts/${alertId}/read`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
