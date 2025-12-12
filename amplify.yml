@@ -6,8 +6,7 @@ frontend:
         - cd frontend && npm ci
     build:
       commands:
-        - echo "Building with API URL ${REACT_APP_API_BASE_URL}"
-        - npm run build --prefix frontend
+        - cd frontend && echo "Building with API URL ${REACT_APP_API_BASE_URL}" && npm run build
   artifacts:
     baseDirectory: frontend/build
     files:
