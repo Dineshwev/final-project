@@ -1,177 +1,249 @@
-// Root-level server for AWS App Runner compatibility
-// This ensures AWS can find and run the server regardless of directory structure
+// AWS App Runner Ultra-Minimal Server - Zero External Dependencies
+// Built with Node.js built-in modules only for guaranteed compatibility
+// Deploy timestamp: 2025-12-11T22:00:00Z - MINIMAL VERSION
 
-import { createServer } from 'http';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import http from 'http';
+import url from 'url';
+import { createRequire } from 'module';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Create require for JSON imports in ES modules
+const require = createRequire(import.meta.url);
 
-console.log('🚀 Starting root-level server for AWS App Runner...');
-console.log('📁 Current directory:', process.cwd());
-console.log('📁 Script directory:', __dirname);
+// Determine port from environment or default to 3002
+const PORT = process.env.PORT || 3002;
 
-// Try to import the backend server
-let backendServer;
-try {
-  // Import the actual backend server
-  const backendPath = path.join(__dirname, 'backend', 'server.js');
-  console.log('📂 Attempting to load backend from:', backendPath);
-  
-  // Import and start the backend server
-  const { default: server } = await import('./backend/server.js');
-  console.log('✅ Backend server imported successfully');
-  
-} catch (error) {
-  console.error('❌ Failed to import backend server:', error);
-  
-  // Fallback: create a simple server with the API routes
-  const server = createServer((req, res) => {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const path = url.pathname;
-    
-    console.log(`📥 Request: ${req.method} ${path}`);
-    
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Content-Type', 'application/json');
-    
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
-    
-    // Handle API routes
-    if (path === '/health') {
+console.log(`🚀 Starting ultra-minimal server on port ${PORT}`);
+console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+
+// Create HTTP server using built-in module only
+const server = http.createServer((req, res) => {
+  // Parse URL and extract clean pathname
+  const parsedUrl = url.parse(req.url, true);
+  let cleanPath = parsedUrl.pathname;
+  const query = parsedUrl.query;
+  const method = req.method;
+
+  // Aggressive path cleanup
+  if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
+    cleanPath = cleanPath.slice(0, -1);
+  }
+  cleanPath = cleanPath.toLowerCase();
+
+  // Universal CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Handle OPTIONS preflight
+  if (method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // Set content type
+  res.setHeader('Content-Type', 'application/json');
+
+  // Log requests
+  const timestamp = new Date().toISOString();
+  console.log(`📥 ${timestamp} - ${method} ${cleanPath}`);
+
+  try {
+    // Root endpoint
+    if (cleanPath === '' || cleanPath === '/') {
       res.writeHead(200);
-      res.end(JSON.stringify({ status: 'healthy', port: 3002 }));
+      res.end(JSON.stringify({
+        status: 'success',
+        message: 'Minimal SEO API Server Running!',
+        version: '1.0.0-minimal',
+        port: PORT,
+        timestamp: timestamp
+      }));
       return;
     }
-    
-    if (path === '/api/get-alerts') {
+
+    // Health check endpoint (required by App Runner)
+    if (cleanPath === '/health') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        status: 'healthy',
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        port: PORT,
+        timestamp: timestamp
+      }));
+      return;
+    }
+
+    // API status endpoint
+    if (cleanPath === '/api/status') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        status: 'success',
+        message: 'API is operational',
+        version: '1.0.0-minimal',
+        environment: process.env.NODE_ENV || 'development',
+        port: PORT,
+        timestamp: timestamp
+      }));
+      return;
+    }
+
+    // Mock scan endpoint GET
+    if (cleanPath === '/api/scan' && method === 'GET') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        success: true,
+        message: 'Scan service available (minimal mode)',
+        features: ['basic-scan', 'health-check'],
+        timestamp: timestamp
+      }));
+      return;
+    }
+
+    // Mock scan endpoint POST
+    if (cleanPath === '/api/scan' && method === 'POST') {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk.toString();
+      });
+
+      req.on('end', () => {
+        try {
+          const scanData = body ? JSON.parse(body) : {};
+          res.writeHead(200);
+          res.end(JSON.stringify({
+            success: true,
+            scanId: 'minimal-scan-' + Date.now(),
+            message: 'Minimal scan initiated',
+            url: scanData.url || 'unknown',
+            features: ['minimal-analysis'],
+            timestamp: timestamp
+          }));
+        } catch (error) {
+          res.writeHead(400);
+          res.end(JSON.stringify({
+            success: false,
+            error: 'Invalid JSON in request body',
+            timestamp: timestamp
+          }));
+        }
+      });
+      return;
+    }
+
+    // Mock alerts endpoint
+    if (cleanPath === '/api/get-alerts' && method === 'GET') {
       res.writeHead(200);
       res.end(JSON.stringify({
         alerts: [
           {
-            id: 1,
-            type: 'broken_link',
-            severity: 'high',
-            message: 'Broken internal link detected: /old-page-url',
-            url: 'https://example.com/contact',
-            detected_at: '2024-01-15T10:30:00Z',
-            status: 'active'
-          },
-          {
-            id: 2,
-            type: 'missing_meta',
-            severity: 'medium',
-            message: 'Missing meta description on homepage',
-            url: 'https://example.com/',
-            detected_at: '2024-01-15T09:45:00Z',
-            status: 'active'
+            id: 'minimal-1',
+            type: 'info',
+            message: 'Minimal mode active - limited features available',
+            timestamp: timestamp
           }
         ],
-        total: 2,
-        timestamp: new Date().toISOString()
+        total: 1,
+        timestamp: timestamp
       }));
       return;
     }
 
-    if (path === '/api/history') {
+    // Mock history endpoint
+    if (cleanPath === '/api/history' && method === 'GET') {
       res.writeHead(200);
       res.end(JSON.stringify({
-        scans: [
-          {
-            id: 'scan_123',
-            url: 'https://example.com',
-            date: '2024-01-15T08:00:00Z',
-            score: 85,
-            issues_found: 3,
-            status: 'completed'
-          },
-          {
-            id: 'scan_122',
-            url: 'https://example.com',
-            date: '2024-01-14T08:00:00Z',
-            score: 82,
-            issues_found: 5,
-            status: 'completed'
-          }
-        ],
-        total: 2,
-        timestamp: new Date().toISOString()
+        scans: [],
+        total: 0,
+        message: 'Minimal mode - no history stored',
+        timestamp: timestamp
       }));
       return;
     }
 
-    if (path === '/api/status') {
+    // Generic API endpoints
+    if (cleanPath.startsWith('/api/')) {
       res.writeHead(200);
-      res.end(JSON.stringify({ 
-        status: 'success', 
-        message: 'Fallback server running',
-        timestamp: new Date().toISOString()
+      res.end(JSON.stringify({
+        status: 'ok',
+        message: 'API endpoint available (minimal mode)',
+        path: cleanPath,
+        method: method,
+        timestamp: timestamp
       }));
       return;
     }
-    
-    if (path === '/api/alerts/unread-count') {
-      res.writeHead(200);
-      res.end(JSON.stringify({ success: true, count: 0 }));
-      return;
-    }
-    
-    if (path === '/api/history/recent') {
-      res.writeHead(200);
-      res.end(JSON.stringify({ 
-        success: true, 
-        data: { history: [], totalCount: 0, currentPage: 1 }
-      }));
-      return;
-    }
-    
-    if (path === '/api/user/api-keys') {
-      res.writeHead(200);
-      res.end(JSON.stringify({ 
-        success: true, 
-        data: { apiKey: 'demo-key', isActive: true }
-      }));
-      return;
-    }
-    
-    if (path === '/api/scan') {
-      res.writeHead(200);
-      res.end(JSON.stringify({ 
-        success: true, 
-        data: { scanId: `scan-${Date.now()}`, status: 'ready' }
-      }));
-      return;
-    }
-    
-    // 404 for unknown routes
+
+    // 404 for all other routes
+    console.log(`❌ 404 - Route not found: ${method} ${cleanPath}`);
     res.writeHead(404);
-    res.end(JSON.stringify({ 
-      error: 'Not found', 
-      path: path,
-      availableRoutes: ['/health', '/api/status', '/api/get-alerts', '/api/history', '/api/alerts/unread-count', '/api/history/recent', '/api/user/api-keys', '/api/scan']
+    res.end(JSON.stringify({
+      status: 'error',
+      message: 'Endpoint not found',
+      path: cleanPath,
+      method: method,
+      availableEndpoints: [
+        'GET /',
+        'GET /health',
+        'GET /api/status',
+        'GET|POST /api/scan',
+        'GET /api/get-alerts',
+        'GET /api/history'
+      ],
+      timestamp: timestamp
     }));
+
+  } catch (error) {
+    console.error('💥 Server error:', error);
+    res.writeHead(500);
+    res.end(JSON.stringify({
+      status: 'error',
+      message: 'Internal server error',
+      timestamp: timestamp
+    }));
+  }
+});
+
+// Error handling
+server.on('error', (err) => {
+  console.error('💥 Server startup error:', err);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('📴 Received SIGTERM, shutting down gracefully');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
   });
-  
-  const PORT = process.env.PORT || 3002;
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Fallback server running on port ${PORT}`);
-    console.log(`🌐 Available endpoints:`);
-    console.log(`   - GET /health`);
-    console.log(`   - GET /api/status`);
-    console.log(`   - GET /api/get-alerts`);
-    console.log(`   - GET /api/history`);
-    console.log(`   - GET /api/alerts/unread-count`);
-    console.log(`   - GET /api/history/recent`);
-    console.log(`   - GET /api/user/api-keys`);
-    console.log(`   - GET /api/scan`);
+});
+
+process.on('SIGINT', () => {
+  console.log('📴 Received SIGINT, shutting down gracefully');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
   });
-}
+});
+
+// Start server
+server.listen(PORT, '0.0.0.0', () => {
+  console.log('✅ Ultra-minimal server started successfully!');
+  console.log(`🌐 Server accessible at http://0.0.0.0:${PORT}`);
+  console.log(`❤️  Health check: http://0.0.0.0:${PORT}/health`);
+  console.log(`📊 API status: http://0.0.0.0:${PORT}/api/status`);
+  console.log(`🔧 Available endpoints:`);
+  console.log(`   ✅ GET /`);
+  console.log(`   ✅ GET /health`);
+  console.log(`   ✅ GET /api/status`);
+  console.log(`   ✅ GET /api/scan`);
+  console.log(`   ✅ POST /api/scan`);
+  console.log(`   ✅ GET /api/get-alerts`);
+  console.log(`   ✅ GET /api/history`);
+  console.log('🚀 Ready for App Runner deployment!');
+});
+
+// Export for testing (optional)
+export default server;
