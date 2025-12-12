@@ -2,8 +2,15 @@
 // Express Server with proper error handling and CORS for AWS App Runner deployment
 // Deploy timestamp: 2025-12-12T11:30:00Z - EXPRESS VERSION
 
+console.log('🔥 SERVER FILE LOADED - Starting execution...');
+console.log('🔥 Current working directory:', process.cwd());
+console.log('🔥 Node version:', process.version);
+console.log('🔥 Platform:', process.platform);
+
 import express from 'express';
 import cors from 'cors';
+
+console.log('🔥 Express and CORS imported successfully');
 
 // Force port configuration for AWS App Runner
 const PORT = process.env.PORT || 3002;

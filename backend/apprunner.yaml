@@ -5,12 +5,14 @@ build:
     build:
       - echo "Installing dependencies"
       - npm install
+      - echo "Checking package.json scripts"
+      - npm run
   env:
     - name: NODE_ENV
       value: production
 run:
   runtime-version: 22
-  command: npm run start:apprunner
+  command: node server-apprunner.js
   network:
     port: 3002
   env:
