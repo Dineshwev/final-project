@@ -7,12 +7,18 @@ build:
       - npm install
       - echo "Checking package.json scripts"
       - npm run
+      - echo "Listing files in current directory"
+      - ls -la
+      - echo "Checking if server-apprunner.js exists"
+      - ls -la server-apprunner.js
+      - echo "Current working directory:"
+      - pwd
   env:
     - name: NODE_ENV
       value: production
 run:
   runtime-version: 22
-  command: node server-apprunner.js
+  command: cd backend && node server-apprunner.js
   network:
     port: 3002
   env:
