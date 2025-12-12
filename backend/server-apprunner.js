@@ -8,9 +8,95 @@ import url from 'url';
 // Explicitly set port to 3002 for AWS App Runner
 const PORT = 3002;
 
+// Helper function to extract URL from scanId
+function generateUrlFromScanId(scanId) {
+  // Extract timestamp from scanId and generate a consistent URL
+  if (scanId.includes('fixed-scan')) {
+    const timestamp = scanId.split('-').pop();
+    const domain = parseInt(timestamp) % 2 === 0 ? 'example.com' : 'testsite.org';
+    return `https://${domain}`;
+  }
+  return 'https://example.com';
+}
+
+// Helper function to generate dynamic scan data based on scanId
+function generateDynamicScanData(scanId) {
+  const url = generateUrlFromScanId(scanId);
+  const timestamp = Date.now();
+  
+  // Generate some variation based on scanId
+  const variation = parseInt(scanId.split('-').pop() || '0') % 100;
+  
+  const seoIssues = [
+    {
+      id: 'issue-0',
+      type: 'warning',
+      title: 'Technical SEO',
+      description: 'Add canonical tags to blog pages',
+      impact: 50 + (variation % 30),
+      recommendation: 'Implement canonical tags on all blog pages'
+    },
+    {
+      id: 'issue-1', 
+      type: 'info',
+      title: 'Content',
+      description: 'Increase content length on product pages',
+      impact: 30 + (variation % 20),
+      recommendation: 'Add more detailed product descriptions'
+    },
+    {
+      id: 'issue-2',
+      type: 'error',
+      title: 'Performance', 
+      description: 'Optimize large images',
+      impact: 80 - (variation % 25),
+      recommendation: 'Compress and optimize images'
+    }
+  ];
+  
+  // Add random issues based on URL
+  if (url.includes('testsite')) {
+    seoIssues.push({
+      id: 'issue-3',
+      type: 'warning',
+      title: 'Meta Tags',
+      description: 'Missing meta description on some pages',
+      impact: 40,
+      recommendation: 'Add meta descriptions to all pages'
+    });
+  }
+  
+  return {
+    id: scanId,
+    url: url,
+    timestamp: new Date().toISOString(),
+    score: Math.max(20, 100 - (variation % 50)), // Score between 20-100
+    seoIssues: seoIssues,
+    keywords: [],
+    metrics: {
+      loadTime: 1.5 + (variation % 30) / 10, // Load time 1.5-4.5s
+      pageSize: 2048 + (variation * 50), // Page size variation
+      requests: 25 + (variation % 20), // Request count
+      mobileScore: Math.max(30, 85 - (variation % 40)), 
+      desktopScore: Math.max(40, 90 - (variation % 35))
+    },
+    securityChecks: [
+      {
+        name: 'HTTPS Enabled',
+        status: url.startsWith('https') ? 'passed' : 'failed'
+      },
+      {
+        name: 'Security Headers', 
+        status: variation % 3 === 0 ? 'passed' : 'warning'
+      }
+    ]
+  };
+}
+
 // Create HTTP server using built-in module
 const server = http.createServer((req, res) => {
-  // Extract Pathname (without Query) and aggressively clean it for strict comparison
+  // Parse URL and extract clean pathname (without query parameters)
+  const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
   const query = parsedUrl.query;
   const method = req.method;
@@ -26,11 +112,29 @@ const server = http.createServer((req, res) => {
   cleanPath = cleanPath.toLowerCase();
   // END AGGRESSIVE PATH CLEANUP
 
-  // START UNIVERSAL CORS FIX (Aggressive Debugging Mode)
-  // This allows ALL origins (*) to rule out CORS as the cause of 404s.
-  res.setHeader('Access-Control-Allow-Origin', '*'); 
+  // Set CORS headers for cross-origin requests
+  // Allow production domain and localhost for development
+  const allowedOrigins = [
+    'https://www.healthyseo.tech',
+    'https://healthyseo.tech', 
+    'https://main.d1a2b3c4d5e6f7g8.amplifyapp.com', // AWS Amplify default domain
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || !origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  
+  // Allow specific HTTP methods
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Allow specific headers (including Authorization for tokens)
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
+  // Allow credentials
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // Handle OPTIONS pre-flight request first.
   if (req.method === 'OPTIONS') {
@@ -244,7 +348,57 @@ const server = http.createServer((req, res) => {
     }));
     return;
   }
+  // Handle scan results endpoint - Dynamic data based on scanId
+  if (pathname.match(/^\/api\/scan\/[^/]+\/results$/) && method === 'GET') {
+    const scanIdMatch = pathname.match(/^\/api\/scan\/([^/]+)\/results$/);
+    const scanId = scanIdMatch ? scanIdMatch[1] : '';
+    
+    console.log(`📊 Scan results request for scanId: ${scanId}`);
+    
+    // Generate dynamic scan data based on scanId
+    const mockScanData = generateDynamicScanData(scanId);
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'success',
+      data: mockScanData
+    }));
+    return;
+  }
 
+  // Handle PDF export endpoint
+  if (pathname.match(/^\/api\/export\/[^/]+\/pdf$/) && method === 'GET') {
+    const scanIdMatch = pathname.match(/^\/api\/export\/([^/]+)\/pdf$/);
+    const scanId = scanIdMatch ? scanIdMatch[1] : '';
+    
+    console.log(`📄 PDF export request for scanId: ${scanId}`);
+    
+    // Generate mock PDF content
+    res.writeHead(200, { 
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="scan-report-${scanId}.pdf"`
+    });
+    res.end('Mock PDF content - PDF generation not implemented yet');
+    return;
+  }
+
+  // Handle CSV export endpoint  
+  if (pathname.match(/^\/api\/export\/[^/]+\/csv$/) && method === 'GET') {
+    const scanIdMatch = pathname.match(/^\/api\/export\/([^/]+)\/csv$/);
+    const scanId = scanIdMatch ? scanIdMatch[1] : '';
+    
+    console.log(`📊 CSV export request for scanId: ${scanId}`);
+    
+    // Generate mock CSV content
+    const csvContent = `URL,Score,Issues,Load Time\n"${generateUrlFromScanId(scanId)}",85,3,2.3s`;
+    
+    res.writeHead(200, { 
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="scan-report-${scanId}.csv"`
+    });
+    res.end(csvContent);
+    return;
+  }
   // Handle alerts general endpoint
   if (cleanPath.startsWith('/api/alerts') && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
