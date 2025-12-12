@@ -3,23 +3,11 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Current directory and files:"
-        - pwd
-        - ls -la
-        - echo "Checking if frontend directory exists:"
-        - test -d frontend && echo "frontend directory exists" || echo "frontend directory does NOT exist"
-        - echo "Listing all directories:"
-        - find . -type d -maxdepth 1
-        - echo "Changing to frontend directory..."
-        - cd frontend
-        - pwd
-        - ls -la
-        - npm ci
+        - cd frontend && npm ci
     build:
       commands:
-        - cd frontend
         - echo "Building with API URL ${REACT_APP_API_BASE_URL}"
-        - npm run build
+        - cd frontend && npm run build
   artifacts:
     baseDirectory: frontend/build
     files:
