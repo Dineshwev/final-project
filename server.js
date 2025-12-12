@@ -132,19 +132,38 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // Mock alerts unread count endpoint
+    if (cleanPath === '/api/alerts/unread-count' && method === 'GET') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        success: true,
+        unreadCount: 0,
+        alerts: [],
+        timestamp: timestamp
+      }));
+      return;
+    }
+
     // Mock alerts endpoint
     if (cleanPath === '/api/get-alerts' && method === 'GET') {
       res.writeHead(200);
       res.end(JSON.stringify({
-        alerts: [
-          {
-            id: 'minimal-1',
-            type: 'info',
-            message: 'Minimal mode active - limited features available',
-            timestamp: timestamp
-          }
-        ],
-        total: 1,
+        success: true,
+        alerts: [],
+        total: 0,
+        timestamp: timestamp
+      }));
+      return;
+    }
+
+    // Mock history recent endpoint
+    if (cleanPath === '/api/history/recent' && method === 'GET') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        success: true,
+        scans: [],
+        total: 0,
+        message: 'No recent scans available',
         timestamp: timestamp
       }));
       return;
@@ -154,9 +173,10 @@ const server = http.createServer((req, res) => {
     if (cleanPath === '/api/history' && method === 'GET') {
       res.writeHead(200);
       res.end(JSON.stringify({
+        success: true,
         scans: [],
         total: 0,
-        message: 'Minimal mode - no history stored',
+        message: 'No scan history available',
         timestamp: timestamp
       }));
       return;
