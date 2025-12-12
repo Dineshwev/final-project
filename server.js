@@ -1,6 +1,6 @@
 // AWS App Runner Ultra-Minimal Server - Zero External Dependencies
 // Built with Node.js built-in modules only for guaranteed compatibility
-// Deploy timestamp: 2025-12-11T22:00:00Z - MINIMAL VERSION
+// Deploy timestamp: 2025-12-12T09:49:00Z - UPDATED VERSION with proper API responses
 
 import http from 'http';
 import url from 'url';
