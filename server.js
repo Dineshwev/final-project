@@ -111,13 +111,13 @@ const server = http.createServer((req, res) => {
       req.on('end', () => {
         try {
           const scanData = body ? JSON.parse(body) : {};
+          const scanId = 'minimal-scan-' + Date.now();
           res.writeHead(200);
           res.end(JSON.stringify({
             success: true,
-            scanId: 'minimal-scan-' + Date.now(),
-            message: 'Minimal scan initiated',
+            scanId: scanId,
             url: scanData.url || 'unknown',
-            features: ['minimal-analysis'],
+            status: 'started',
             timestamp: timestamp
           }));
         } catch (error) {
@@ -137,8 +137,20 @@ const server = http.createServer((req, res) => {
       res.writeHead(200);
       res.end(JSON.stringify({
         success: true,
+        count: 0,
         unreadCount: 0,
         alerts: [],
+        timestamp: timestamp
+      }));
+      return;
+    }
+
+    // Mock social platforms endpoint
+    if (cleanPath === '/api/social/platforms' && method === 'GET') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        success: true,
+        platforms: ['facebook', 'twitter', 'linkedin', 'instagram'],
         timestamp: timestamp
       }));
       return;
@@ -151,6 +163,41 @@ const server = http.createServer((req, res) => {
         success: true,
         alerts: [],
         total: 0,
+        timestamp: timestamp
+      }));
+      return;
+    }
+
+    // Mock scan status endpoint
+    if (cleanPath.startsWith('/api/scan/') && cleanPath.includes('/status') && method === 'GET') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        success: true,
+        status: 'completed',
+        progress: 100,
+        timestamp: timestamp
+      }));
+      return;
+    }
+
+    // Mock scan results endpoint
+    if (cleanPath.startsWith('/api/scan/') && cleanPath.includes('/results') && method === 'GET') {
+      const scanId = cleanPath.split('/')[3];
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        success: true,
+        scanId: scanId,
+        status: 'completed',
+        results: {
+          title: 'Sample SEO Analysis',
+          score: 85,
+          issues: [
+            { type: 'warning', message: 'Meta description could be longer' }
+          ],
+          recommendations: [
+            { type: 'improvement', message: 'Add alt text to images' }
+          ]
+        },
         timestamp: timestamp
       }));
       return;
@@ -208,8 +255,13 @@ const server = http.createServer((req, res) => {
         'GET /health',
         'GET /api/status',
         'GET|POST /api/scan',
+        'GET /api/scan/{id}/status',
+        'GET /api/scan/{id}/results',
+        'GET /api/alerts/unread-count',
         'GET /api/get-alerts',
-        'GET /api/history'
+        'GET /api/history',
+        'GET /api/history/recent',
+        'GET /api/social/platforms'
       ],
       timestamp: timestamp
     }));
@@ -260,8 +312,13 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`   ✅ GET /api/status`);
   console.log(`   ✅ GET /api/scan`);
   console.log(`   ✅ POST /api/scan`);
+  console.log(`   ✅ GET /api/scan/{id}/status`);
+  console.log(`   ✅ GET /api/scan/{id}/results`);
+  console.log(`   ✅ GET /api/alerts/unread-count`);
   console.log(`   ✅ GET /api/get-alerts`);
   console.log(`   ✅ GET /api/history`);
+  console.log(`   ✅ GET /api/history/recent`);
+  console.log(`   ✅ GET /api/social/platforms`);
   console.log('🚀 Ready for App Runner deployment!');
 });
 
