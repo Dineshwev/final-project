@@ -6,14 +6,8 @@ frontend:
         - cd frontend && npm ci
     build:
       commands:
-        - echo "Current working directory:"
-        - pwd
-        - echo "Listing current directory:"
-        - ls -la
-        - echo "Listing frontend directory:"
-        - ls -la frontend/
         - echo "Building with API URL ${REACT_APP_API_BASE_URL}"
-        - cd frontend && npm run build
+        - npm run build
   artifacts:
     baseDirectory: frontend/build
     files:
