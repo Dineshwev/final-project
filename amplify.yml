@@ -3,11 +3,17 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Current directory:"
+        - echo "Current directory and files:"
         - pwd
         - ls -la
-        - echo "Changing to frontend directory"
+        - echo "Checking if frontend directory exists:"
+        - test -d frontend && echo "frontend directory exists" || echo "frontend directory does NOT exist"
+        - echo "Listing all directories:"
+        - find . -type d -maxdepth 1
+        - echo "Changing to frontend directory..."
         - cd frontend
+        - pwd
+        - ls -la
         - npm ci
     build:
       commands:
