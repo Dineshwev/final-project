@@ -121,6 +121,39 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // FIXED: Results endpoint
+    if (cleanPath.startsWith('/api/results/') && method === 'GET') {
+      const scanId = cleanPath.split('/')[3];
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        status: 'success',
+        data: {
+          scanId: scanId,
+          url: 'example.com',
+          basicSeo: { 
+            score: 85, 
+            metaTitle: 'Example Page', 
+            metaDescription: 'Example description' 
+          },
+          technicalSeo: { 
+            score: 75, 
+            errors: []
+          },
+          contentSeo: { 
+            score: 80, 
+            wordCount: 500 
+          },
+          mobileSeo: { 
+            score: 90, 
+            issues: []
+          },
+          overallScore: 82
+        },
+        timestamp: timestamp
+      }));
+      return;
+    }
+
     // Generic API response
     res.writeHead(200);
     res.end(JSON.stringify({
