@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "description": "SEO analysis API - App Runner optimized",
-  "main": "server.js",
+  "main": "server-fixed.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "node server-fixed.js",
+    "dev": "node server-fixed.js",
     "test": "echo \"Test passed - minimal version\""
   },
   "engines": {
