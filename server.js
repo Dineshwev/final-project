@@ -347,11 +347,16 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    // FIXED: Export endpoints (PDF/CSV)
+    // FIXED: Export endpoints (PDF/CSV) with proper CORS
     if (cleanPath.startsWith('/api/export/') && method === 'GET') {
       const parts = cleanPath.split('/');
       const scanId = parts[3];
       const format = parts[4] || 'pdf';
+      
+      // Enhanced CORS headers for export endpoints
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
       
       // Return mock file content
       res.writeHead(200);

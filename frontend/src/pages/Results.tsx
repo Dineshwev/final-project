@@ -116,7 +116,7 @@ const ResultsPage: React.FC = () => {
             id: rawData.scanId || scanId || "",
             url: rawData.url || "",
             timestamp: rawData.completedAt || new Date().toISOString(),
-            score: rawData.lighthouse?.scores?.seo || 0, // Backend already returns 0-100
+            score: rawData.overallScore || rawData.lighthouse?.scores?.seo || 0, // Use overallScore from backend
             seoIssues: (rawData.recommendations || []).map(
               (rec: any, idx: number) => ({
                 id: `issue-${idx}`,
@@ -138,20 +138,11 @@ const ResultsPage: React.FC = () => {
               })
             ),
             metrics: {
-              loadTime:
-                parseFloat(
-                  rawData.lighthouse?.metrics?.firstContentfulPaint?.replace(
-                    "s",
-                    ""
-                  )
-                ) ||
-                (rawData.lighthouse?.metrics?.FCP
-                  ? rawData.lighthouse.metrics.FCP / 1000
-                  : 0),
+              loadTime: rawData.technicalSeo?.loadTime || 0, // Use loadTime from backend technicalSeo
               pageSize: 0,
               requests: 0,
-              mobileScore: rawData.lighthouse?.scores?.performance || 0, // Backend already returns 0-100
-              desktopScore: rawData.lighthouse?.scores?.performance || 0, // Backend already returns 0-100
+              mobileScore: rawData.mobileSeo?.score || 0, // Use mobileSeo score from backend
+              desktopScore: rawData.technicalSeo?.score || 0, // Use technicalSeo score for desktop
             },
             securityChecks: rawData.security?.issues
               ? rawData.security.issues.map((issue: string, idx: number) => ({

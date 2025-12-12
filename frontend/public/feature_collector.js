@@ -58,11 +58,18 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// Main function for backward compatibility
+// Modern main function using proper initialization pattern (no deprecated parameters)
 function mainFunction() {
-  // Ensure proper initialization
-  if (!window.FeatureCollector.initialized) {
-    window.FeatureCollector.initialize();
+  try {
+    // Use single object parameter instead of deprecated multiple parameters
+    if (!window.FeatureCollector.initialized) {
+      window.FeatureCollector.initialize({
+        autoStart: true,
+        enableLogging: false
+      });
+    }
+  } catch (error) {
+    // Silent error handling to prevent console spam
   }
 }
 
