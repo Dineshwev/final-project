@@ -8,9 +8,20 @@ import cors from 'cors';
 // Force port configuration for AWS App Runner
 const PORT = process.env.PORT || 3002;
 
+console.log('🔧 Starting AWS App Runner Express server...');
+console.log('🔧 PORT:', PORT);
+console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+
 // Add full error logging
-process.on("unhandledRejection", err => console.error("Unhandled Rejection:", err));
-process.on("uncaughtException", err => console.error("Uncaught Exception:", err));
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
+
+process.on("uncaughtException", err => {
+  console.error("❌ Uncaught Exception:", err);
+  process.exit(1);
+});
 
 // Create Express app
 const app = express();
@@ -364,11 +375,11 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
+// Start server with error handling
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log("🚀 AWS App Runner Backend running on port " + PORT);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔧 API status: http://localhost:${PORT}/api/status`);
+  console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
+  console.log(`🔧 API status: http://0.0.0.0:${PORT}/api/status`);
   console.log(`📋 Available API endpoints:`);
   console.log(`   ✅ GET /api/alerts/unread-count`);
   console.log(`   ✅ GET /api/history/recent`);
@@ -381,16 +392,24 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 AWS App Runner Express server ready!`);
 });
 
+server.on('error', (error) => {
+  console.error('❌ Server error:', error);
+  process.exit(1);
+});
+
 // Graceful shutdown handling
 process.on('SIGTERM', () => {
   console.log('📴 Received SIGTERM, shutting down gracefully');
-  process.exit(0);
+  server.close(() => {
+    console.log('📴 Server closed');
+    process.exit(0);
+  });
 });
 
 process.on('SIGINT', () => {
   console.log('📴 Received SIGINT, shutting down gracefully');
-  process.exit(0);
+  server.close(() => {
+    console.log('📴 Server closed');
+    process.exit(0);
+  });
 });
-
-
-
