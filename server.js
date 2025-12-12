@@ -114,10 +114,12 @@ const server = http.createServer((req, res) => {
           const scanId = 'minimal-scan-' + Date.now();
           res.writeHead(200);
           res.end(JSON.stringify({
-            success: true,
-            scanId: scanId,
-            url: scanData.url || 'unknown',
-            status: 'started',
+            status: 'success',
+            data: {
+              scanId: scanId,
+              url: scanData.url || 'unknown',
+              status: 'started'
+            },
             timestamp: timestamp
           }));
         } catch (error) {
@@ -169,12 +171,16 @@ const server = http.createServer((req, res) => {
     }
 
     // Mock scan status endpoint
-    if (cleanPath.startsWith('/api/scan/') && cleanPath.includes('/status') && method === 'GET') {
+    if (cleanPath.startsWith('/api/scan/') && !cleanPath.includes('/results') && method === 'GET') {
+      const scanId = cleanPath.split('/')[3];
       res.writeHead(200);
       res.end(JSON.stringify({
-        success: true,
-        status: 'completed',
-        progress: 100,
+        status: 'success',
+        data: {
+          scanId: scanId,
+          status: 'completed',
+          progress: 100
+        },
         timestamp: timestamp
       }));
       return;
@@ -185,18 +191,20 @@ const server = http.createServer((req, res) => {
       const scanId = cleanPath.split('/')[3];
       res.writeHead(200);
       res.end(JSON.stringify({
-        success: true,
-        scanId: scanId,
-        status: 'completed',
-        results: {
-          title: 'Sample SEO Analysis',
-          score: 85,
-          issues: [
-            { type: 'warning', message: 'Meta description could be longer' }
-          ],
-          recommendations: [
-            { type: 'improvement', message: 'Add alt text to images' }
-          ]
+        status: 'success',
+        data: {
+          scanId: scanId,
+          status: 'completed',
+          results: {
+            title: 'Sample SEO Analysis',
+            score: 85,
+            issues: [
+              { type: 'warning', message: 'Meta description could be longer' }
+            ],
+            recommendations: [
+              { type: 'improvement', message: 'Add alt text to images' }
+            ]
+          }
         },
         timestamp: timestamp
       }));
