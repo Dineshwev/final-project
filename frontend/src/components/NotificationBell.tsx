@@ -55,8 +55,9 @@ const NotificationBell: React.FC = () => {
       const API_BASE_URL =
         process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
       
+      // Add cache busting to force fresh data
       const response = await fetch(
-        `${API_BASE_URL}/alerts/unread-count?userId=${userId}`
+        `${API_BASE_URL}/alerts/unread-count?userId=${userId}&_=${Date.now()}`
       );
       
       if (response.status === 404) {
@@ -65,15 +66,19 @@ const NotificationBell: React.FC = () => {
       }
       
       const data = await response.json();
+      console.log('🔔 API Response:', data); // Temporary debug log
 
       if (data.success) {
-        setUnreadCount(data.count || 0);
-        console.log(`🔔 ${data.count || 0} unread notifications`);
+        const count = data.count || data.unreadCount || 0;
+        setUnreadCount(count);
+        console.log(`🔔 ${count} unread notifications`);
       } else {
         setUnreadCount(0);
+        console.log('🔔 API response not successful:', data);
       }
     } catch (error) {
       console.error("Error loading unread count:", error);
+      setUnreadCount(0);
     }
   };
 
