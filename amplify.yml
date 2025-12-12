@@ -3,15 +3,17 @@ frontend:
   phases:
     preBuild:
       commands:
+        - cd frontend
         - npm ci
     build:
       commands:
+        - cd frontend
         - echo "Building with API URL ${REACT_APP_API_BASE_URL}"
         - npm run build
   artifacts:
-    baseDirectory: build
+    baseDirectory: frontend/build
     files:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      - frontend/node_modules/**/*
