@@ -18,13 +18,17 @@ const server = http.createServer((req, res) => {
   }
   cleanPath = cleanPath.toLowerCase();
 
+  // Enhanced CORS headers for all requests including preflight  
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, HEAD');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.setHeader('Access-Control-Allow-Credentials', 'false');
+  res.setHeader('Access-Control-Max-Age', '86400');
   res.setHeader('Content-Type', 'application/json');
 
+  // Handle preflight with proper status
   if (method === 'OPTIONS') {
-    res.writeHead(204);
+    res.writeHead(200);
     res.end();
     return;
   }
@@ -38,7 +42,7 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({
         status: 'success',
         message: 'SEO API Server - Full Features!',
-        version: '3.0.0-alerts-fixed',
+        version: '3.1.0-cors-fixed',
         port: PORT,
         timestamp: timestamp
       }));
@@ -347,16 +351,11 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    // FIXED: Export endpoints (PDF/CSV) with proper CORS
+    // FIXED: Export endpoints (PDF/CSV)
     if (cleanPath.startsWith('/api/export/') && method === 'GET') {
       const parts = cleanPath.split('/');
       const scanId = parts[3];
       const format = parts[4] || 'pdf';
-      
-      // Enhanced CORS headers for export endpoints
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
       
       // Return mock file content
       res.writeHead(200);
