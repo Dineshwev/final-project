@@ -55,16 +55,11 @@ const NotificationBell: React.FC = () => {
       const API_BASE_URL =
         process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
       
-      console.log(`🔔 NotificationBell: Making request to ${API_BASE_URL}/alerts/unread-count`);
-      
       const response = await fetch(
         `${API_BASE_URL}/alerts/unread-count?userId=${userId}`
       );
       
-      console.log(`🔔 NotificationBell: Response status ${response.status}`);
-      
       if (response.status === 404) {
-        console.log('🔔 NotificationBell: API endpoint not found, using fallback');
         setUnreadCount(0);
         return;
       }
@@ -73,8 +68,8 @@ const NotificationBell: React.FC = () => {
 
       if (data.success) {
         setUnreadCount(data.count || 0);
+        console.log(`🔔 ${data.count || 0} unread notifications`);
       } else {
-        console.warn('🔔 NotificationBell: API returned unsuccessful response');
         setUnreadCount(0);
       }
     } catch (error) {
@@ -93,7 +88,6 @@ const NotificationBell: React.FC = () => {
       );
       
       if (response.status === 404) {
-        console.log('🔔 Recent alerts: API endpoint not found, using empty array');
         setAlerts([]);
         setLoading(false);
         return;
