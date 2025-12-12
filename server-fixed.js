@@ -361,6 +361,39 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // FIXED: Accessibility audit endpoint
+    if (cleanPath === '/api/accessibility' || cleanPath === '/accessibility') {
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        success: true,
+        data: {
+          score: 89,
+          issues: [
+            {
+              type: 'missing-alt-text',
+              severity: 'warning', 
+              count: 3,
+              description: 'Some images are missing alt text'
+            },
+            {
+              type: 'color-contrast',
+              severity: 'info',
+              count: 1, 
+              description: 'Minor color contrast issues detected'
+            }
+          ],
+          passedChecks: [
+            'keyboard-navigation',
+            'focus-indicators',
+            'semantic-html',
+            'aria-labels'
+          ]
+        },
+        timestamp: timestamp
+      }));
+      return;
+    }
+
     // Generic API response
     res.writeHead(200);
     res.end(JSON.stringify({
