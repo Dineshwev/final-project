@@ -5,7 +5,7 @@
   "description": "API for Website SEO & Health Checker",
   "main": "server.js",
   "engines": {
-    "node": ">=18.0.0 <=25.0.0"
+    "node": ">=20.0.0 <=25.0.0"
   },
   "scripts": {
     "start": "node server-apprunner.js",
