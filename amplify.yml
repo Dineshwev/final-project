@@ -7,7 +7,7 @@ frontend:
     build:
       commands:
         - echo "Building with API URL ${REACT_APP_API_BASE_URL}"
-        - cd frontend && npm run build
+        - npm run build --prefix frontend
   artifacts:
     baseDirectory: frontend/build
     files:
