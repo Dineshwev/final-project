@@ -42,7 +42,7 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({
         status: 'success',
         message: 'SEO API Server - Full Features!',
-        version: '3.1.0-cors-fixed',
+        version: '3.2.0-cors-ultimate-fix',
         port: PORT,
         timestamp: timestamp
       }));
