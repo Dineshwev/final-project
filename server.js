@@ -12,8 +12,9 @@ const require = createRequire(import.meta.url);
 // Determine port from environment or default to 3002
 const PORT = process.env.PORT || 3002;
 
-console.log(`🚀 Starting ultra-minimal server on port ${PORT}`);
+console.log(`🚀 Starting ultra-minimal server on port ${PORT} - UPDATED BACKEND v2.1`);
 console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`📡 Backend deployment timestamp: ${new Date().toISOString()}`);
 
 // Create HTTP server using built-in module only
 const server = http.createServer((req, res) => {
@@ -89,13 +90,17 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    // Mock scan endpoint GET
+    // Mock scan endpoint GET (for URL parameter requests)
     if (cleanPath === '/api/scan' && method === 'GET') {
+      const url = query.url || 'unknown';
       res.writeHead(200);
       res.end(JSON.stringify({
-        success: true,
-        message: 'Scan service available (minimal mode)',
-        features: ['basic-scan', 'health-check'],
+        status: 'success',
+        data: {
+          scanId: 'minimal-scan-' + Date.now(),
+          url: decodeURIComponent(url),
+          status: 'started'
+        },
         timestamp: timestamp
       }));
       return;
