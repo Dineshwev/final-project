@@ -1,32 +1,14 @@
-# AWS App Runner Configuration - Standard Node.js Structure
 version: 1.0
-
 runtime: nodejs18
-
 build:
   commands:
-    # Standard Node.js build - App Runner will automatically run 'npm install'
-    - echo "Building Node.js application..."
-    - npm --version
-    - node --version
-    
+    build:
+      - npm install
 run:
-  runtime-version: "18"
   command: npm start
   network:
     port: 3002
+    env: PORT
   env:
-    - name: NODE_ENV
-      value: "production"
     - name: PORT
       value: "3002"
-
-healthcheck:
-  path: /health
-  protocol: HTTP
-  timeout: 10
-
-healthcheck:
-  path: /health
-  protocol: HTTP
-  timeout: 10
