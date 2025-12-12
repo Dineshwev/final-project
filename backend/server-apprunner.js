@@ -6,7 +6,7 @@ import http from 'http';
 import url from 'url';
 
 // Explicitly set port to 3002 for AWS App Runner
-const PORT = 3002;
+const PORT = process.env.PORT || 3002;
 
 // Helper function to extract URL from scanId
 function generateUrlFromScanId(scanId) {
@@ -113,19 +113,8 @@ const server = http.createServer((req, res) => {
   // END AGGRESSIVE PATH CLEANUP
 
   // Set CORS headers for cross-origin requests
-  // Allow production domain and localhost for development
-  const allowedOrigins = [
-    'https://www.healthyseo.tech',
-    'https://healthyseo.tech', 
-    'https://main.d1a2b3c4d5e6f7g8.amplifyapp.com', // AWS Amplify default domain
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ];
-  
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  }
+  // Enable CORS for all origins
+  res.setHeader('Access-Control-Allow-Origin', '*');
   
   // Allow specific HTTP methods
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -483,8 +472,7 @@ server.on('error', (err) => {
 
 // Start server on port 3002
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ App Runner server running on port ${PORT}`);
-  console.log(`🌐 Server accessible at http://0.0.0.0:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
   console.log(`🔧 API status: http://0.0.0.0:${PORT}/api/status`);
   console.log(`📋 Available API endpoints:`);
