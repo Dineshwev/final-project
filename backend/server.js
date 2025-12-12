@@ -1,12 +1,24 @@
-// AWS App Runner Conformant Server - Port 3002
-// Using built-in Node.js modules only for App Runner deployment
-// Deploy timestamp: 2025-12-10T05:10:00Z - FORCE REDEPLOY with /api/get-alerts endpoint
+// Express Server with proper error handling and CORS
+// Production-ready server for AWS App Runner deployment
 
-import { createServer } from 'http';
-import { parse as parseUrl } from 'url';
+import express from 'express';
+import cors from 'cors';
 
-// Explicitly set port to 3002 for AWS App Runner
+// Force port configuration
 const PORT = process.env.PORT || 3002;
+
+// Add full error logging
+process.on("unhandledRejection", err => console.error("Unhandled Rejection:", err));
+process.on("uncaughtException", err => console.error("Uncaught Exception:", err));
+
+// Create Express app
+const app = express();
+
+// Add CORS support for all origins
+app.use(cors());
+
+// Parse JSON bodies
+app.use(express.json());
 
 // Helper function to extract URL from scanId
 function generateUrlFromScanId(scanId) {
@@ -93,332 +105,166 @@ function generateDynamicScanData(scanId) {
   };
 }
 
-// Create HTTP server using built-in module
-const server = createServer((req, res) => {
-  // Parse URL and extract clean pathname (without query parameters)
-  const parsedUrl = parseUrl(req.url, true);
-  const pathname = parsedUrl.pathname; // Clean path without query string
-  const query = parsedUrl.query;
-  const method = req.method;
+// Guaranteed health-check route
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "backend running", port: PORT });
+});
 
-  // Set CORS headers for cross-origin requests
-  // Enable CORS for all origins
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  
-  // Allow specific HTTP methods
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  
-  // Allow specific headers (including Authorization for tokens)
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  
-  // Allow credentials
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+// Root endpoint
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Server running on Express!',
+    port: PORT,
+    timestamp: new Date().toISOString()
+  });
+});
 
-  // Handle preflight OPTIONS request FIRST
-  if (method === 'OPTIONS') {
-    res.writeHead(204); // 204: No Content, but headers sent
-    res.end();
-    return;
-  }
+// API Status endpoint
+app.get("/api/status", (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'API server running on Express!',
+    version: '1.0.0',
+    environment: 'production',
+    port: PORT
+  });
+});
 
-  // Set content type
-  res.setHeader('Content-Type', 'application/json');
-
-  // Log incoming requests for debugging
-  console.log(`📥 ${new Date().toISOString()} - ${method} ${pathname}`);
-  if (query && Object.keys(query).length > 0) {
-    console.log(`📋 Query params:`, query);
-  }
-  console.log(`🔍 Full URL: ${req.url}`);
-  console.log(`🌐 Origin: ${req.headers.origin}`);
-
-  // Handle root path
-  if (pathname === '/' && method === 'GET') {
-    res.writeHead(200);
-    res.end(JSON.stringify({
-      status: 'success',
-      message: 'Server running on App Runner port 3002!',
-      port: PORT,
-      timestamp: new Date().toISOString()
-    }));
-    return;
-  }
-
-  // Handle mock auth login endpoint for debugging
-  if (pathname === '/api/auth/login' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    req.on('end', () => {
-      try {
-        const userData = JSON.parse(body);
-        // Mock successful login response
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: true,
-          message: 'Login successful',
-          user: {
-            id: 'mock-user-123',
-            email: userData.email || 'user@example.com',
-            name: 'Mock User',
-            verified: true
-          },
-          token: 'mock-jwt-token-' + Date.now()
-        }));
-      } catch (error) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: false,
-          message: 'Invalid request data'
-        }));
-      }
-    });
-    return;
-  }
-
-  // Handle mock auth login endpoint for debugging
-  if (pathname === '/api/auth/login' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    req.on('end', () => {
-      try {
-        const userData = JSON.parse(body);
-        // Mock successful login response
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: true,
-          message: 'Login successful',
-          user: {
-            id: 'mock-user-123',
-            email: userData.email || 'user@example.com',
-            name: 'Mock User',
-            verified: true
-          },
-          token: 'mock-jwt-token-' + Date.now()
-        }));
-      } catch (error) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: false,
-          message: 'Invalid request data'
-        }));
-      }
-    });
-    return;
-  }
-
-  // Handle health check endpoint for App Runner
-  if (pathname === '/health' && method === 'GET') {
-    res.writeHead(200);
-    res.end(JSON.stringify({
-      status: 'healthy',
-      port: PORT,
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString()
-    }));
-    return;
-  }
-
-  // Handle API status endpoint
-  if (pathname === '/api/status' && method === 'GET') {
-    res.writeHead(200);
-    res.end(JSON.stringify({
-      status: 'success',
-      message: 'API server running on App Runner port 3002!',
-      version: '1.0.0',
-      environment: 'production',
-      port: PORT
-    }));
-    return;
-  }
-
-  // Handle scan results endpoint - Dynamic data based on scanId
-  if (pathname.match(/^\/api\/scan\/[^/]+\/results$/) && method === 'GET') {
-    const scanIdMatch = pathname.match(/^\/api\/scan\/([^/]+)\/results$/);
-    const scanId = scanIdMatch ? scanIdMatch[1] : '';
-    
-    console.log(`📊 Scan results request for scanId: ${scanId}`);
-    
-    // Generate dynamic scan data based on scanId
-    const mockScanData = generateDynamicScanData(scanId);
-    
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'success',
-      data: mockScanData
-    }));
-    return;
-  }
-
-  // Handle PDF export endpoint
-  if (pathname.match(/^\/api\/export\/[^/]+\/pdf$/) && method === 'GET') {
-    const scanIdMatch = pathname.match(/^\/api\/export\/([^/]+)\/pdf$/);
-    const scanId = scanIdMatch ? scanIdMatch[1] : '';
-    
-    console.log(`📄 PDF export request for scanId: ${scanId}`);
-    
-    // Generate mock PDF content
-    res.writeHead(200, { 
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="scan-report-${scanId}.pdf"`
-    });
-    res.end('Mock PDF content - PDF generation not implemented yet');
-    return;
-  }
-
-  // Handle CSV export endpoint  
-  if (pathname.match(/^\/api\/export\/[^/]+\/csv$/) && method === 'GET') {
-    const scanIdMatch = pathname.match(/^\/api\/export\/([^/]+)\/csv$/);
-    const scanId = scanIdMatch ? scanIdMatch[1] : '';
-    
-    console.log(`📊 CSV export request for scanId: ${scanId}`);
-    
-    // Generate mock CSV content
-    const csvContent = `URL,Score,Issues,Load Time\n"${generateUrlFromScanId(scanId)}",85,3,2.3s`;
-    
-    res.writeHead(200, { 
-      'Content-Type': 'text/csv',
-      'Content-Disposition': `attachment; filename="scan-report-${scanId}.csv"`
-    });
-    res.end(csvContent);
-    return;
-  }
-
-  // Handle alerts unread count endpoint
-  if (pathname === '/api/alerts/unread-count' && method === 'GET') {
-    const userId = query.userId || 'anonymous';
-    console.log(`🔔 Alerts unread count request for user: ${userId}`);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
+// Mock auth login endpoint
+app.post("/api/auth/login", (req, res) => {
+  try {
+    const userData = req.body || {};
+    res.status(200).json({
       success: true,
-      count: 2
-    }));
-    return;
+      message: 'Login successful',
+      user: {
+        id: 'mock-user-123',
+        email: userData.email || 'user@example.com',
+        name: 'Mock User',
+        verified: true
+      },
+      token: 'mock-jwt-token-' + Date.now()
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid request data'
+    });
   }
+});
 
-  // Handle user API keys endpoint
-  if (pathname === '/api/user/api-keys' && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
+// Scan endpoint GET
+app.get("/api/scan", (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: {
+      scanId: 'mock-scan-123',
+      status: 'ready',
+      message: 'Scan service available'
+    }
+  });
+});
+
+// Scan endpoint POST
+app.post("/api/scan", (req, res) => {
+  try {
+    const scanData = req.body || {};
+    res.status(200).json({
       success: true,
       data: {
-        apiKey: 'mock-key-123',
-        isActive: true
-      }
-    }));
-    return;
-  }
-
-  // Handle history recent endpoint
-  if (pathname === '/api/history/recent' && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      success: true,
-      data: {
-        history: [],
-        totalCount: 0,
-        currentPage: 1
-      }
-    }));
-    return;
-  }
-
-  // Handle scan endpoint
-  if (pathname === '/api/scan' && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      success: true,
-      data: {
-        scanId: 'mock-scan-123',
-        status: 'ready',
-        message: 'Scan service available'
-      }
-    }));
-    return;
-  }
-
-  // Handle scan POST requests (need to parse body)
-  if (pathname === '/api/scan' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    req.on('end', () => {
-      try {
-        const scanData = body ? JSON.parse(body) : {};
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: true,
-          data: {
-            scanId: 'mock-scan-' + Date.now(),
-            status: 'initiated',
-            message: 'Scan started successfully',
-            url: scanData.url || 'unknown'
-          }
-        }));
-      } catch (error) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: false,
-          error: 'Invalid JSON in request body'
-        }));
+        scanId: 'fixed-scan-' + Date.now(),
+        status: 'initiated',
+        message: 'Scan started successfully',
+        url: scanData.url || 'unknown'
       }
     });
-    return;
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: 'Invalid JSON in request body'
+    });
   }
+});
 
-  // Handle specific get-alerts endpoint (what the frontend calls)
-  if (pathname === '/api/get-alerts' && method === 'GET') {
-    console.log('🚨 GET-ALERTS endpoint accessed');
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      alerts: [
-        {
-          id: 1,
-          type: 'broken_link',
-          severity: 'high',
-          message: 'Broken internal link detected: /old-page-url',
-          url: 'https://example.com/contact',
-          detected_at: '2024-01-15T10:30:00Z',
-          status: 'active'
-        },
-        {
-          id: 2,
-          type: 'missing_meta',
-          severity: 'medium', 
-          message: 'Missing meta description on homepage',
-          url: 'https://example.com/',
-          detected_at: '2024-01-15T09:45:00Z',
-          status: 'active'
-        }
-      ],
-      total: 2,
-      timestamp: new Date().toISOString()
-    }));
-    return;
-  }
+// Scan results endpoint - Dynamic data based on scanId
+app.get("/api/scan/:scanId/results", (req, res) => {
+  const scanId = req.params.scanId;
+  console.log(`📊 Scan results request for scanId: ${scanId}`);
+  
+  // Generate dynamic scan data based on scanId
+  const mockScanData = generateDynamicScanData(scanId);
+  
+  res.status(200).json({
+    status: 'success',
+    data: mockScanData
+  });
+});
 
-  // Handle history endpoint (what the frontend calls)
-  if (pathname === '/api/history' && method === 'GET') {
-    console.log('📊 HISTORY endpoint accessed');
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
+// PDF export endpoint
+app.get("/api/export/:scanId/pdf", (req, res) => {
+  const scanId = req.params.scanId;
+  console.log(`📄 PDF export request for scanId: ${scanId}`);
+  
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="scan-report-${scanId}.pdf"`);
+  res.status(200).send('Mock PDF content - PDF generation not implemented yet');
+});
+
+// CSV export endpoint  
+app.get("/api/export/:scanId/csv", (req, res) => {
+  const scanId = req.params.scanId;
+  console.log(`📊 CSV export request for scanId: ${scanId}`);
+  
+  const csvContent = `URL,Score,Issues,Load Time\n"${generateUrlFromScanId(scanId)}",85,3,2.3s`;
+  
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="scan-report-${scanId}.csv"`);
+  res.status(200).send(csvContent);
+});
+
+// Alerts unread count endpoint
+app.get("/api/alerts/unread-count", (req, res) => {
+  const userId = req.query.userId || 'anonymous';
+  console.log(`🔔 Alerts unread count request for user: ${userId}`);
+  res.status(200).json({
+    success: true,
+    count: 2
+  });
+});
+
+// User API keys endpoint
+app.get("/api/user/api-keys", (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: {
+      apiKey: 'mock-key-123',
+      isActive: true
+    }
+  });
+});
+
+// History recent endpoint
+app.get("/api/history/recent", (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  
+  res.status(200).json({
+    success: true,
+    data: {
       scans: [
         {
           id: 'scan_123',
           url: 'https://example.com',
-          date: '2024-01-15T08:00:00Z',
+          timestamp: '2024-01-15T10:30:00Z',
           score: 85,
           issues_found: 3,
           status: 'completed'
         },
         {
           id: 'scan_122', 
-          url: 'https://example.com',
-          date: '2024-01-14T08:00:00Z',
+          url: 'https://testsite.com',
+          timestamp: '2024-01-14T15:20:00Z',
           score: 82,
           issues_found: 5,
           status: 'completed'
@@ -426,70 +272,70 @@ const server = createServer((req, res) => {
       ],
       total: 2,
       timestamp: new Date().toISOString()
-    }));
-    return;
-  }
+    }
+  });
+});
 
-  // Handle alerts general endpoint
-  if (pathname.startsWith('/api/alerts') && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      success: true,
-      data: []
-    }));
-    return;
-  }
+// Get alerts endpoint
+app.get("/api/get-alerts", (req, res) => {
+  console.log('🚨 GET-ALERTS endpoint accessed');
+  res.status(200).json({
+    alerts: [
+      {
+        id: 1,
+        type: 'broken_link',
+        severity: 'high',
+        message: 'Broken internal link detected: /old-page-url',
+        url: 'https://example.com/contact',
+        detected_at: '2024-01-15T10:30:00Z',
+        status: 'active'
+      },
+      {
+        id: 2,
+        type: 'missing_meta',
+        severity: 'medium', 
+        message: 'Missing meta description on homepage',
+        url: 'https://example.com',
+        detected_at: '2024-01-15T09:15:00Z',
+        status: 'active'
+      }
+    ],
+    success: true,
+    count: 2,
+    unreadCount: 2,
+    timestamp: new Date().toISOString()
+  });
+});
 
-  // Handle any other API endpoints with generic response
-  if (pathname.startsWith('/api/') && method === 'GET') {
-    console.log(`🔧 Generic API handler for: ${pathname}`);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'ok',
-      message: 'API endpoint available',
-      path: pathname,
-      method: method,
-      timestamp: new Date().toISOString(),
-      data: []
-    }));
-    return;
-  }
+// General alerts endpoint
+app.get("/api/alerts", (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: []
+  });
+});
 
-  // Handle test endpoint for debugging
-  if (pathname === '/api/test' && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'success',
-      message: 'Test endpoint working!',
-      timestamp: new Date().toISOString(),
-      server: 'AWS App Runner',
-      version: '2.0.0'
-    }));
-    return;
-  }
+// Catch-all for undefined API routes
+app.all("/api/*", (req, res) => {
+  console.log(`🔧 Generic API handler for: ${req.path}`);
+  res.status(200).json({
+    status: 'ok',
+    message: 'API endpoint available',
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString(),
+    data: []
+  });
+});
 
-  // 404 for all other routes
-  console.log(`❌ 404 - Route not found: ${method} ${pathname}`);
-  console.log(`🔍 Request details:`);
-  console.log(`   - Method: ${method}`);
-  console.log(`   - Path: ${pathname}`);
-  console.log(`   - Full URL: ${req.url}`);
-  console.log(`   - Headers:`, req.headers);
-  console.log(`📋 Available routes:`);
-  console.log(`   - GET /`);
-  console.log(`   - GET /health`);
-  console.log(`   - GET /api/status`);
-  console.log(`   - GET /api/alerts/unread-count`);
-  console.log(`   - GET /api/history/recent`);
-  console.log(`   - GET /api/user/api-keys`);
-  console.log(`   - GET /api/scan`);
-  console.log(`   - POST /api/scan`);
-  res.writeHead(404);
-  res.end(JSON.stringify({
+// 404 handler for non-API routes
+app.all("*", (req, res) => {
+  console.log(`❌ 404 - Route not found: ${req.method} ${req.path}`);
+  res.status(404).json({
     status: 'error',
     message: 'Endpoint not found',
-    path: pathname,
-    method: method,
+    path: req.path,
+    method: req.method,
     timestamp: new Date().toISOString(),
     availableRoutes: [
       'GET /',
@@ -499,44 +345,48 @@ const server = createServer((req, res) => {
       'GET /api/history/recent',
       'GET /api/user/api-keys',
       'GET /api/scan',
-      'POST /api/scan'
+      'POST /api/scan',
+      'GET /api/scan/:scanId/results',
+      'GET /api/export/:scanId/pdf',
+      'GET /api/export/:scanId/csv'
     ]
-  }));
+  });
 });
 
-// Error handling
-server.on('error', (err) => {
-  console.error('Server error:', err);
-  process.exit(1);
+// Error handling middleware
+app.use((error, req, res, next) => {
+  console.error('Express Error:', error);
+  res.status(500).json({
+    status: 'error',
+    message: 'Internal server error',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Start server on port 3002
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
-  console.log(`🔧 API status: http://0.0.0.0:${PORT}/api/status`);
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log("Backend running on http://localhost:" + PORT);
+  console.log(`📊 Health check: http://localhost:${PORT}/health`);
+  console.log(`🔧 API status: http://localhost:${PORT}/api/status`);
   console.log(`📋 Available API endpoints:`);
   console.log(`   ✅ GET /api/alerts/unread-count`);
   console.log(`   ✅ GET /api/history/recent`);
   console.log(`   ✅ GET /api/user/api-keys`);
   console.log(`   ✅ GET /api/scan`);
   console.log(`   ✅ POST /api/scan`);
-  console.log(`🚀 All API routes registered successfully!`);
+  console.log(`   ✅ GET /api/scan/:scanId/results`);
+  console.log(`   ✅ GET /api/export/:scanId/pdf`);
+  console.log(`   ✅ GET /api/export/:scanId/csv`);
+  console.log(`🚀 Express server ready!`);
 });
 
 // Graceful shutdown handling
 process.on('SIGTERM', () => {
   console.log('📴 Received SIGTERM, shutting down gracefully');
-  server.close(() => {
-    console.log('✅ Server closed');
-    process.exit(0);
-  });
+  process.exit(0);
 });
 
 process.on('SIGINT', () => {
   console.log('📴 Received SIGINT, shutting down gracefully');
-  server.close(() => {
-    console.log('✅ Server closed');
-    process.exit(0);
-  });
+  process.exit(0);
 });
