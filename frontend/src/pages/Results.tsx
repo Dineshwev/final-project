@@ -131,23 +131,30 @@ const ResultsPage: React.FC = () => {
           };
 
           console.log("Transformed results:", transformedData);
-          setResults(transformedData);
-          setError(null);
-          setLoading(false);
           
-          // Clear polling interval to prevent further API calls
+          // Clear polling BEFORE setting results to prevent race conditions
           if (pollInterval) {
             clearTimeout(pollInterval);
             pollInterval = null;
           }
+          
+          // Set results only once after polling is stopped
+          setResults(transformedData);
+          setError(null);
+          setLoading(false);
+          
+          // Ensure we return to prevent any further execution
+          return;
         } else if (rData.status === "error") {
           setError(rData.message || "Scan not found");
           setLoading(false);
+          return;
         } else {
           setError(
             "Scan not found. It may have been deleted or never existed."
           );
           setLoading(false);
+          return;
         }
       } catch (err) {
         console.error("Results fetch error:", err);

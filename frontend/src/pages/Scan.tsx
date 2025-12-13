@@ -59,7 +59,8 @@ const ScanPage: React.FC = () => {
     setIsScanning(true);
     setProgress(0);
     setError(null);
-    setResults(null);
+    // Don't reset results to avoid interfering with Results page
+    // setResults(null);
     try {
       const res = await fetch(`${API_BASE}/scan`, {
         method: "POST",
