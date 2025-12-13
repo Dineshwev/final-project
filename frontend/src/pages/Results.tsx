@@ -598,6 +598,15 @@ const ResultsPage: React.FC = () => {
     );
   }
 
+  // Early return guard for null results
+  if (!results) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p>Loading scan results...</p>
+      </div>
+    );
+  }
+
   // Calculate stats from results data
   const seoIssues = results.seoIssues;
   const securityChecks = results.securityChecks;
