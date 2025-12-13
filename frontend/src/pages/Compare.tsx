@@ -16,9 +16,6 @@ import {
   staggerItem,
 } from "../utils/animations";
 
-const API_BASE =
-  process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
-
 const ComparePage: React.FC = () => {
   const [urls, setUrls] = useState<string[]>(["", ""]);
   const [loading, setLoading] = useState(false);

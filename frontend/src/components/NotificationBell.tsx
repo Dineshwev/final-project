@@ -26,7 +26,7 @@ const NotificationBell: React.FC = () => {
     const interval = setInterval(loadUnreadCount, 30000);
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, []); // Empty dependency array to prevent infinite loop
 
   useEffect(() => {
     // Close dropdown when clicking outside
@@ -47,7 +47,7 @@ const NotificationBell: React.FC = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen]); // Only depend on isOpen
 
   const loadUnreadCount = async () => {
     try {

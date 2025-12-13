@@ -94,22 +94,30 @@ export async function analyzeDuplicateContent(
   exactThreshold: number = 0.95,
   nearThreshold: number = 0.8
 ): Promise<AnalysisReport> {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/analyze`, {
-      url,
-      maxPages,
-      exactThreshold,
-      nearThreshold,
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error("Error analyzing duplicate content:", error);
-    throw new Error(
-      error.response?.data?.error ||
-        error.message ||
-        "Failed to analyze duplicate content"
-    );
-  }
+  // Service disabled - API not available
+  return {
+    success: false,
+    url,
+    analyzedAt: new Date().toISOString(),
+    summary: {
+      totalPages: 0,
+      uniquePages: 0,
+      affectedPages: 0,
+      duplicatePercentage: 0,
+      exactDuplicateClusters: 0,
+      nearDuplicatePairs: 0,
+      totalClusters: 0
+    },
+    duplicateClusters: [],
+    exactDuplicates: [],
+    nearDuplicates: [],
+    recommendations: [{
+      priority: "success",
+      message: "Duplicate content analysis coming soon"
+    }],
+    pages: [],
+    error: "Duplicate content analysis coming soon"
+  };
 }
 
 /**
@@ -140,35 +148,32 @@ export async function generateDiff(
   text1: string,
   text2: string
 ): Promise<{ success: boolean; diff: DiffInfo; error?: string }> {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/diff`, {
-      text1,
-      text2,
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error("Error generating diff:", error);
-    throw new Error(
-      error.response?.data?.error || error.message || "Failed to generate diff"
-    );
-  }
+  // Service disabled - API not available
+  return {
+    success: false,
+    diff: {
+      commonWords: 0,
+      uniqueToFirst: 0,
+      uniqueToSecond: 0,
+      totalWords: 0,
+      commonPercentage: "0%",
+      uniqueWords1: [],
+      uniqueWords2: []
+    },
+    error: "Text comparison coming soon"
+  };
 }
 
 /**
  * Get service information
  */
 export async function getServiceInfo(): Promise<any> {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/info`);
-    return response.data;
-  } catch (error: any) {
-    console.error("Error fetching service info:", error);
-    throw new Error(
-      error.response?.data?.error ||
-        error.message ||
-        "Failed to fetch service info"
-    );
-  }
+  // Service disabled - API not available
+  return {
+    success: false,
+    message: "Duplicate content service coming soon",
+    version: "disabled"
+  };
 }
 
 /**

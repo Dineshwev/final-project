@@ -59,35 +59,53 @@ export const validateOpenGraph = async (
   url: string
 ): Promise<ValidationReport> => {
   try {
-    const response = await axios.post<ValidationResponse>(
-      `${API_BASE_URL}/og-validator/validate`,
-      { url },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: 30000, // 30 second timeout
-      }
-    );
-
-    if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.error || "Validation failed");
-    }
-
-    return response.data.data;
+    // Service disabled - API not available
+    return {
+      isValid: false,
+      url: url,
+      errors: ["Open Graph validation service is not available"],
+      warnings: [],
+      recommendations: ["Feature will be available soon"],
+      tags: {},
+      imageValidation: null,
+      debugTools: {
+        facebook: "",
+        linkedin: "",
+        twitter: ""
+      },
+      summary: {
+        totalTags: 0,
+        requiredTagsPresent: 0,
+        requiredTagsTotal: 5,
+        errorsCount: 1,
+        warningsCount: 0
+      },
+      timestamp: new Date().toISOString()
+    };
   } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        throw new Error(
-          error.response.data?.error || `Server error: ${error.response.status}`
-        );
-      } else if (error.request) {
-        throw new Error(
-          "Unable to connect to validation service. Please check if the server is running."
-        );
-      }
-    }
-    throw new Error(error.message || "An unexpected error occurred");
+    // Service disabled - return same disabled response
+    return {
+      isValid: false,
+      url: url,
+      errors: ["Open Graph validation service is not available"],
+      warnings: [],
+      recommendations: ["Feature will be available soon"],
+      tags: {},
+      imageValidation: null,
+      debugTools: {
+        facebook: "",
+        linkedin: "",
+        twitter: ""
+      },
+      summary: {
+        totalTags: 0,
+        requiredTagsPresent: 0,
+        requiredTagsTotal: 5,
+        errorsCount: 1,
+        warningsCount: 0
+      },
+      timestamp: new Date().toISOString()
+    };
   }
 };
 

@@ -76,61 +76,63 @@ export const validateTwitterCard = async (
   url: string
 ): Promise<ValidationReport> => {
   try {
-    const response = await axios.post<ValidationResponse>(
-      `${API_BASE_URL}/twitter-card/validate`,
-      { url },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: 30000, // 30 second timeout
-      }
-    );
-
-    if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.error || "Validation failed");
-    }
-
-    return response.data.data;
+    // Service disabled - API not available
+    return {
+      isValid: false,
+      url: url,
+      cardType: "summary",
+      errors: ["Twitter Card validation service is not available"],
+      warnings: [],
+      recommendations: ["Feature will be available soon"],
+      twitterTags: {},
+      ogTags: {},
+      fallbacks: {},
+      imageValidation: null,
+      previewUrl: "",
+      summary: {
+        totalTags: 0,
+        cardType: "summary",
+        hasFallbacks: false,
+        errorsCount: 1,
+        warningsCount: 0
+      },
+      timestamp: new Date().toISOString()
+    };
   } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        throw new Error(
-          error.response.data?.error || `Server error: ${error.response.status}`
-        );
-      } else if (error.request) {
-        throw new Error(
-          "Unable to connect to validation service. Please check if the server is running."
-        );
-      }
-    }
-    throw new Error(error.message || "An unexpected error occurred");
+    // Service disabled - return same disabled response
+    return {
+      isValid: false,
+      url: url,
+      cardType: "summary",
+      errors: ["Twitter Card validation service is not available"],
+      warnings: [],
+      recommendations: ["Feature will be available soon"],
+      twitterTags: {},
+      ogTags: {},
+      fallbacks: {},
+      imageValidation: null,
+      previewUrl: "",
+      summary: {
+        totalTags: 0,
+        cardType: "summary",
+        hasFallbacks: false,
+        errorsCount: 1,
+        warningsCount: 0
+      },
+      timestamp: new Date().toISOString()
+    };
   }
 };
 
 /**
+
  * Get supported Twitter Card types and their requirements
  */
 export const getCardTypes = async (): Promise<{
   [key: string]: CardTypeInfo;
 }> => {
-  try {
-    const response = await axios.get<CardTypesResponse>(
-      `${API_BASE_URL}/twitter-card/card-types`,
-      {
-        timeout: 5000,
-      }
-    );
-
-    if (!response.data.success || !response.data.data) {
-      throw new Error("Failed to fetch card types");
-    }
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch card types:", error);
-    return {};
-  }
+  // Service disabled - API not available
+  return {};
 };
 
 /**

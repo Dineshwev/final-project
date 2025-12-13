@@ -68,41 +68,63 @@ export const getShareCounts = async (
   url: string
 ): Promise<ShareCountReport> => {
   try {
-    const response = await axios.post<ShareCountReport>(
-      `${API_BASE_URL}/share-counts/analyze`,
-      { url },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: 15000, // 15 second timeout
-      }
-    );
-
-    if (!response.data.success) {
-      throw new Error("Failed to fetch share counts");
-    }
-
-    return response.data;
+    // Service disabled - API not available
+    return {
+      success: false,
+      url: url,
+      counts: {
+        facebook: 0,
+        pinterest: 0,
+        linkedin: 0,
+        totalShares: 0,
+        lastUpdated: new Date().toISOString(),
+        url: url
+      },
+      trends: {
+        facebook: { change: 0, percentage: 0, direction: "neutral" },
+        pinterest: { change: 0, percentage: 0, direction: "neutral" },
+        linkedin: { change: 0, percentage: 0, direction: "neutral" },
+        totalShares: { change: 0, percentage: 0, direction: "neutral" }
+      },
+      displayValues: {
+        facebook: "0",
+        pinterest: "0",
+        linkedin: "0",
+        totalShares: "0"
+      },
+      lastUpdated: new Date().toISOString(),
+      cached: false
+    };
   } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        if (error.response.status === 429) {
-          throw new Error(
-            "Rate limit exceeded. Please try again later (SharedCount API limit: 500 requests/day)"
-          );
-        }
-        throw new Error(
-          error.response.data?.error || `Server error: ${error.response.status}`
-        );
-      } else if (error.request) {
-        throw new Error(
-          "Unable to connect to share count service. Please check if the server is running."
-        );
-      }
-    }
-    throw new Error(error.message || "An unexpected error occurred");
+    // Service disabled - return same disabled response
+    return {
+      success: false,
+      url: url,
+      counts: {
+        facebook: 0,
+        pinterest: 0,
+        linkedin: 0,
+        totalShares: 0,
+        lastUpdated: new Date().toISOString(),
+        url: url
+      },
+      trends: {
+        facebook: { change: 0, percentage: 0, direction: "neutral" },
+        pinterest: { change: 0, percentage: 0, direction: "neutral" },
+        linkedin: { change: 0, percentage: 0, direction: "neutral" },
+        totalShares: { change: 0, percentage: 0, direction: "neutral" }
+      },
+      displayValues: {
+        facebook: "0",
+        pinterest: "0",
+        linkedin: "0",
+        totalShares: "0"
+      },
+      lastUpdated: new Date().toISOString(),
+      cached: false
+    };
   }
+
 };
 
 /**

@@ -80,29 +80,38 @@ export async function validateRichPin(
   pinType?: string
 ): Promise<ValidationReport> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/pinterest-rich-pin/validate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url, pinType }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw new Error(
-      `Failed to validate Rich Pin: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
-    );
+    // Service disabled - API not available
+    return {
+      success: false,
+      url: url,
+      isValid: false,
+      pinType: pinType || "unknown",
+      errors: ["Pinterest Rich Pin validation service is not available"],
+      warnings: [],
+      foundTags: [],
+      missingTags: [],
+      validationURL: "",
+      allTags: {},
+      timestamp: new Date().toISOString(),
+      suggestion: "Feature will be available soon"
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      url: url,
+      isValid: false,
+      pinType: pinType || "unknown",
+      errors: ["Pinterest Rich Pin validation service is not available"],
+      warnings: [],
+      foundTags: [],
+      missingTags: [],
+      validationURL: "",
+      allTags: {},
+      timestamp: new Date().toISOString(),
+      error: "Service disabled"
+    };
   }
+
 }
 
 /**

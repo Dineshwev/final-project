@@ -112,19 +112,11 @@ export async function getGSCAuthUrl(): Promise<{
   authUrl?: string;
   error?: string;
 }> {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/auth-url`);
-    return response.data;
-  } catch (error: any) {
-    console.error("Error getting auth URL:", error);
-    return {
-      success: false,
-      error:
-        error.response?.data?.error ||
-        error.message ||
-        "Failed to get auth URL",
-    };
-  }
+  // Service disabled - API not available
+  return {
+    success: false,
+    error: "Toxic backlink analysis coming soon"
+  };
 }
 
 /**
@@ -136,12 +128,22 @@ export async function analyzeToxicBacklinks(
   maxBacklinks: number = 100
 ): Promise<AnalysisReport> {
   try {
-    const response = await axios.post(`${API_BASE_URL}/analyze`, {
-      siteUrl,
-      accessToken,
-      maxBacklinks,
-    });
-    return response.data;
+    // Service disabled - API not available
+    return {
+      success: false,
+      siteUrl: siteUrl,
+      analyzedAt: new Date().toISOString(),
+      summary: {
+        total: 0,
+        safe: 0,
+        suspicious: 0,
+        toxic: 0,
+        averageScore: 0,
+        toDisavow: 0
+      },
+      results: [],
+      message: "Toxic backlink analysis service is not available"
+    };
   } catch (error: any) {
     console.error("Error analyzing backlinks:", error);
     throw new Error(
@@ -160,11 +162,11 @@ export async function checkSingleBacklink(
   anchorText: string = ""
 ): Promise<ToxicBacklink & { success: boolean; error?: string }> {
   try {
-    const response = await axios.post(`${API_BASE_URL}/check-single`, {
-      url,
-      anchorText,
-    });
-    return response.data;
+    // Service disabled - API not available
+    return {
+      success: false,
+      error: "Single backlink check coming soon"
+    } as ToxicBacklink & { success: boolean; error?: string };
   } catch (error: any) {
     console.error("Error checking backlink:", error);
     throw new Error(
