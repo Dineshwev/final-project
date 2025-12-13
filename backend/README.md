@@ -1,37 +1,55 @@
 # SEO Health Checker Backend
 
-Clean, production-safe backend structure for a SaaS SEO tool using a single public Scan API.
+## 🔒 LOCKED API CONTRACT - v1.0
+
+**This backend implements a LOCKED API CONTRACT that ensures backward compatibility and predictable responses.**
+
+> ⚠️ **CRITICAL**: The API response structure is locked and must not change without versioning. The frontend depends on the exact structure defined in [API_CONTRACT.md](API_CONTRACT.md).
+
+## 🎯 Key Features
+
+✅ **Standardized Response Format** - Every API call returns the same structure  
+✅ **Error Isolation** - Failed services don't break the entire response  
+✅ **Progress Tracking** - Built-in progress calculation  
+✅ **Type Safety** - All fields always present with correct types  
+✅ **Future Compatible** - Designed for billing, async processing, and caching  
 
 ## 🏗️ Project Structure
 
 ```
 backend/
 ├─ routes/
-│   └─ scan.routes.js          # Scan API routes
-├─ controllers/
-│   └─ scan.controller.js      # Scan logic controller
+│   └─ scan.routes.js               # 🔒 Locked API routes
+├─ controllers/  
+│   └─ scan.controller.js           # 🔒 Locked response controller
 ├─ services/
-│   ├─ duplicateContent.service.js   # Mock duplicate content analysis
-│   ├─ accessibility.service.js      # Mock accessibility analysis
-│   ├─ backlinks.service.js          # Mock backlinks analysis
-│   ├─ schema.service.js             # Mock schema markup analysis
-│   ├─ multiLanguage.service.js      # Mock multi-language SEO analysis
-│   └─ rankTracker.service.js        # Mock rank tracking analysis
-├─ app.js                      # Express app configuration
-├─ server.js                   # Server startup
-└─ package.json               # Dependencies and scripts
+│   ├─ scanOrchestrator.service.js  # 🔒 Orchestrator with locked contract
+│   ├─ duplicateContent.service.js  # Duplicate content analysis
+│   ├─ accessibility.service.js     # Accessibility analysis  
+│   ├─ backlinks.service.js         # Backlinks analysis
+│   ├─ schema.service.js            # Schema markup analysis
+│   ├─ multiLanguage.service.js     # Multi-language SEO analysis
+│   └─ rankTracker.service.js       # Rank tracking analysis
+├─ utils/
+│   ├─ responseContract.js          # 🔒 LOCKED response builder
+│   └─ testApiContract.js           # Contract validation tests
+├─ app.js                           # Express app configuration  
+├─ server.js                        # Server startup
+├─ API_CONTRACT.md                  # 📖 Complete API documentation
+└─ package.json                     # Dependencies and scripts
 ```
 
 ## 🚀 API Endpoints
 
+### Single Scan API (LOCKED CONTRACT v1.0)
+
+- **POST** `/api/scan` - Start a new website scan
+- **GET** `/api/scan/:scanId/results` - Get standardized scan results
+
 ### Health Check
 - **GET** `/api/health` - Check API status
 
-### Scan API
-- **POST** `/api/scan` - Start a new website scan
-- **GET** `/api/scan/:scanId/results` - Get scan results
-
-## 📋 API Usage
+## 📋 LOCKED API CONTRACT USAGE
 
 ### Start a Scan
 ```bash
@@ -39,73 +57,100 @@ POST /api/scan
 Content-Type: application/json
 
 {
+  "url": "https://example.com",
+  "keywords": ["seo", "optimization"]  // optional
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "scanId": "scan_1671234567890_abc123def",
+  "status": "completed",
   "url": "https://example.com"
 }
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "scanId": "scan_1234567890_abc123"
-  }
-}
-```
-
-### Get Scan Results
+### Get Scan Results (LOCKED CONTRACT)
 ```bash
-GET /api/scan/{scanId}/results
+GET /api/scan/:scanId/results
 ```
 
-**Response:**
+**Response Structure (ALWAYS THE SAME):**
 ```json
 {
   "success": true,
   "data": {
-    "scanId": "scan_1234567890_abc123",
+    "status": "completed | partial | failed | pending",
+    "scanId": "scan_1671234567890_abc123def",
     "url": "https://example.com",
-    "status": "completed",
-    "createdAt": "2025-12-13T14:00:00.000Z",
-    "results": {
-      "duplicateContent": { 
-        "status": "mock", 
-        "score": 85, 
-        "duplicates": [ {...} ] 
+    "startedAt": "2025-12-13T10:00:00.000Z",
+    "completedAt": "2025-12-13T10:01:30.000Z",
+    "progress": {
+      "completedServices": 6,
+      "totalServices": 6, 
+      "percentage": 100
+    },
+    "services": {
+      "accessibility": {
+        "status": "success | failed | pending",
+        "score": 85,  // 0-100 or null
+        "data": { /* service-specific data */ },
+        "issues": [
+          {
+            "type": "string",
+            "severity": "low | medium | high | critical", 
+            "message": "Issue description",
+            "recommendation": "How to fix"
+          }
+        ],
+        "error": {
+          "code": "ERROR_CODE",
+          "message": "Human readable error",
+          "retryable": true
+        } | null,
+        "executionTimeMs": 1500
       },
-      "accessibility": { 
-        "status": "mock", 
-        "score": 78, 
-        "issues": [ {...} ] 
-      },
-      "backlinks": { 
-        "status": "mock", 
-        "total": 1247, 
-        "toxic": 8 
-      },
-      "schema": { 
-        "status": "mock", 
-        "valid": true, 
-        "errors": [ {...} ] 
-      },
-      "multiLanguage": { 
-        "status": "mock", 
-        "languages": ["en", "es", "fr"] 
-      },
-      "rankTracker": { 
-        "status": "mock", 
-        "keywords": [ {...} ] 
-      }
-    }
-  }
+      "duplicateContent": { /* same structure */ },
+      "backlinks": { /* same structure */ },
+      "schema": { /* same structure */ },
+      "multiLanguage": { /* same structure */ },
+      "rankTracker": { /* same structure */ }
 }
+```
+
+## 🔧 TESTING THE CONTRACT
+
+### Validate API Contract
+```bash
+# Run contract validation tests
+node utils/testApiContract.js
+```
+
+This verifies:
+- ✅ All required fields are always present
+- ✅ Response structure is consistent
+- ✅ Service normalization works correctly
+- ✅ Progress calculation is accurate
+- ✅ Error handling follows the contract
+
+### Example Test Output
+```
+🧪 Testing Locked API Contract...
+✓ Mock response generated successfully
+✓ Contains all required top-level keys
+✓ Services object contains all required services
+✓ All responses pass schema validation
+🎉 ALL TESTS PASSED - API Contract is working correctly!
 ```
 
 ## 🛠️ Development
 
 ### Start the server
 ```bash
-npm start
+npm start          # Production mode
+npm run dev        # Development mode (auto-restart)
 ```
 
 ### Install dependencies
@@ -113,7 +158,70 @@ npm start
 npm install
 ```
 
-## 🎯 Features
+### Run tests
+```bash
+npm test
+```
+
+## 🎯 CONTRACT GUARANTEES
+
+### ✅ ALWAYS PRESENT
+- All 6 service results (`accessibility`, `duplicateContent`, `backlinks`, `schema`, `multiLanguage`, `rankTracker`)
+- `status`, `scanId`, `url`, `startedAt`, `completedAt`, `progress`, `services`, `meta`
+- Each service has: `status`, `score`, `data`, `issues`, `error`, `executionTimeMs`
+- `progress.percentage` calculated correctly
+- `issues` is always an array (empty if no issues)
+
+### ✅ RELIABLE BEHAVIOR  
+- Failed services don't break the response
+- Partial success is handled gracefully
+- Error messages are human-readable
+- All timestamps are ISO-8601 format
+- Scores are 0-100 or null
+
+## 🚀 DEPLOYMENT
+
+### Environment Variables
+```bash
+NODE_ENV=production    # Environment type
+PORT=8080             # Server port (default: 8080)
+```
+
+### Production Setup
+1. Install dependencies: `npm install --production`
+2. Set `NODE_ENV=production`
+3. Start server: `npm start`
+
+## 🔄 FUTURE COMPATIBILITY
+
+The locked contract supports future enhancements:
+
+- **Async Processing**: Change to polling without breaking structure
+- **Billing Integration**: Add billing fields to `meta` object
+- **Caching**: Add cache metadata without affecting core structure  
+- **New Services**: Add to `services` object without breaking existing ones
+- **Retry Logic**: Use `error.retryable` for automatic retry logic
+
+## 📖 FULL DOCUMENTATION
+
+See [API_CONTRACT.md](API_CONTRACT.md) for complete contract documentation, including:
+- Detailed field descriptions
+- Frontend integration patterns  
+- Error handling examples
+- Response structure guarantees
+- Breaking change policies
+
+## ⚠️ CRITICAL NOTES
+
+1. **DO NOT** change the response structure without API versioning
+2. **DO NOT** remove or rename fields in the services object
+3. **DO NOT** change the meaning of status values
+4. **DO NOT** throw unhandled errors from API endpoints
+5. **ALWAYS** test changes against `utils/testApiContract.js`
+
+---
+
+**🔐 This API contract is LOCKED for frontend stability and backward compatibility.**
 
 - **Mock Data Only**: All services return static mock data with `"status": "mock"`
 - **Clean Architecture**: Separation of routes, controllers, and services
