@@ -88,13 +88,21 @@ const ResultsPage: React.FC = () => {
         console.log("Scan results response:", rData);
 
         if (rData.status === "success" && rData.data) {
-          const rawData = rData.data;
-          console.log("Raw scan results data:", rawData);
+          const result = rData.data;
+          console.log("Raw scan results data:", result);
 
-          // Check if scan is still pending
+          // Add safety guard for invalid payload
+          if (!result) {
+            console.error("Invalid scan result payload", rData);
+            setError("Invalid scan result data received");
+            setLoading(false);
+            return;
+          }
+
+          // Check if scan is still pending (for compatibility with old polling logic)
           if (
-            rawData.status === "pending" ||
-            rawData.status === "in-progress"
+            result.status === "pending" ||
+            result.status === "in-progress"
           ) {
             setError(null);
             pollCount++;
@@ -110,48 +118,16 @@ const ResultsPage: React.FC = () => {
             return;
           }
 
-          // Transform backend data to match expected format
-          // Backend returns scores as whole numbers (85, 92, etc), not decimals
+          // Map backend response exactly as received
           const transformedData: ScanResultData = {
-            id: rawData.scanId || scanId || "",
-            url: rawData.url || "",
-            timestamp: rawData.completedAt || new Date().toISOString(),
-            score: rawData.overallScore || rawData.lighthouse?.scores?.seo || 0, // Use overallScore from backend
-            seoIssues: (rawData.recommendations || []).map(
-              (rec: any, idx: number) => ({
-                id: `issue-${idx}`,
-                type:
-                  rec.priority === "high"
-                    ? "error"
-                    : rec.priority === "medium"
-                    ? "warning"
-                    : "info",
-                title: rec.category || "General",
-                description: rec.issue || "",
-                impact:
-                  rec.priority === "high"
-                    ? 80
-                    : rec.priority === "medium"
-                    ? 50
-                    : 30,
-                recommendation: rec.issue || "",
-              })
-            ),
-            metrics: {
-              loadTime: rawData.technicalSeo?.loadTime || 0, // Use loadTime from backend technicalSeo
-              pageSize: 0,
-              requests: 0,
-              mobileScore: rawData.mobileSeo?.score || 0, // Use mobileSeo score from backend
-              desktopScore: rawData.technicalSeo?.score || 0, // Use technicalSeo score for desktop
-            },
-            securityChecks: rawData.security?.issues
-              ? rawData.security.issues.map((issue: string, idx: number) => ({
-                  name: issue,
-                  status: "warning" as const,
-                  details: issue,
-                }))
-              : [],
-            keywords: [],
+            id: result.id,
+            url: result.url,
+            timestamp: result.timestamp,
+            score: result.score,
+            seoIssues: result.seoIssues,
+            metrics: result.metrics,
+            securityChecks: result.securityChecks,
+            keywords: result.keywords || [],
           };
 
           console.log("Transformed results:", transformedData);
@@ -293,9 +269,9 @@ const ResultsPage: React.FC = () => {
     );
   }
 
-  // Ensure all data structures exist with safe defaults
-  const seoIssues = results.seoIssues || [];
-  const securityChecks = results.securityChecks || [];
+  // Calculate stats from results data
+  const seoIssues = results.seoIssues;
+  const securityChecks = results.securityChecks;
 
   // Calculate stats
   const issueStats = {
