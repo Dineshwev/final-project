@@ -67,10 +67,17 @@ const ScanPage: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: scanUrl }),
       });
-      const data = await res.json();
-      if (!res.ok || data.status !== "success")
-        throw new Error(data.message || "Failed to start scan");
-      const scanId = data.data.scanId;
+      const response = await res.json();
+      
+      const apiResponse = response;
+
+      if (!apiResponse?.success || !apiResponse?.data?.scanId) {
+        throw new Error("Failed to start scan");
+      }
+
+      const scanId = apiResponse.data.scanId;
+      
+      setError(null);
       let attempts = 0;
       const maxAttempts = 45;
       while (attempts < maxAttempts) {
