@@ -134,6 +134,12 @@ const ResultsPage: React.FC = () => {
           setResults(transformedData);
           setError(null);
           setLoading(false);
+          
+          // Clear polling interval to prevent further API calls
+          if (pollInterval) {
+            clearTimeout(pollInterval);
+            pollInterval = null;
+          }
         } else if (rData.status === "error") {
           setError(rData.message || "Scan not found");
           setLoading(false);
