@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api';
 
 /**
  * Generic API call handler with error handling

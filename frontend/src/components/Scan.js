@@ -25,7 +25,7 @@ const Scan = () => {
     setProgress(0);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_BASE_URL || 'https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api';
+      const apiUrl = process.env.REACT_APP_API_BASE_URL || 'https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api';
       
       // Step 1: Start the scan
       const response = await fetch(`${apiUrl}/scan`, {

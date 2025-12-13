@@ -8,7 +8,7 @@ const BackendTest: React.FC = () => {
     setLoading(true);
     setTestResult('');
     
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
     
     try {
       console.log(`🧪 Testing backend connection to: ${API_BASE_URL}`);
@@ -49,7 +49,7 @@ const BackendTest: React.FC = () => {
       )}
       
       <div className="mt-4 text-sm text-gray-400">
-        <p><strong>API Base URL:</strong> {process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api"}</p>
+        <p><strong>API Base URL:</strong> {process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api"}</p>
       </div>
     </div>
   );

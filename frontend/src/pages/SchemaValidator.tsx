@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://inrpws5mww.ap-southeast-2.awsapprunner.com/api';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api';
 
 const templates: Record<string, any> = {
   Article: {

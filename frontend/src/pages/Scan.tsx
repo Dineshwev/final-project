@@ -9,7 +9,7 @@ import SecurityPanel from "../components/scan/SecurityPanel";
 import DeviceComparison from "../components/scan/DeviceComparison";
 
 const API_BASE =
-  process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
+  process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
 
 const ScanPage: React.FC = () => {
   const location = useLocation();
@@ -1189,7 +1189,7 @@ const SecurityHeadersTab: React.FC<{ url: string }> = ({ url }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const API_BASE_URL =
-    process.env.REACT_APP_API_BASE_URL || "https://inrpws5mww.ap-southeast-2.awsapprunner.com/api";
+    process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
 
   const checkSecurityHeaders = async () => {
     if (!url) return;

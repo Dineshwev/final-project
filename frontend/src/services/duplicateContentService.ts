@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api/duplicate-content";
+const API_BASE_URL = "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api/duplicate-content";
 
 // Interfaces
 export interface PageInfo {

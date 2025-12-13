@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api/toxic-backlinks";
+const API_BASE_URL = "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api/toxic-backlinks";
 
 // Interfaces
 export interface BacklinkMetrics {

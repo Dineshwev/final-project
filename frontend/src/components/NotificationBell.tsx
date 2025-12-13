@@ -53,7 +53,7 @@ const NotificationBell: React.FC = () => {
     try {
       const userId = user?.uid || "demo-user";
       const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
+        process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
       
       // Add cache busting to force fresh data
       const response = await fetch(
@@ -87,7 +87,7 @@ const NotificationBell: React.FC = () => {
       setLoading(true);
       const userId = user?.uid || "demo-user";
       const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
+        process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
       const response = await fetch(
         `${API_BASE_URL}/alerts?userId=${userId}&limit=10&isRead=false`
       );
@@ -116,7 +116,7 @@ const NotificationBell: React.FC = () => {
     try {
       const userId = user?.uid || "demo-user";
       const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api";
+        process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
       await fetch(`${API_BASE_URL}/alerts/${alertId}/read`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

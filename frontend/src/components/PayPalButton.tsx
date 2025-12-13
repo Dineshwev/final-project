@@ -39,7 +39,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
 
       // Create PayPal order
       const createResponse = await fetch(
-        "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api/payment/create-order",
+        "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api/payment/create-order",
         {
           method: "POST",
           headers: {
@@ -105,7 +105,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
               // Check if payment was completed
               try {
                 const captureResponse = await fetch(
-                  "https://zp9kzmug2t.ap-southeast-2.awsapprunner.com/api/payment/capture-order",
+                  "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api/payment/capture-order",
                   {
                     method: "POST",
                     headers: {
