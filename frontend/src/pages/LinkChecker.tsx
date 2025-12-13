@@ -48,13 +48,8 @@ const LinkChecker: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       if (status === "completed" && savedId) {
-        try {
-          const res = await fetch(`${API_BASE}/link-checker/${savedId}`);
-          const ct = res.headers.get("content-type") || "";
-          if (!ct.includes("application/json")) return;
-          const json = await res.json();
-          if (json.status === "success") setResults(json.data);
-        } catch {}
+        // Link checker results API not available
+        setResults({ results: [], message: "Link checker feature is coming soon!" });
       }
     };
     load();
@@ -89,39 +84,13 @@ const LinkChecker: React.FC = () => {
             }
           })()
         : undefined;
-      const res = await fetch(`${API_BASE}/link-checker`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url,
-          depth,
-          maxPages,
-          headless,
-          userAgent: userAgent || undefined,
-          cookieHeader: cookieHeader || undefined,
-          headers: headersObj,
-          proxy: proxy || undefined,
-          respectRobots,
-          useStealth,
-          maxRetries,
-          timeoutMs,
-        }),
-      });
-      const ct = res.headers.get("content-type") || "";
-      if (!ct.includes("application/json")) {
-        const text = await res.text();
-        throw new Error(
-          `Unexpected response (not JSON): ${text.substring(0, 100)}...`
-        );
-      }
-      const json = await res.json();
-      if (json.status !== "accepted")
-        throw new Error(json.message || "Failed to start");
-      setJobId(json.jobId);
-      setStatus("running");
-      setProgress(0);
+      // Link checker API not available - show coming soon message
+      setError("Link checker feature is coming soon!");
+      setStatus("error");
+      return;
     } catch (e: any) {
       setError(e.message);
+      setStatus("error");
     }
   };
 

@@ -75,32 +75,24 @@ const apiService = {
     return wrapResponse(api.delete(`/history/scan/${scanId}`));
   },
 
-  // Backlinks
+  // Backlinks - DISABLED (API not available)
   getBacklinks: async (url: string) => {
-    return wrapResponse(api.get(`/backlinks`, { params: { url } }));
+    console.log('Backlinks API not available');
+    return { success: false, error: 'Feature coming soon', fallback: true, data: { total: 0, message: "Backlinks analysis coming soon" } };
   },
 
-  // Export related
+  // Export related - DISABLED (API not available)
   exportReport: async (scanId: string, format: "pdf" | "csv" = "pdf") => {
-    return wrapResponse(
-      api.get(`/export/${scanId}/${format}`, {
-        responseType: "blob",
-      })
-    );
+    console.log('Export API not available');
+    return { success: false, error: 'Export feature coming soon', fallback: true, data: null };
   },
   exportPDF: async (scanId: string) => {
-    return wrapResponse(
-      api.get(`/export/${scanId}/pdf`, {
-        responseType: "blob",
-      })
-    );
+    console.log('PDF export API not available');
+    return { success: false, error: 'PDF export coming soon', fallback: true, data: null };
   },
   exportCSV: async (scanId: string) => {
-    return wrapResponse(
-      api.get(`/export/${scanId}/csv`, {
-        responseType: "blob",
-      })
-    );
+    console.log('CSV export API not available');
+    return { success: false, error: 'CSV export coming soon', fallback: true, data: null };
   },
 
   // API Keys management

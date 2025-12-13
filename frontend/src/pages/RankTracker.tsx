@@ -28,28 +28,25 @@ const RankTracker: React.FC = () => {
 
   const loadKeywords = useCallback(async (page=kwPage) => {
     try {
-      const params = new URLSearchParams({ page:String(page), pageSize:String(kwPageSize) });
-      if (kwSearch.trim()) params.set('search', kwSearch.trim());
-      const res = await fetch(`${API_BASE}/rank-tracker?${params.toString()}`);
-      const ct = res.headers.get('content-type')||''; if (!ct.includes('application/json')) return;
-      const json = await res.json(); if (json.status==='success') { setKeywords(json.items||json.data||[]); setKwTotal(json.total||0); setKwPage(json.page||page); }
+      // Rank tracker API not available - show coming soon message
+      setError("Rank tracking feature is coming soon!");
+      setLoading(false);
+      return;
     } catch {}
   }, [kwPageSize, kwSearch, kwPage]);
   async function loadAlerts() {
     try {
-      const res = await fetch(`${API_BASE}/rank-tracker/alerts/list`);
-      const ct = res.headers.get('content-type')||''; if (!ct.includes('application/json')) return;
-      const json = await res.json(); if (json.status==='success') setAlerts(json.data);
+      // Rank tracker alerts API not available
+      setAlerts([]);
+      return;
     } catch {}
   }
   const loadHistory = useCallback(async (id:number, page=histPage) => {
     try {
-      const params = new URLSearchParams({ page:String(page), pageSize:String(histPageSize) });
-      if (histFrom) params.set('from', histFrom);
-      if (histTo) params.set('to', histTo);
-      const res = await fetch(`${API_BASE}/rank-tracker/${id}/history?${params.toString()}`);
-      const ct = res.headers.get('content-type')||''; if (!ct.includes('application/json')) return;
-      const json = await res.json(); if (json.status==='success') { setHistory(json.items||json.data||[]); setHistTotal(json.total||0); setHistPage(json.page||page); }
+      // Rank tracker history API not available
+      setHistory([]);
+      setHistTotal(0);
+      return;
     } catch {}
   }, [histPageSize, histFrom, histTo, histPage]);
 
@@ -60,50 +57,33 @@ const RankTracker: React.FC = () => {
   async function add(e:React.FormEvent) {
     e.preventDefault(); setError(null); setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/rank-tracker`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url, keyword }) });
-      const json = await res.json(); if (json.status==='success') { setUrl(''); setKeyword(''); loadKeywords(); }
-      else throw new Error(json.message||'Add failed');
+      // Rank tracker add API not available
+      setError("Add keyword feature is coming soon!");
     } catch (e:any) { setError(e.message); } finally { setLoading(false); }
   }
 
   async function refreshOne(id:number) {
-    await fetch(`${API_BASE}/rank-tracker/refresh/${id}`, { method:'POST' });
-    loadKeywords(); if (selected && selected.id===id) loadHistory(id); loadAlerts();
+    // Refresh API not available
+    setError("Refresh feature is coming soon!");
   }
 
   async function refreshAll() {
-    await fetch(`${API_BASE}/rank-tracker/refresh-all`, { method:'POST' });
-    loadKeywords(kwPage); if (selected) loadHistory(selected.id, histPage); loadAlerts();
+    // Refresh all API not available
+    setError("Refresh all feature is coming soon!");
   }
   async function exportAlertsCsv() {
-    try {
-      const res = await fetch(`${API_BASE}/rank-tracker/alerts/export.csv`);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'rank-alerts.csv'; a.click();
-      URL.revokeObjectURL(url);
-    } catch {}
+    // Export alerts CSV API not available
+    alert("Export alerts feature is coming soon!");
   }
   async function exportHistoryCsv() {
     if (!selected) return;
-    try {
-      const params = new URLSearchParams();
-      if (histFrom) params.set('from', histFrom);
-      if (histTo) params.set('to', histTo);
-      const res = await fetch(`${API_BASE}/rank-tracker/${selected.id}/history/export.csv?${params.toString()}`);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `rank-history-${selected.id}.csv`; a.click();
-      URL.revokeObjectURL(url);
-    } catch {}
+    // Export history CSV API not available
+    alert("Export history feature is coming soon!");
   }
 
   async function remove(id:number) {
-    await fetch(`${API_BASE}/rank-tracker/${id}`, { method:'DELETE' });
-    if (selected && selected.id===id) { setSelected(null); setHistory([]); }
-    loadKeywords();
+    // Remove API not available
+    alert("Remove keyword feature is coming soon!");
   }
 
   const chartData = useMemo(()=>{

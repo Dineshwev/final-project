@@ -126,68 +126,8 @@ const History: React.FC = () => {
   };
 
   const handleExport = async (scanId: string, format: "pdf" | "csv") => {
-    try {
-      if (!scanId) {
-        alert("Invalid scan ID");
-        return;
-      }
-
-      console.log("Exporting report:", { scanId, format });
-      const response = await apiService.exportReport(scanId, format);
-
-      console.log("Export response:", response);
-
-      if (response.success && response.data) {
-        // Check if response.data is a Blob or contains error info
-        if (response.data instanceof Blob) {
-          // Check if it's an error response in blob format (backend sent JSON error as blob)
-          if (response.data.type === "application/json") {
-            const text = await response.data.text();
-            console.error("Error response:", text);
-            try {
-              const errorData = JSON.parse(text);
-              alert(`Export failed: ${errorData.message || text}`);
-            } catch {
-              alert(`Export failed: ${text}`);
-            }
-            return;
-          }
-
-          // Valid file blob received
-          const url = window.URL.createObjectURL(response.data);
-
-          // Create a link element and trigger download
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `seo-report-${scanId}.${format}`;
-
-          // Trigger download
-          document.body.appendChild(link);
-          link.click();
-
-          // Cleanup
-          setTimeout(() => {
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-          }, 100);
-        } else {
-          console.error("Invalid response format:", response.data);
-          alert("Failed to export report. Invalid response format.");
-        }
-      } else {
-        const errorMsg =
-          (response as any).error?.message ||
-          (response as any).error ||
-          "Unknown error";
-        console.error("Export failed:", response);
-        alert(`Failed to export report: ${errorMsg}`);
-      }
-    } catch (err: any) {
-      console.error("Export error:", err);
-      const errorMessage =
-        err?.response?.data?.message || err?.message || "Unknown error";
-      alert(`Failed to export report: ${errorMessage}`);
-    }
+    // Export feature is not available
+    alert("Export feature is coming soon!");
   };
 
   // Filter scans based on search term

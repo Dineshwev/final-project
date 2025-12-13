@@ -111,21 +111,10 @@ const MultiLanguageSeoChecker: React.FC = () => {
     setReport(null);
 
     try {
-      // Construct API URL
-      const apiUrl = API_BASE_URL.endsWith("/api")
-        ? `${API_BASE_URL}/multi-language-seo?url=${encodeURIComponent(url)}`
-        : `${API_BASE_URL}/api/multi-language-seo?url=${encodeURIComponent(
-            url
-          )}`;
-
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to analyze multi-language SEO");
-      }
-
-      setReport(data.data);
+      // Multi-language SEO API not available - show coming soon message
+      setError("Multi-language SEO analysis feature is coming soon!");
+      setLoading(false);
+      return;
     } catch (err: any) {
       setError(err.message || "Failed to analyze URL");
     } finally {

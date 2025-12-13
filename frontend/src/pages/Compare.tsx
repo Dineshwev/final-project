@@ -44,15 +44,10 @@ const ComparePage: React.FC = () => {
     setError(null);
     setData(null);
     try {
-      const res = await fetch(`${API_BASE}/compare`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls: active }),
-      });
-      const json = await res.json();
-      if (json.status !== "success")
-        throw new Error(json.message || "Compare failed");
-      setData(json.data);
+      // Compare API not available - show coming soon message
+      setError("Website comparison feature is coming soon!");
+      setLoading(false);
+      return;
     } catch (e: any) {
       setError(e.message);
     } finally {

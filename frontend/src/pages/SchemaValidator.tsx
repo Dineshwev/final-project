@@ -38,17 +38,10 @@ const SchemaValidator: React.FC = () => {
   const submit = async (e:React.FormEvent) => {
     e.preventDefault(); setError(null); setData(null); setLoading(true);
     try {
-  const params = new URLSearchParams({ url });
-  if (headless) params.set('headless','true');
-  const res = await fetch(`${API_BASE}/schema-validator?${params.toString()}`);
-      const ct = res.headers.get('content-type') || '';
-      if (!ct.includes('application/json')) {
-        const text = await res.text();
-        throw new Error(`Unexpected response (not JSON): ${text.substring(0,100)}...`);
-      }
-      const json = await res.json();
-      if (json.status !== 'success') throw new Error(json.message || 'Validation failed');
-      setData(json.data);
+      // Schema validator API not available - show coming soon message
+      setError("Schema validation feature is coming soon!");
+      setLoading(false);
+      return;
     } catch (e:any) { setError(e.message); } finally { setLoading(false); }
   };
 

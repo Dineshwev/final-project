@@ -26,20 +26,12 @@ const ScanPage: React.FC = () => {
     const shouldFetch = activeTab === "backlinks" && !backlinks;
     const targetUrl = results?.url || url;
     if (shouldFetch && targetUrl) {
-      const fetchBacklinks = async () => {
-        try {
-          const res = await fetch(
-            `${API_BASE}/backlinks?url=${encodeURIComponent(targetUrl)}`
-          );
-          const data = await res.json();
-          if (data?.status === "success") {
-            setBacklinks(data.data);
-          }
-        } catch (e) {
-          console.error("Backlinks fetch failed", e);
-        }
-      };
-      void fetchBacklinks();
+      // Backlinks API not available - show placeholder data
+      setBacklinks({
+        total: 0,
+        message: "Backlinks analysis coming soon",
+        placeholder: true
+      });
     }
   }, [activeTab, results, url, backlinks]);
 

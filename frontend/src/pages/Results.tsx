@@ -182,31 +182,8 @@ const ResultsPage: React.FC = () => {
     if (format === "csv") setDownloadingCSV(true);
 
     try {
-      // Use direct fetch for export as well
-      const response = await fetch(`${API_BASE}/export/${scanId}/${format}`);
-
-      if (response.ok) {
-        // Get the blob from the response
-        const blob = await response.blob();
-
-        // Create a URL for the blob
-        const url = window.URL.createObjectURL(blob);
-
-        // Create a link element
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `seo-report-${scanId}.${format}`;
-
-        // Append to the document, click it, and remove it
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Release the URL
-        window.URL.revokeObjectURL(url);
-      } else {
-        alert("Failed to export report");
-      }
+      // Export API not available - show coming soon message  
+      alert("Export feature is coming soon!");
     } catch (err) {
       console.error("Export error:", err);
       alert("Failed to export report");
