@@ -273,7 +273,7 @@ const ResultsPage: React.FC = () => {
 
     const fetchScanStatus = async () => {
       if (!scanId) {
-        setError("No scan ID provided");
+        // Don't set error - let the main component handle the no-scanId case
         setLoading(false);
         return;
       }
@@ -491,6 +491,66 @@ const ResultsPage: React.FC = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show CTA instead of error when no scan exists
+  if (!scanId) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg shadow-lg p-8 text-center">
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <FaSearch className="h-8 w-8 text-blue-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                No Global Scan Found
+              </h2>
+              <p className="text-lg text-gray-600 mb-8 max-w-2xl">
+                Start a comprehensive global SEO analysis to get detailed insights about your website's 
+                performance, accessibility, technical SEO, and more.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <FaChartBar className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                    <h3 className="font-semibold text-gray-800">Comprehensive Analysis</h3>
+                    <p className="text-sm text-gray-600">Complete SEO audit across all dimensions</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <FaShieldAlt className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">Security & technical health checks</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <FaMobileAlt className="h-6 w-6 text-purple-500 mx-auto mb-2" />
+                    <h3 className="font-semibold text-gray-800">Mobile Optimization</h3>
+                    <p className="text-sm text-gray-600">Performance & accessibility insights</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link 
+                  to="/scan" 
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+                >
+                  <FaSearch className="mr-2" />
+                  Run Global Scan
+                </Link>
+                <Link 
+                  to="/dashboard" 
+                  className="inline-flex items-center px-6 py-3 border border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+                >
+                  <FaArrowLeft className="mr-2" />
+                  Back to Dashboard
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -95,6 +95,29 @@ const apiService = {
     return { success: false, error: 'CSV export coming soon', fallback: true, data: null };
   },
 
+  // Individual tool endpoints
+  analyzeSchema: async (url: string) => {
+    return wrapResponse(api.post("/tools/schema", { url }));
+  },
+  analyzeAccessibility: async (url: string) => {
+    return wrapResponse(api.post("/tools/accessibility", { url }));
+  },
+  analyzeBacklinks: async (url: string) => {
+    return wrapResponse(api.post("/tools/backlinks", { url }));
+  },
+  analyzeLinkChecker: async (url: string) => {
+    return wrapResponse(api.post("/tools/link-checker", { url }));
+  },
+  analyzeDuplicateContent: async (url: string) => {
+    return wrapResponse(api.post("/tools/duplicate-content", { url }));
+  },
+  analyzeMultiLanguage: async (url: string) => {
+    return wrapResponse(api.post("/tools/multi-language", { url }));
+  },
+  analyzeRankTracker: async (url: string, keywords: string[]) => {
+    return wrapResponse(api.post("/tools/rank-tracker", { url, keywords }));
+  },
+
   // API Keys management
   getApiKeys: async () => {
     return wrapResponse(api.get("/user/api-keys"));

@@ -1,18 +1,63 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import useScanResults from "../hooks/useScanResults";
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api';
-
-interface KeywordRow { id:number; url:string; keyword:string; last_position:number|null; created_at:string; updated_at:string; }
-interface HistoryRow { id:number; keyword_id:number; position:number|null; fetched_at:string; }
-interface AlertRow { id:number; keyword_id:number; old_position:number|null; new_position:number|null; delta:number; created_at:string; keyword:string; url:string; }
+import { FeatureScanContainer } from "../scan-modes";
+import { motion } from "framer-motion";
+import {
+  TrendingUp,
+  CheckCircle,
+  Download,
+  ExternalLink,
+  Search,
+  Info,
+  BarChart3,
+  Target,
+} from "lucide-react";
 
 const RankTracker: React.FC = () => {
-  const { scanResults, serviceData, hasServiceData, serviceStatus, loading: scanLoading, error: scanError } = useScanResults({ serviceName: 'rankTracker' });
-  const [url,setUrl] = useState('');
-  const [keyword,setKeyword] = useState('');
+  const [url, setUrl] = useState("");
+  const [showResults, setShowResults] = useState(false);
+
+  const handleScanComplete = (result: any) => {
+    setShowResults(true);
+  };
+
+  const handleScanError = (error: any) => {
+    console.error('Rank tracking scan failed:', error);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-600 to-green-600 rounded-full mb-6">
+            <TrendingUp className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Keyword Rank Tracker
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Track your website's search engine rankings for target keywords
+          </p>
+        </motion.div>
+
+        <FeatureScanContainer
+          feature="rank-tracker"
+          initialUrl={url}
+          onScanComplete={handleScanComplete}
+          onScanError={handleScanError}
+          className="rank-tracker-scan"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default RankTracker;
   const [keywords,setKeywords] = useState<KeywordRow[]>([]);
   const [kwTotal,setKwTotal] = useState(0);
   const [kwPage,setKwPage] = useState(1);

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import useScanResults from "../hooks/useScanResults";
-
+import apiService from "../services/api";
 const LinkChecker: React.FC = () => {
   const { scanResults, serviceData, hasServiceData, serviceStatus, loading, error: scanError } = useScanResults({ serviceName: 'backlinks' });
   const [url, setUrl] = useState("");
@@ -9,10 +9,12 @@ const LinkChecker: React.FC = () => {
     "all" | "broken" | "redirects" | "images"
   >("all");
   const [error, setError] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeResults, setAnalyzeResults] = useState<any>(null);
 
-  // Get link checker data from scan results
-  const linkCheckerData = serviceData;
-  const hasLinkData = hasServiceData;
+  // Get link checker data from scan results or analyze results
+  const linkCheckerData = serviceData || analyzeResults;
+  const hasLinkData = hasServiceData || !!analyzeResults;
 
   // Set error from scan service
   React.useEffect(() => {
@@ -25,13 +27,27 @@ const LinkChecker: React.FC = () => {
     }
   }, [scanError, hasLinkData, loading, serviceStatus]);
 
-  const redirectToScan = () => {
+  const analyzeLinkChecker = async () => {
     if (!url.trim()) {
       setError("Please enter a URL");
       return;
     }
-    // Redirect to scan page to run a new scan
-    window.location.href = `/scan?url=${encodeURIComponent(url)}`;
+    
+    setAnalyzing(true);
+    setError(null);
+    
+    try {
+      const response = await apiService.analyzeLinkChecker(url);
+      if (response.success) {
+        setAnalyzeResults(response.data);
+      } else {
+        setError(response.error || 'Link analysis failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Link analysis failed');
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const filtered = React.useMemo(() => {
@@ -64,7 +80,7 @@ const LinkChecker: React.FC = () => {
           )}
           
           {!hasLinkData && (
-            <form onSubmit={(e) => { e.preventDefault(); redirectToScan(); }} className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); analyzeLinkChecker(); }} className="space-y-4">
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="md:col-span-2">
                   <input
@@ -78,9 +94,10 @@ const LinkChecker: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                  disabled={analyzing}
+                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
                 >
-                  Start Scan
+                  {analyzing ? 'Analyzing...' : 'Analyze Links'}
                 </button>
               </div>
             </form>

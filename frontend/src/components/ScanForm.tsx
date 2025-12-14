@@ -1,8 +1,7 @@
-// src/components/ScanForm.tsx
+// src/components/ScanForm.tsx - Simplified for Basic Scan
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { FaSearch } from ".//Icons";
-import apiService from "../services/api.js";
+import { executeSimpleBasicScan, type SimpleScanResult } from "../services/simpleScan";
 
 interface ScanFormProps {
   className?: string;
@@ -12,12 +11,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ className = "" }) => {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [options, setOptions] = useState({
-    deepCrawl: false,
-    includeSecurity: true,
-    includeBacklinks: false,
-  });
-  const navigate = useNavigate();
+  const [result, setResult] = useState<SimpleScanResult | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,30 +31,95 @@ const ScanForm: React.FC<ScanFormProps> = ({ className = "" }) => {
 
     setError(null);
     setLoading(true);
+    setResult(null);
 
     try {
-      const response = await apiService.scanWebsite(url, options);
+      const scanResult = await executeSimpleBasicScan(url.trim());
 
-      if (response.success) {
-        // Navigate to results page with the scan ID
-        navigate(`/results/${response.data.scanId}`);
-      } else {
-        setError("Failed to scan website. Please try again.");
-      }
-    } catch (err) {
-      setError("An error occurred. Please try again later.");
-      console.error("Scan error:", err);
+      // Set the simplified result directly
+      setResult(scanResult);
+
+    } catch (err: any) {
+      // Show friendly error message, no redirect
+      setError(err.message || "Unable to analyze website. Please try again in a moment.");
+      console.error("Basic scan error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setOptions((prevOptions) => ({
-      ...prevOptions,
-      [name]: checked,
-    }));
+  const resetScan = () => {
+    setResult(null);
+    setError(null);
+    setUrl("");
+  };
+
+  const renderResults = () => {
+    if (!result) return null;
+
+    // Calculate simple scores based on available data
+    const overallScore = result.score || 75;
+    const technicalScore = result.httpsStatus ? 90 : 60;
+    const contentScore = (result.title && result.metaDescription) ? 85 : result.title || result.metaDescription ? 65 : 40;
+    const userExperienceScore = result.h1Count === 1 ? 90 : result.h1Count === 0 ? 50 : 70;
+
+    return (
+      <div className="mt-6 bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-xl border-2 border-green-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-gray-800">Scan Results</h3>
+          <div className="text-3xl font-bold text-blue-600">{overallScore}/100</div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-700">{technicalScore}</div>
+            <div className="text-sm text-gray-600">Technical</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-700">{contentScore}</div>
+            <div className="text-sm text-gray-600">Content</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-700">{userExperienceScore}</div>
+            <div className="text-sm text-gray-600">User Experience</div>
+          </div>
+        </div>
+
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Title:</span>
+            <span className={`font-medium ${result.title ? 'text-green-600' : 'text-red-600'}`}>
+              {result.title ? '✓ Present' : '✗ Missing'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Meta Description:</span>
+            <span className={`font-medium ${result.metaDescription ? 'text-green-600' : 'text-red-600'}`}>
+              {result.metaDescription ? '✓ Present' : '✗ Missing'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">H1 Count:</span>
+            <span className={`font-medium ${result.h1Count === 1 ? 'text-green-600' : 'text-orange-600'}`}>
+              {result.h1Count || 0} {result.h1Count === 1 ? '✓' : result.h1Count === 0 ? '✗' : '⚠'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">HTTPS:</span>
+            <span className={`font-medium ${result.httpsStatus ? 'text-green-600' : 'text-red-600'}`}>
+              {result.httpsStatus ? '✓ Enabled' : '✗ Not Enabled'}
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={resetScan}
+          className="mt-4 w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+        >
+          Scan Another Website
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -79,16 +138,17 @@ const ScanForm: React.FC<ScanFormProps> = ({ className = "" }) => {
                 placeholder="Enter website URL (e.g., https://example.com)"
                 className="flex-grow w-full px-4 py-4 sm:px-5 sm:py-5 pl-10 sm:pl-12 bg-white/95 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all duration-300 font-medium border-0 text-sm sm:text-base min-h-[52px] sm:min-h-[60px] touch-manipulation"
                 required
+                disabled={loading}
               />
             </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !url.trim()}
               className={`px-6 py-4 sm:px-8 sm:py-5 text-white font-bold text-base sm:text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] min-h-[52px] sm:min-h-[60px] touch-manipulation ${
                 loading
                   ? "bg-blue-500 cursor-wait"
                   : "bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-lg hover:shadow-xl"
-              } focus:outline-none focus:ring-4 focus:ring-blue-400/50`}
+              } focus:outline-none focus:ring-4 focus:ring-blue-400/50 disabled:opacity-50`}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -116,7 +176,7 @@ const ScanForm: React.FC<ScanFormProps> = ({ className = "" }) => {
                 </div>
               ) : (
                 <span className="flex items-center">
-                  <FaSearch className="mr-2" /> Analyze Website
+                  <FaSearch className="mr-2" /> Quick SEO Scan
                 </span>
               )}
             </button>
@@ -128,55 +188,16 @@ const ScanForm: React.FC<ScanFormProps> = ({ className = "" }) => {
             </div>
           )}
 
-          <div className="bg-white/95 backdrop-blur-sm p-5 rounded-2xl shadow-xl border-2 border-white/40 flex flex-wrap gap-6">
-            <label className="inline-flex items-center group cursor-pointer">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  name="deepCrawl"
-                  checked={options.deepCrawl}
-                  onChange={handleOptionChange}
-                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-10 rounded transition-opacity duration-200"></div>
-              </div>
-              <span className="ml-2 text-sm font-medium text-gray-800 group-hover:text-blue-700 transition-colors duration-200">
-                Deep crawl (analyzes multiple pages)
-              </span>
-            </label>
+          {renderResults()}
 
-            <label className="inline-flex items-center group cursor-pointer">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  name="includeSecurity"
-                  checked={options.includeSecurity}
-                  onChange={handleOptionChange}
-                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-10 rounded transition-opacity duration-200"></div>
+          {!result && (
+            <div className="bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-xl border-2 border-white/40">
+              <div className="text-center text-gray-700">
+                <p className="font-medium">✅ Free Quick SEO Analysis</p>
+                <p className="text-sm mt-1">Get instant insights on title, meta description, headings, and HTTPS status</p>
               </div>
-              <span className="ml-2 text-sm font-medium text-gray-800 group-hover:text-blue-700 transition-colors duration-200">
-                Security analysis
-              </span>
-            </label>
-
-            <label className="inline-flex items-center group cursor-pointer">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  name="includeBacklinks"
-                  checked={options.includeBacklinks}
-                  onChange={handleOptionChange}
-                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-10 rounded transition-opacity duration-200"></div>
-              </div>
-              <span className="ml-2 text-sm font-medium text-gray-800 group-hover:text-blue-700 transition-colors duration-200">
-                Backlink analysis
-              </span>
-            </label>
-          </div>
+            </div>
+          )}
         </div>
       </form>
     </div>
