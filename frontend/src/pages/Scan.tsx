@@ -69,6 +69,9 @@ const ScanPage: React.FC = () => {
 
       const scanId = apiResponse.data.scanId;
       
+      // Save scan ID to localStorage for other pages to access
+      localStorage.setItem('lastScanId', scanId);
+      
       setError(null);
       let attempts = 0;
       const maxAttempts = 45;

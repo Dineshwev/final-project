@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Link } from "react-router-dom";
+import useScanResults from "../hooks/useScanResults";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api';
 
@@ -8,6 +10,7 @@ interface HistoryRow { id:number; keyword_id:number; position:number|null; fetch
 interface AlertRow { id:number; keyword_id:number; old_position:number|null; new_position:number|null; delta:number; created_at:string; keyword:string; url:string; }
 
 const RankTracker: React.FC = () => {
+  const { scanResults, serviceData, hasServiceData, serviceStatus, loading: scanLoading, error: scanError } = useScanResults({ serviceName: 'rankTracker' });
   const [url,setUrl] = useState('');
   const [keyword,setKeyword] = useState('');
   const [keywords,setKeywords] = useState<KeywordRow[]>([]);
@@ -26,14 +29,24 @@ const RankTracker: React.FC = () => {
   const [loading,setLoading] = useState(false);
   const [error,setError] = useState<string|null>(null);
 
+  // Get rank tracker data from scan results
+  const rankTrackerData = serviceData;
+  const hasRankData = hasServiceData;
+
   const loadKeywords = useCallback(async (page=kwPage) => {
     try {
+      // Check if we have rank data from scan results first
+      if (hasRankData && rankTrackerData) {
+        // Use scan results data instead of API call
+        return;
+      }
+      
       // Rank tracker API not available - show coming soon message
       setError("Rank tracking feature is coming soon!");
       setLoading(false);
       return;
     } catch {}
-  }, [kwPageSize, kwSearch, kwPage]);
+  }, [kwPageSize, kwSearch, kwPage, hasRankData, rankTrackerData]);
   async function loadAlerts() {
     try {
       // Rank tracker alerts API not available
@@ -89,6 +102,95 @@ const RankTracker: React.FC = () => {
   const chartData = useMemo(()=>{
     return history.slice().reverse().map(h => ({ date: new Date(h.fetched_at).toLocaleDateString(), position: h.position==null? 100: h.position }));
   },[history]);
+
+  // If we have rank tracker data from scan results, show it
+  if (hasRankData && rankTrackerData) {
+    return (
+      <div className='min-h-screen bg-gradient-to-br from-indigo-50 via-white to-sky-50 py-10 px-4'>
+        <div className='max-w-7xl mx-auto space-y-8'>
+          <div className='bg-white p-6 rounded-2xl shadow'>
+            <h1 className='text-2xl font-bold mb-4'>Rank Tracker Analysis</h1>
+            <p className='text-gray-600 mb-6'>
+              Rank tracking results for: <span className='font-semibold'>{scanResults?.url || url}</span>
+            </p>
+            
+            {scanError && (
+              <div className='bg-red-50 border border-red-200 rounded-lg p-4 mb-4'>
+                <p className='text-red-700'>Error loading scan results: {scanError}</p>
+              </div>
+            )}
+
+            <div className='space-y-6'>
+              {/* Rankings Display */}
+              <div className='bg-gray-50 p-4 rounded-lg'>
+                <h3 className='text-lg font-semibold mb-4'>Current Rankings</h3>
+                {Array.isArray(rankTrackerData.rankings) && rankTrackerData.rankings.length > 0 ? (
+                  <div className='space-y-3'>
+                    {rankTrackerData.rankings.map((ranking: any, index: number) => (
+                      <div key={index} className='bg-white p-4 rounded-lg border'>
+                        <div className='grid md:grid-cols-4 gap-4 items-center'>
+                          <div>
+                            <span className='text-sm text-gray-500'>Keyword:</span>
+                            <div className='font-semibold'>{ranking.keyword}</div>
+                          </div>
+                          <div>
+                            <span className='text-sm text-gray-500'>Position:</span>
+                            <div className='text-lg font-bold text-indigo-600'>#{ranking.position}</div>
+                          </div>
+                          <div>
+                            <span className='text-sm text-gray-500'>Search Engine:</span>
+                            <div>{ranking.searchEngine || 'Google'}</div>
+                          </div>
+                          {ranking.url && (
+                            <div>
+                              <span className='text-sm text-gray-500'>Page:</span>
+                              <div className='text-xs break-all'>{ranking.url}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className='text-center py-8 text-gray-500'>
+                    <p>No ranking data available</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Summary Stats */}
+              {rankTrackerData.summary && (
+                <div className='bg-gray-50 p-4 rounded-lg'>
+                  <h3 className='text-lg font-semibold mb-4'>Summary Statistics</h3>
+                  <div className='grid md:grid-cols-2 gap-4'>
+                    {rankTrackerData.summary.totalKeywords && (
+                      <div className='bg-white p-4 rounded-lg text-center'>
+                        <div className='text-2xl font-bold text-indigo-600'>{rankTrackerData.summary.totalKeywords}</div>
+                        <div className='text-sm text-gray-600'>Total Keywords</div>
+                      </div>
+                    )}
+                    {rankTrackerData.summary.averagePosition && (
+                      <div className='bg-white p-4 rounded-lg text-center'>
+                        <div className='text-2xl font-bold text-green-600'>#{rankTrackerData.summary.averagePosition}</div>
+                        <div className='text-sm text-gray-600'>Average Position</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className='flex justify-center'>
+                <Link to="/results" className='px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors'>
+                  Back to All Results
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-indigo-50 via-white to-sky-50 py-10 px-4'>

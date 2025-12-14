@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api';
+import { Link } from "react-router-dom";
+import useScanResults from "../hooks/useScanResults";
 
 const templates: Record<string, any> = {
   Article: {
@@ -28,21 +28,33 @@ const templates: Record<string, any> = {
 };
 
 const SchemaValidator: React.FC = () => {
+  const { scanResults, serviceData, hasServiceData, serviceStatus, loading, error: scanError } = useScanResults({ serviceName: 'schema' });
   const [url, setUrl] = useState('');
-  const [data, setData] = useState<any|null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string|null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('Article');
-  const [headless, setHeadless] = useState(false);
 
-  const submit = async (e:React.FormEvent) => {
-    e.preventDefault(); setError(null); setData(null); setLoading(true);
-    try {
-      // Schema validator API not available - show coming soon message
-      setError("Schema validation feature is coming soon!");
-      setLoading(false);
+  // Get schema data from scan results
+  const schemaData = serviceData;
+  const hasSchemaData = hasServiceData;
+
+  // Set error from scan service
+  React.useEffect(() => {
+    if (scanError) {
+      setError(scanError);
+    } else if (!hasSchemaData && !loading) {
+      setError(serviceStatus);
+    } else {
+      setError(null);
+    }
+  }, [scanError, hasSchemaData, loading, serviceStatus]);
+
+  const redirectToScan = () => {
+    if (!url.trim()) {
+      setError("Please enter a URL");
       return;
-    } catch (e:any) { setError(e.message); } finally { setLoading(false); }
+    }
+    // Redirect to scan page to run a new scan
+    window.location.href = `/scan?url=${encodeURIComponent(url)}`;
   };
 
   return (
@@ -50,76 +62,134 @@ const SchemaValidator: React.FC = () => {
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="bg-white p-6 rounded-2xl shadow">
           <h1 className="text-2xl font-bold mb-3">Schema Markup Validator</h1>
-          <form onSubmit={submit} className="space-y-4">
-            <div className="flex gap-3">
-              <input type="url" required value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://example.com/article" className="flex-1 px-4 py-3 rounded-lg border" />
-              <button className="px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold" disabled={loading}>{loading? 'Validating…':'Validate'}</button>
+          
+          {scanResults && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                Showing results from scan: <strong>{scanResults.url}</strong>
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                <Link to="/scan" className="underline">Click here to run a new scan</Link>
+              </p>
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={headless} onChange={e=>setHeadless(e.target.checked)} />
-              <span>Headless (render JS, may bypass blocks)</span>
-            </label>
-          </form>
+          )}
+          
+          {!hasSchemaData && (
+            <form onSubmit={(e) => { e.preventDefault(); redirectToScan(); }} className="space-y-4">
+              <div className="flex gap-3">
+                <input 
+                  type="url" 
+                  required 
+                  value={url} 
+                  onChange={e=>setUrl(e.target.value)} 
+                  placeholder="https://example.com/article" 
+                  className="flex-1 px-4 py-3 rounded-lg border" 
+                />
+                <button className="px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold">
+                  Start Scan
+                </button>
+              </div>
+            </form>
+          )}
+          
           {error && <div className="text-sm text-red-600 mt-2">{error}</div>}
         </div>
 
-        {data && (
+        {loading && (
+          <div className="bg-white p-6 rounded-xl shadow">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              <span className="ml-3 text-gray-600">Loading scan results...</span>
+            </div>
+          </div>
+        )}
+
+        {schemaData && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-xl shadow">
-              <h2 className="font-semibold mb-2">Detections</h2>
-              {data.validation.detections.length === 0 && <p className="text-sm text-gray-500">No structured data found.</p>}
+              <h2 className="font-semibold mb-2">Schema Detection Results</h2>
+              {(!schemaData.detections || schemaData.detections.length === 0) && (
+                <p className="text-sm text-gray-500">No structured data found.</p>
+              )}
               <ul className="text-sm space-y-1">
-                {data.validation.detections.map((d:any,i:number)=>(
-                  <li key={i} className="flex justify-between"><span>{d.format} {d.type || ''}</span></li>
+                {(schemaData.detections || []).map((d:any,i:number)=>(
+                  <li key={i} className="flex justify-between">
+                    <span>{d.format} {d.type || ''}</span>
+                    <span className="text-green-600">✓ Found</span>
+                  </li>
                 ))}
               </ul>
             </div>
+
             <div className="bg-white p-4 rounded-xl shadow">
-              <h2 className="font-semibold mb-2">Issues</h2>
-              {data.validation.issues.length === 0 && <p className="text-sm text-green-700">No missing required fields detected for sampled types.</p>}
+              <h2 className="font-semibold mb-2">Validation Issues</h2>
+              {(!schemaData.errors || schemaData.errors.length === 0) && (
+                <p className="text-sm text-green-700">No critical schema validation errors detected.</p>
+              )}
               <ul className="text-sm space-y-1">
-                {data.validation.issues.map((iss:any,i:number)=>(
+                {(schemaData.errors || []).map((iss:any,i:number)=>(
                   <li key={i} className="text-red-600">[{iss.type}] {iss.message}</li>
                 ))}
               </ul>
             </div>
+
             <div className="bg-white p-4 rounded-xl shadow">
-              <h2 className="font-semibold mb-2">Rich Snippet Preview (simplified)</h2>
-              {data.previews.length === 0 && <p className="text-sm text-gray-500">No previewable schemas.</p>}
-              <div className="grid md:grid-cols-2 gap-4">
-                {data.previews.map((p:any,i:number)=>(
-                  <div key={i} className="border rounded-lg p-3 text-sm">
-                    <div className="font-medium">{p.type}</div>
-                    {p.title && <div>{p.title}</div>}
-                    {p.date && <div className="text-xs text-gray-500">{p.date}</div>}
-                    {p.price && <div className="text-xs">Price: {p.price}</div>}
-                    {p.rating && <div className="text-xs">Rating: {p.rating}</div>}
-                    {p.count && <div className="text-xs">FAQ entries: {p.count}</div>}
+              <h2 className="font-semibold mb-2">Schema Summary</h2>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {schemaData.summary?.totalSchemas || 0}
                   </div>
-                ))}
+                  <div className="text-sm text-blue-800">Total Schemas</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {schemaData.summary?.validSchemas || 0}
+                  </div>
+                  <div className="text-sm text-green-800">Valid Schemas</div>
+                </div>
+                <div className="text-center p-3 bg-red-50 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">
+                    {schemaData.summary?.errors || 0}
+                  </div>
+                  <div className="text-sm text-red-800">Errors Found</div>
+                </div>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow">
-              <h2 className="font-semibold mb-2">Suggestions</h2>
-              <ul className="text-sm space-y-1">
-                {data.validation.suggestions.map((s:string,i:number)=>(
-                  <li key={i} className="text-blue-600">{s}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow">
-              <h2 className="font-semibold mb-2">Schema Templates</h2>
-              <div className="flex gap-3 mb-3 flex-wrap">
-                {Object.keys(templates).map(t => (
-                  <button key={t} onClick={()=>setSelectedTemplate(t)} className={`px-3 py-2 rounded text-sm border ${selectedTemplate===t? 'bg-purple-600 text-white':'bg-gray-50'}`}>{t}</button>
-                ))}
+
+            {schemaData.recommendations && schemaData.recommendations.length > 0 && (
+              <div className="bg-white p-4 rounded-xl shadow">
+                <h2 className="font-semibold mb-2">Recommendations</h2>
+                <ul className="text-sm space-y-2">
+                  {schemaData.recommendations.map((rec:any,i:number)=>(
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-yellow-600 mt-1">⚡</span>
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <pre className="text-xs bg-gray-900 text-green-200 p-3 rounded overflow-x-auto">
-{JSON.stringify(templates[selectedTemplate], null, 2)}
-              </pre>
-            </div>
+            )}
           </div>
         )}
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <h2 className="font-semibold mb-2">Schema Templates</h2>
+          <div className="flex gap-2 mb-3 flex-wrap">
+            {Object.keys(templates).map(k=>(
+              <button
+                key={k}
+                onClick={()=>setSelectedTemplate(k)}
+                className={`px-3 py-1 text-xs rounded ${selectedTemplate === k ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}
+              >
+                {k}
+              </button>
+            ))}
+          </div>
+          <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto">
+            {JSON.stringify(templates[selectedTemplate], null, 2)}
+          </pre>
+        </div>
       </div>
     </div>
   );

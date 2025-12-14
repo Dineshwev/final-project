@@ -1,555 +1,337 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import useScanResults from "../hooks/useScanResults";
+import { motion } from "framer-motion";
 import {
   Copy,
-  Search,
-  FileText,
+  CheckCircle,
   Download,
   ExternalLink,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
+  Search,
   Info,
-  Network,
-  ChevronDown,
-  ChevronUp,
-  Maximize2,
-  Minimize2,
+  BarChart3,
+  FileText,
 } from "lucide-react";
-import {
-  analyzeDuplicateContent,
-  exportAsJSON,
-  convertToNetworkGraph,
-  getSimilarityColor,
-  getClusterTypeColor,
-  getPriorityColor,
-  truncateUrl,
-  estimateCrawlTime,
-  type AnalysisReport,
-} from "../services/duplicateContentService";
-import NetworkGraph from "../components/NetworkGraph";
 
 const DuplicateContentDetector: React.FC = () => {
+  const { scanResults, serviceData, hasServiceData, serviceStatus, loading, error: scanError } = useScanResults({ serviceName: 'duplicateContent' });
   const [url, setUrl] = useState("");
-  const [maxPages, setMaxPages] = useState(50);
-  const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<AnalysisReport | null>(null);
   const [error, setError] = useState("");
-  const [expandedCluster, setExpandedCluster] = useState<number | null>(null);
-  const [showNetworkGraph, setShowNetworkGraph] = useState(false);
-  const [isGraphFullscreen, setIsGraphFullscreen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"internal" | "external">("internal");
 
-  const handleAnalyze = async () => {
+  // Get duplicate content data from scan results
+  const duplicateContentData = serviceData;
+  const hasDuplicateContentData = hasServiceData;
+
+  // Set error from scan service
+  React.useEffect(() => {
+    if (scanError) {
+      setError(scanError);
+    } else if (!hasDuplicateContentData && !loading) {
+      setError(serviceStatus);
+    } else {
+      setError("");
+    }
+  }, [scanError, hasDuplicateContentData, loading, serviceStatus]);
+
+  const redirectToScan = () => {
     if (!url.trim()) {
-      setError("Please enter a website URL");
+      setError("Please enter a URL");
       return;
     }
+    // Redirect to scan page to run a new scan
+    window.location.href = `/scan?url=${encodeURIComponent(url)}`;
+  };
 
-    try {
-      setLoading(true);
-      setError("");
-      setReport(null);
-
-      const analysisReport = await analyzeDuplicateContent(url, maxPages);
-
-      if (analysisReport.success) {
-        setReport(analysisReport);
-      } else {
-        setError(analysisReport.error || "Analysis failed");
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to analyze duplicate content");
-    } finally {
-      setLoading(false);
-    }
+  const getSeverityColor = (percentage: number) => {
+    if (percentage >= 80) return "text-red-600 bg-red-100";
+    if (percentage >= 50) return "text-orange-600 bg-orange-100";
+    if (percentage >= 20) return "text-yellow-600 bg-yellow-100";
+    return "text-green-600 bg-green-100";
   };
 
   const handleExport = () => {
-    if (!report) return;
-    const domain = new URL(url).hostname.replace(/\./g, "-");
-    const filename = `duplicate-content-${domain}-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
-    exportAsJSON(report, filename);
+    if (!duplicateContentData) return;
+    
+    const dataStr = JSON.stringify(duplicateContentData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'duplicate-content-report.json';
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
-  const toggleCluster = (index: number) => {
-    setExpandedCluster(expandedCluster === index ? null : index);
-  };
-
-  const renderNetworkVisualization = () => {
-    if (!report || !showNetworkGraph) return null;
-
-    const { nodes, edges } = convertToNetworkGraph(report);
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: "auto" }}
-        exit={{ opacity: 0, height: 0 }}
-        className={`bg-white rounded-lg shadow-lg p-6 mb-6 ${
-          isGraphFullscreen ? "fixed inset-4 z-50 overflow-auto" : "relative"
-        }`}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <Network className="w-6 h-6 text-blue-600" />
-            Interactive Content Similarity Network
-          </h3>
-          <button
-            onClick={() => setIsGraphFullscreen(!isGraphFullscreen)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title={isGraphFullscreen ? "Exit fullscreen" : "Fullscreen"}
-          >
-            {isGraphFullscreen ? (
-              <Minimize2 className="w-5 h-5 text-gray-600" />
-            ) : (
-              <Maximize2 className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <p className="text-sm font-semibold text-gray-700 mb-2">
-              Network Statistics:
-            </p>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>
-                • <strong>{nodes.length}</strong> pages (nodes)
-              </li>
-              <li>
-                • <strong>{edges.length}</strong> similarity connections (edges)
-              </li>
-              <li>
-                • <strong>{report.summary.totalClusters}</strong> duplicate
-                clusters
-              </li>
-            </ul>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <p className="text-sm font-semibold text-gray-700 mb-2">
-              Node Colors:
-            </p>
-            <ul className="text-sm space-y-1">
-              <li className="flex items-center gap-2">
-                <span className="w-4 h-4 bg-green-500 rounded-full border-2 border-green-600"></span>
-                <span>Unique content</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-4 h-4 bg-red-500 rounded-full border-2 border-red-600"></span>
-                <span>Exact duplicates (≥95%)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-4 h-4 bg-orange-500 rounded-full border-2 border-orange-600"></span>
-                <span>Near duplicates (≥80%)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-4 h-4 bg-blue-500 rounded-full border-2 border-blue-600"></span>
-                <span>Similar content (≥60%)</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-          <div className="flex items-start gap-2">
-            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-blue-800">
-              <strong>Interactive controls:</strong> Drag nodes to reposition,
-              scroll to zoom, hover over nodes/edges for details, click nodes to
-              highlight connections.
-            </p>
-          </div>
-        </div>
-
-        <NetworkGraph
-          nodes={nodes}
-          edges={edges}
-          height={isGraphFullscreen ? "calc(100vh - 300px)" : "600px"}
-        />
-      </motion.div>
-    );
+  const getActiveData = () => {
+    if (!duplicateContentData) return [];
+    
+    if (activeTab === "internal") {
+      return duplicateContentData.internalDuplicates || [];
+    } else {
+      return duplicateContentData.externalDuplicates || [];
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="text-center mb-12"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <Copy className="w-10 h-10 text-purple-600" />
-            <h1 className="text-4xl font-bold text-gray-800">
-              Duplicate Content Detector
-            </h1>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-6">
+            <Copy className="h-8 w-8 text-white" />
           </div>
-          <p className="text-gray-600 ml-13">
-            Crawl your website and detect exact and near-duplicate content using
-            TF-IDF similarity analysis
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Duplicate Content Detector
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Identify duplicate content across your website and external sources 
+            that may be affecting your SEO performance.
           </p>
         </motion.div>
 
-        {/* Analysis Input */}
+        {/* URL Input */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-lg p-6 mb-6"
+          className="bg-white rounded-2xl shadow-xl p-8 mb-8"
         >
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Website URL
-              </label>
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://example.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
+          {scanResults && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                Showing results from scan: <strong>{scanResults.url}</strong>
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                <Link to="/scan" className="underline">Click here to run a new scan</Link>
+              </p>
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Max Pages to Crawl (Estimated time:{" "}
-                {estimateCrawlTime(maxPages)})
-              </label>
-              <select
-                value={maxPages}
-                onChange={(e) => setMaxPages(Number(e.target.value))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option value={10}>10 pages</option>
-                <option value={25}>25 pages</option>
-                <option value={50}>50 pages</option>
-                <option value={100}>100 pages</option>
-                <option value={250}>250 pages</option>
-              </select>
+          {!hasDuplicateContentData && (
+            <form onSubmit={(e) => { e.preventDefault(); redirectToScan(); }} className="space-y-6">
+              <div>
+                <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
+                  Website URL to Analyze
+                </label>
+                <div className="flex rounded-lg shadow-sm">
+                  <input
+                    type="url"
+                    id="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className="flex-1 min-w-0 block w-full px-4 py-3 rounded-l-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-lg"
+                    placeholder="https://example.com"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-lg font-medium rounded-r-lg text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                  >
+                    <Search className="h-5 w-5 mr-2" />
+                    Analyze
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {error && (
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700">{error}</p>
             </div>
-
-            <button
-              onClick={handleAnalyze}
-              disabled={loading || !url}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Crawling & Analyzing... (This may take several minutes)
-                </>
-              ) : (
-                <>
-                  <Search className="w-5 h-5" />
-                  Analyze Duplicate Content
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Info Box */}
-          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800">
-              <p className="font-semibold mb-1">How it works:</p>
-              <ul className="space-y-1 list-disc list-inside">
-                <li>Crawls all internal pages using Puppeteer</li>
-                <li>
-                  Extracts main content (removes headers, footers, navigation)
-                </li>
-                <li>
-                  Calculates TF-IDF similarity scores between all page pairs
-                </li>
-                <li>Groups pages into duplicate clusters</li>
-                <li>Generates recommendations for SEO improvement</li>
-              </ul>
-            </div>
-          </div>
+          )}
         </motion.div>
 
-        {/* Error Message */}
-        {error && (
+        {/* Loading State */}
+        {loading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg mb-6 flex items-start gap-3"
+            className="bg-white rounded-2xl shadow-xl p-8 mb-8"
           >
-            <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">Error</p>
-              <p className="text-sm">{error}</p>
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mr-3"></div>
+              <span className="text-lg text-gray-600">Analyzing content for duplicates...</span>
             </div>
           </motion.div>
         )}
 
         {/* Results */}
-        {report && (
-          <>
+        {duplicateContentData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
+          >
             {/* Summary Cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
-            >
-              <div className="bg-white rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Total Pages</p>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {report.summary.totalPages}
-                    </p>
-                  </div>
-                  <FileText className="w-8 h-8 text-blue-600" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <BarChart3 className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-gray-900">
+                  {duplicateContentData.score || 0}%
                 </div>
+                <div className="text-sm text-gray-600">Uniqueness Score</div>
               </div>
 
-              <div className="bg-green-50 rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-green-600 font-semibold">
-                      Unique Pages
-                    </p>
-                    <p className="text-2xl font-bold text-green-700">
-                      {report.summary.uniquePages}
-                    </p>
-                  </div>
-                  <CheckCircle className="w-8 h-8 text-green-600" />
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <Copy className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-purple-600">
+                  {duplicateContentData.duplicatePercentage || 0}%
                 </div>
+                <div className="text-sm text-gray-600">Duplicate Content</div>
               </div>
 
-              <div className="bg-red-50 rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-red-600 font-semibold">
-                      Affected Pages
-                    </p>
-                    <p className="text-2xl font-bold text-red-700">
-                      {report.summary.affectedPages}
-                    </p>
-                  </div>
-                  <AlertTriangle className="w-8 h-8 text-red-600" />
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <FileText className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-green-600">
+                  {(duplicateContentData.internalDuplicates || []).length}
                 </div>
+                <div className="text-sm text-gray-600">Internal Issues</div>
               </div>
 
-              <div className="bg-purple-50 rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-purple-600 font-semibold">
-                      Duplicate %
-                    </p>
-                    <p className="text-2xl font-bold text-purple-700">
-                      {report.summary.duplicatePercentage}%
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <ExternalLink className="h-8 w-8 text-orange-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-orange-600">
+                  {(duplicateContentData.externalDuplicates || []).length}
+                </div>
+                <div className="text-sm text-gray-600">External Matches</div>
+              </div>
+            </div>
+
+            {/* Tabs and Export */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setActiveTab("internal")}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === "internal"
+                        ? "bg-purple-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Internal Duplicates
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("external")}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === "external"
+                        ? "bg-purple-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    External Matches
+                  </button>
+                </div>
+                
+                <button
+                  onClick={handleExport}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Report
+                </button>
+              </div>
+
+              {/* Content List */}
+              <div className="space-y-4">
+                {getActiveData().length === 0 ? (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                    <p className="text-gray-600">
+                      {activeTab === "internal" 
+                        ? "No internal duplicate content found!" 
+                        : "No external duplicate content detected!"}
                     </p>
                   </div>
-                  <Copy className="w-8 h-8 text-purple-600" />
-                </div>
+                ) : (
+                  getActiveData().map((item: any, index: number) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                              {item.title || item.url}
+                            </a>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(
+                                item.similarity || 0
+                              )}`}
+                            >
+                              {item.similarity || 0}% similar
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <p><strong>URL:</strong> {item.url}</p>
+                            {item.snippet && (
+                              <p><strong>Content Preview:</strong> {item.snippet}</p>
+                            )}
+                            {item.issues && item.issues.length > 0 && (
+                              <p><strong>Issues:</strong> {item.issues.join(", ")}</p>
+                            )}
+                          </div>
+                        </div>
+                        <ExternalLink className="h-4 w-4 text-gray-400" />
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            </motion.div>
-
-            {/* Action Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-wrap gap-3 mb-6"
-            >
-              <button
-                onClick={handleExport}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-              >
-                <Download className="w-5 h-5" />
-                Export Report (JSON)
-              </button>
-
-              <button
-                onClick={() => setShowNetworkGraph(!showNetworkGraph)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-              >
-                <Network className="w-5 h-5" />
-                {showNetworkGraph ? "Hide" : "Show"} Network Graph
-              </button>
-            </motion.div>
-
-            {/* Network Visualization */}
-            <AnimatePresence>{renderNetworkVisualization()}</AnimatePresence>
+            </div>
 
             {/* Recommendations */}
-            {report.recommendations.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-lg shadow-lg p-6 mb-6"
-              >
-                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Info className="w-6 h-6 text-blue-600" />
+            {duplicateContentData.recommendations && duplicateContentData.recommendations.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Recommendations
                 </h3>
                 <div className="space-y-3">
-                  {report.recommendations.map((rec, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 p-4 rounded-lg border-2"
-                      style={{
-                        borderColor:
-                          rec.priority === "critical"
-                            ? "#ef4444"
-                            : rec.priority === "high"
-                            ? "#f59e0b"
-                            : rec.priority === "medium"
-                            ? "#eab308"
-                            : "#10b981",
-                      }}
-                    >
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${getPriorityColor(
-                          rec.priority
-                        )}`}
-                      >
-                        {rec.priority.toUpperCase()}
-                      </span>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-800">
-                          {rec.message}
-                        </p>
-                        {rec.action && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            <strong>Action:</strong> {rec.action}
-                          </p>
-                        )}
-                      </div>
+                  {duplicateContentData.recommendations.map((rec: string, index: number) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+                      <p className="text-gray-700">{rec}</p>
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
-            {/* Duplicate Clusters */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-4"
-            >
-              <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <Copy className="w-7 h-7 text-purple-600" />
-                Duplicate Clusters ({report.duplicateClusters.length})
-              </h3>
-
-              {report.duplicateClusters.length === 0 ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
-                  <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-                  <h4 className="text-xl font-bold text-green-800 mb-2">
-                    No Duplicate Content Detected!
-                  </h4>
-                  <p className="text-green-600">
-                    All pages have unique content. Great job maintaining content
-                    diversity!
-                  </p>
+            {/* Content Analysis Summary */}
+            {duplicateContentData.summary && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Content Analysis Summary
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Content Statistics</h4>
+                    <ul className="space-y-1 text-sm text-gray-600">
+                      <li>Total Pages Analyzed: {duplicateContentData.summary.totalPages || 0}</li>
+                      <li>Unique Content: {duplicateContentData.summary.uniqueContent || 0}%</li>
+                      <li>Average Similarity: {duplicateContentData.summary.averageSimilarity || 0}%</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Recommendations</h4>
+                    <ul className="space-y-1 text-sm text-gray-600">
+                      <li>Review flagged content for originality</li>
+                      <li>Implement canonical tags where appropriate</li>
+                      <li>Consider 301 redirects for duplicate pages</li>
+                    </ul>
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {report.duplicateClusters.map((cluster, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="bg-white rounded-lg shadow-lg overflow-hidden"
-                    >
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span
-                                className={`px-3 py-1 rounded-full text-sm font-semibold border ${getClusterTypeColor(
-                                  cluster.type
-                                )}`}
-                              >
-                                {cluster.type.toUpperCase()}
-                              </span>
-                              <span className="text-sm text-gray-600">
-                                {cluster.clusterSize} pages
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-2">
-                              <strong>Content Sample:</strong>{" "}
-                              {cluster.contentSample}
-                            </p>
-                          </div>
-                          <div className="text-right ml-4">
-                            <div
-                              className={`text-3xl font-bold ${getSimilarityColor(
-                                cluster.similarityScore
-                              )}`}
-                            >
-                              {(cluster.similarityScore * 100).toFixed(1)}%
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              Similarity
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Pages in Cluster */}
-                        <div className="space-y-2">
-                          <p className="text-sm font-semibold text-gray-700">
-                            Pages in this cluster:
-                          </p>
-                          {cluster.pages
-                            .slice(0, expandedCluster === index ? undefined : 3)
-                            .map((page, pageIndex) => (
-                              <div
-                                key={pageIndex}
-                                className="bg-gray-50 rounded p-3 flex items-start justify-between"
-                              >
-                                <div className="flex-1">
-                                  <a
-                                    href={page.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-2 font-medium"
-                                  >
-                                    {truncateUrl(page.url, 70)}
-                                    <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                                  </a>
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    <strong>Title:</strong>{" "}
-                                    {page.title || "No title"}
-                                  </p>
-                                </div>
-                                <span className="text-sm text-gray-600 ml-4">
-                                  {page.wordCount} words
-                                </span>
-                              </div>
-                            ))}
-
-                          {cluster.pages.length > 3 && (
-                            <button
-                              onClick={() => toggleCluster(index)}
-                              className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-2 text-sm mt-2"
-                            >
-                              {expandedCluster === index ? (
-                                <>
-                                  <ChevronUp className="w-4 h-4" />
-                                  Show Less
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="w-4 h-4" />
-                                  Show All {cluster.pages.length} Pages
-                                </>
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          </>
+              </div>
+            )}
+          </motion.div>
         )}
       </div>
     </div>

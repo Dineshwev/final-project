@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import useScanResults from "../hooks/useScanResults";
+import { motion } from "framer-motion";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -7,704 +9,296 @@ import {
   Download,
   ExternalLink,
   Search,
-  FileText,
   Info,
-  Link as LinkIcon,
   BarChart3,
-  CheckCircle,
-  XCircle,
-  Eye,
 } from "lucide-react";
-import {
-  analyzeToxicBacklinks,
-  getGSCAuthUrl,
-  generateDisavowFile,
-  downloadDisavowFile,
-  exportReportAsJSON,
-  getToxicityColor,
-  getCategoryColor,
-  getRecommendationColor,
-  formatNumber,
-  truncateUrl,
-  type AnalysisReport,
-} from "../services/toxicBacklinkService";
 
 const ToxicBacklinkDetector: React.FC = () => {
-  const [siteUrl, setSiteUrl] = useState("");
-  const [accessToken, setAccessToken] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [report, setReport] = useState<AnalysisReport | null>(null);
+  const { scanResults, serviceData, hasServiceData, serviceStatus, loading, error: scanError } = useScanResults({ serviceName: 'backlinks' });
+  const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState<
     "all" | "safe" | "suspicious" | "toxic"
   >("all");
-  const [expandedBacklink, setExpandedBacklink] = useState<string | null>(null);
-  const [maxBacklinks, setMaxBacklinks] = useState(100);
 
-  // Check for OAuth token in URL params
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      setAccessToken(token);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
+  // Get toxic backlink data from scan results
+  const toxicBacklinkData = serviceData;
+  const hasToxicBacklinkData = hasServiceData;
 
-  const handleConnectGSC = async () => {
-    try {
-      setLoading(true);
+  // Set error from scan service
+  React.useEffect(() => {
+    if (scanError) {
+      setError(scanError);
+    } else if (!hasToxicBacklinkData && !loading) {
+      setError(serviceStatus);
+    } else {
       setError("");
-      const response = await getGSCAuthUrl();
-      if (response.success && response.authUrl) {
-        window.location.href = response.authUrl;
-      } else {
-        setError(response.error || "Failed to get authentication URL");
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    }
+  }, [scanError, hasToxicBacklinkData, loading, serviceStatus]);
+
+  const redirectToScan = () => {
+    if (!url.trim()) {
+      setError("Please enter a URL");
+      return;
+    }
+    // Redirect to scan page to run a new scan
+    window.location.href = `/scan?url=${encodeURIComponent(url)}`;
+  };
+
+  const getToxicityColor = (toxicity: string) => {
+    switch (toxicity) {
+      case "toxic": return "text-red-600 bg-red-100";
+      case "suspicious": return "text-orange-600 bg-orange-100";
+      case "safe": return "text-green-600 bg-green-100";
+      default: return "text-gray-600 bg-gray-100";
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!siteUrl.trim()) {
-      setError("Please enter a site URL");
-      return;
-    }
-
-    if (!accessToken) {
-      setError("Please connect to Google Search Console first");
-      return;
-    }
-
-    try {
-      setAnalyzing(true);
-      setError("");
-      setReport(null);
-
-      const analysisReport = await analyzeToxicBacklinks(
-        siteUrl,
-        accessToken,
-        maxBacklinks
-      );
-
-      if (analysisReport.success) {
-        setReport(analysisReport);
-      } else {
-        setError(analysisReport.message || "Analysis failed");
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to analyze backlinks");
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  const handleGenerateDisavow = async () => {
-    if (!report) return;
-
-    const toxicLinks = report.results.filter(
-      (link) => link.recommendation === "Disavow"
+  const getFilteredBacklinks = () => {
+    if (!toxicBacklinkData?.backlinks) return [];
+    
+    const backlinks = toxicBacklinkData.backlinks;
+    if (activeFilter === "all") return backlinks;
+    
+    return backlinks.filter((backlink: any) => 
+      backlink.toxicity === activeFilter
     );
-
-    if (toxicLinks.length === 0) {
-      setError("No toxic links found to disavow");
-      return;
-    }
-
-    try {
-      const response = await generateDisavowFile(toxicLinks);
-      if (response.success) {
-        const domain = new URL(siteUrl).hostname.replace(/\./g, "-");
-        const filename = `disavow-${domain}-${
-          new Date().toISOString().split("T")[0]
-        }.txt`;
-        downloadDisavowFile(response.content, filename);
-      } else {
-        setError(response.error || "Failed to generate disavow file");
-      }
-    } catch (err: any) {
-      setError(err.message);
-    }
   };
 
-  const handleExportJSON = () => {
-    if (!report) return;
-    const domain = new URL(siteUrl).hostname.replace(/\./g, "-");
-    const filename = `backlink-analysis-${domain}-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
-    exportReportAsJSON(report, filename);
+  const handleExport = () => {
+    if (!toxicBacklinkData) return;
+    
+    const dataStr = JSON.stringify(toxicBacklinkData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'toxic-backlinks-report.json';
+    link.click();
+    URL.revokeObjectURL(url);
   };
-
-  const toggleBacklink = (url: string) => {
-    setExpandedBacklink(expandedBacklink === url ? null : url);
-  };
-
-  const filteredResults =
-    report?.results.filter((link) => {
-      if (activeFilter === "all") return true;
-      return link.category === activeFilter;
-    }) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="text-center mb-12"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <ShieldAlert className="w-10 h-10 text-red-600" />
-            <h1 className="text-4xl font-bold text-gray-800">
-              Toxic Backlink Detector
-            </h1>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-red-600 to-orange-600 rounded-full mb-6">
+            <ShieldAlert className="h-8 w-8 text-white" />
           </div>
-          <p className="text-gray-600 ml-13">
-            Identify spam, low-quality, and toxic backlinks that could harm your
-            SEO
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Toxic Backlink Detector
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Identify harmful backlinks that may be damaging your website's SEO 
+            and create disavow files to protect your rankings.
           </p>
         </motion.div>
 
-        {/* Google Search Console Connection */}
-        {!accessToken && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6 mb-6"
-          >
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <ShieldCheck className="w-12 h-12 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  Connect to Google Search Console
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  To analyze your backlinks, you need to connect your Google
-                  Search Console account. This allows us to fetch backlink data
-                  from GSC API.
-                </p>
-                <button
-                  onClick={handleConnectGSC}
-                  disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <ExternalLink className="w-5 h-5" />
-                      Connect GSC Account
-                    </>
-                  )}
-                </button>
-              </div>
+        {/* URL Input */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl shadow-xl p-8 mb-8"
+        >
+          {scanResults && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                Showing results from scan: <strong>{scanResults.url}</strong>
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                <Link to="/scan" className="underline">Click here to run a new scan</Link>
+              </p>
             </div>
-          </motion.div>
-        )}
+          )}
 
-        {/* Analysis Input */}
-        {accessToken && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6 mb-6"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-              <span className="text-green-600 font-semibold">
-                Connected to GSC
-              </span>
-            </div>
-
-            <div className="space-y-4">
+          {!hasToxicBacklinkData && (
+            <form onSubmit={(e) => { e.preventDefault(); redirectToScan(); }} className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Site URL (verified in GSC)
+                <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
+                  Website URL to Analyze
                 </label>
-                <input
-                  type="url"
-                  value={siteUrl}
-                  onChange={(e) => setSiteUrl(e.target.value)}
-                  placeholder="https://example.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div className="flex rounded-lg shadow-sm">
+                  <input
+                    type="url"
+                    id="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className="flex-1 min-w-0 block w-full px-4 py-3 rounded-l-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg"
+                    placeholder="https://example.com"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-lg font-medium rounded-r-lg text-white bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    <Search className="h-5 w-5 mr-2" />
+                    Analyze
+                  </button>
+                </div>
               </div>
+            </form>
+          )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Max Backlinks to Analyze
-                </label>
-                <select
-                  value={maxBacklinks}
-                  onChange={(e) => setMaxBacklinks(Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={50}>50 backlinks</option>
-                  <option value={100}>100 backlinks</option>
-                  <option value={250}>250 backlinks</option>
-                  <option value={500}>500 backlinks</option>
-                  <option value={1000}>1000 backlinks</option>
-                </select>
-              </div>
-
-              <button
-                onClick={handleAnalyze}
-                disabled={analyzing || !siteUrl}
-                className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {analyzing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Analyzing Backlinks... (This may take a few minutes)
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-5 h-5" />
-                    Analyze Toxic Backlinks
-                  </>
-                )}
-              </button>
+          {error && (
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700">{error}</p>
             </div>
-          </motion.div>
-        )}
+          )}
+        </motion.div>
 
-        {/* Error Message */}
-        {error && (
+        {/* Loading State */}
+        {loading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg mb-6 flex items-start gap-3"
+            className="bg-white rounded-2xl shadow-xl p-8 mb-8"
           >
-            <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">Error</p>
-              <p className="text-sm">{error}</p>
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mr-3"></div>
+              <span className="text-lg text-gray-600">Analyzing backlinks for toxic patterns...</span>
             </div>
           </motion.div>
         )}
 
         {/* Results */}
-        {report && (
-          <>
+        {toxicBacklinkData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
+          >
             {/* Summary Cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6"
-            >
-              <div className="bg-white rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Total Backlinks</p>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {report.summary.total}
-                    </p>
-                  </div>
-                  <LinkIcon className="w-8 h-8 text-blue-600" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <BarChart3 className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-gray-900">
+                  {toxicBacklinkData.summary?.total || 0}
                 </div>
+                <div className="text-sm text-gray-600">Total Backlinks</div>
               </div>
 
-              <div className="bg-green-50 rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-green-600 font-semibold">Safe</p>
-                    <p className="text-2xl font-bold text-green-700">
-                      {report.summary.safe}
-                    </p>
-                  </div>
-                  <ShieldCheck className="w-8 h-8 text-green-600" />
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <ShieldCheck className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-green-600">
+                  {toxicBacklinkData.summary?.safe || 0}
                 </div>
+                <div className="text-sm text-gray-600">Safe Backlinks</div>
               </div>
 
-              <div className="bg-yellow-50 rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-yellow-600 font-semibold">
-                      Suspicious
-                    </p>
-                    <p className="text-2xl font-bold text-yellow-700">
-                      {report.summary.suspicious}
-                    </p>
-                  </div>
-                  <AlertTriangle className="w-8 h-8 text-yellow-600" />
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <AlertTriangle className="h-8 w-8 text-orange-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-orange-600">
+                  {toxicBacklinkData.summary?.suspicious || 0}
                 </div>
+                <div className="text-sm text-gray-600">Suspicious</div>
               </div>
 
-              <div className="bg-red-50 rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-red-600 font-semibold">Toxic</p>
-                    <p className="text-2xl font-bold text-red-700">
-                      {report.summary.toxic}
-                    </p>
-                  </div>
-                  <ShieldAlert className="w-8 h-8 text-red-600" />
+              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <ShieldAlert className="h-8 w-8 text-red-600 mx-auto mb-3" />
+                <div className="text-2xl font-bold text-red-600">
+                  {toxicBacklinkData.summary?.toxic || 0}
                 </div>
+                <div className="text-sm text-gray-600">Toxic Backlinks</div>
               </div>
+            </div>
 
-              <div className="bg-purple-50 rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-purple-600 font-semibold">
-                      Avg Score
-                    </p>
-                    <p className="text-2xl font-bold text-purple-700">
-                      {report.summary.averageScore.toFixed(1)}
-                    </p>
-                  </div>
-                  <BarChart3 className="w-8 h-8 text-purple-600" />
+            {/* Filter and Export */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex space-x-2">
+                  {["all", "safe", "suspicious", "toxic"].map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setActiveFilter(filter as any)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        activeFilter === filter
+                          ? "bg-red-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    </button>
+                  ))}
                 </div>
-              </div>
-            </motion.div>
-
-            {/* Action Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-wrap gap-3 mb-6"
-            >
-              <button
-                onClick={handleGenerateDisavow}
-                disabled={report.summary.toDisavow === 0}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <Download className="w-5 h-5" />
-                Download Disavow File ({report.summary.toDisavow})
-              </button>
-
-              <button
-                onClick={handleExportJSON}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-              >
-                <FileText className="w-5 h-5" />
-                Export Full Report (JSON)
-              </button>
-            </motion.div>
-
-            {/* Filter Tabs */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {[
-                {
-                  key: "all",
-                  label: "All Backlinks",
-                  count: report.summary.total,
-                },
-                { key: "safe", label: "Safe", count: report.summary.safe },
-                {
-                  key: "suspicious",
-                  label: "Suspicious",
-                  count: report.summary.suspicious,
-                },
-                { key: "toxic", label: "Toxic", count: report.summary.toxic },
-              ].map((filter) => (
+                
                 <button
-                  key={filter.key}
-                  onClick={() => setActiveFilter(filter.key as any)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                    activeFilter === filter.key
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
+                  onClick={handleExport}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  {filter.label} ({filter.count})
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Report
                 </button>
-              ))}
-            </div>
-
-            {/* Info Box */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3"
-            >
-              <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-semibold mb-1">Toxicity Scoring Guide:</p>
-                <ul className="space-y-1">
-                  <li>
-                    <strong>Safe (0-39):</strong> Low risk backlinks from
-                    authoritative sources. Keep these.
-                  </li>
-                  <li>
-                    <strong>Suspicious (40-69):</strong> Medium risk backlinks.
-                    Manually review before deciding.
-                  </li>
-                  <li>
-                    <strong>Toxic (70-100):</strong> High risk spam/toxic
-                    backlinks. Disavow recommended.
-                  </li>
-                </ul>
               </div>
-            </motion.div>
 
-            {/* Backlinks List */}
-            <div className="space-y-4">
-              <AnimatePresence>
-                {filteredResults.map((backlink, index) => (
-                  <motion.div
-                    key={backlink.url}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white rounded-lg shadow-lg overflow-hidden"
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
+              {/* Backlinks List */}
+              <div className="space-y-4">
+                {getFilteredBacklinks().length === 0 ? (
+                  <div className="text-center py-8">
+                    <Info className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">
+                      No backlinks found for the selected filter.
+                    </p>
+                  </div>
+                ) : (
+                  getFilteredBacklinks().map((backlink: any, index: number) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <a
+                              href={backlink.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                              {backlink.domain || backlink.url}
+                            </a>
                             <span
-                              className={`px-3 py-1 rounded-full text-sm font-semibold border ${getCategoryColor(
-                                backlink.category
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getToxicityColor(
+                                backlink.toxicity
                               )}`}
                             >
-                              {backlink.category.toUpperCase()}
-                            </span>
-                            <span
-                              className={`px-3 py-1 rounded-full text-sm font-semibold ${getRecommendationColor(
-                                backlink.recommendation
-                              )}`}
-                            >
-                              {backlink.recommendation}
+                              {backlink.toxicity}
                             </span>
                           </div>
-                          <a
-                            href={backlink.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-2 mb-1"
-                          >
-                            {truncateUrl(backlink.url, 80)}
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                          <p className="text-sm text-gray-600">
-                            <strong>Domain:</strong> {backlink.domain}
-                          </p>
-                          {backlink.anchorText && (
-                            <p className="text-sm text-gray-600">
-                              <strong>Anchor:</strong> {backlink.anchorText}
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <div
-                            className={`text-3xl font-bold ${getToxicityColor(
-                              backlink.toxicityScore
-                            )}`}
-                          >
-                            {backlink.toxicityScore}
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <p><strong>Anchor Text:</strong> {backlink.anchorText || "Unknown"}</p>
+                            <p><strong>Domain Authority:</strong> {backlink.domainAuthority || "N/A"}</p>
+                            {backlink.issues && backlink.issues.length > 0 && (
+                              <p><strong>Issues:</strong> {backlink.issues.join(", ")}</p>
+                            )}
                           </div>
-                          <div className="text-sm text-gray-600">Toxicity</div>
                         </div>
+                        <ExternalLink className="h-4 w-4 text-gray-400" />
                       </div>
-
-                      {/* Metrics */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="bg-gray-50 rounded p-3">
-                          <p className="text-xs text-gray-600">Clicks</p>
-                          <p className="text-lg font-bold text-gray-800">
-                            {formatNumber(backlink.metrics.clicks)}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded p-3">
-                          <p className="text-xs text-gray-600">Impressions</p>
-                          <p className="text-lg font-bold text-gray-800">
-                            {formatNumber(backlink.metrics.impressions)}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded p-3">
-                          <p className="text-xs text-gray-600">CTR</p>
-                          <p className="text-lg font-bold text-gray-800">
-                            {(backlink.metrics.ctr * 100).toFixed(2)}%
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded p-3">
-                          <p className="text-xs text-gray-600">Position</p>
-                          <p className="text-lg font-bold text-gray-800">
-                            {backlink.metrics.position.toFixed(1)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Reasons */}
-                      {backlink.reasons.length > 0 && (
-                        <div className="mb-4">
-                          <p className="text-sm font-semibold text-gray-700 mb-2">
-                            Issues Detected:
-                          </p>
-                          <ul className="space-y-1">
-                            {backlink.reasons.map((reason, idx) => (
-                              <li
-                                key={idx}
-                                className="text-sm text-gray-600 flex items-start gap-2"
-                              >
-                                <span className="text-red-500">•</span>
-                                {reason}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Expand Details Button */}
-                      <button
-                        onClick={() => toggleBacklink(backlink.url)}
-                        className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-2 text-sm"
-                      >
-                        <Eye className="w-4 h-4" />
-                        {expandedBacklink === backlink.url
-                          ? "Hide"
-                          : "Show"}{" "}
-                        Technical Details
-                      </button>
-
-                      {/* Expanded Details */}
-                      {expandedBacklink === backlink.url && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="mt-4 pt-4 border-t border-gray-200"
-                        >
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Domain Authority */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                              <h4 className="font-semibold text-gray-800 mb-2">
-                                Domain Authority
-                              </h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span>Score:</span>
-                                  <span className="font-semibold">
-                                    {backlink.details.domainAuthority.score}/100
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Indexed:</span>
-                                  <span>
-                                    {backlink.details.domainAuthority.indexed
-                                      ? "✅"
-                                      : "❌"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>HTTPS:</span>
-                                  <span>
-                                    {backlink.details.domainAuthority.https
-                                      ? "✅"
-                                      : "❌"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>DNS:</span>
-                                  <span>
-                                    {backlink.details.domainAuthority.dns
-                                      ? "✅"
-                                      : "❌"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Spam Signals */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                              <h4 className="font-semibold text-gray-800 mb-2">
-                                Spam Signals
-                              </h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span>Score:</span>
-                                  <span className="font-semibold text-red-600">
-                                    {backlink.details.spamSignals.score}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Spam Keywords:</span>
-                                  <span>
-                                    {
-                                      backlink.details.spamSignals.spamKeywords
-                                        .length
-                                    }
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Suspicious Anchor:</span>
-                                  <span>
-                                    {backlink.details.spamSignals
-                                      .suspiciousAnchor
-                                      ? "⚠️"
-                                      : "✅"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Too Many Links:</span>
-                                  <span>
-                                    {backlink.details.spamSignals.tooManyLinks
-                                      ? "⚠️"
-                                      : "✅"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Blacklists */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                              <h4 className="font-semibold text-gray-800 mb-2">
-                                Blacklist Status
-                              </h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span>Score:</span>
-                                  <span className="font-semibold text-red-600">
-                                    {backlink.details.blacklists.score}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Safe Browsing:</span>
-                                  <span>
-                                    {backlink.details.blacklists.safeBrowsing
-                                      ? "🚫 FLAGGED"
-                                      : "✅ Clean"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Public Lists:</span>
-                                  <span>
-                                    {backlink.details.blacklists
-                                      .publicBlacklists
-                                      ? "⚠️ Found"
-                                      : "✅ Clean"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  ))
+                )}
+              </div>
             </div>
 
-            {filteredResults.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
-                No backlinks found in this category.
+            {/* Recommendations */}
+            {toxicBacklinkData.recommendations && toxicBacklinkData.recommendations.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Recommendations
+                </h3>
+                <div className="space-y-3">
+                  {toxicBacklinkData.recommendations.map((rec: string, index: number) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+                      <p className="text-gray-700">{rec}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </>
+          </motion.div>
         )}
       </div>
     </div>
