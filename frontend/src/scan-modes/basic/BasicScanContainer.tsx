@@ -27,6 +27,10 @@ import {
   getBasicScanConfiguration 
 } from './basicScan.service';
 
+// 🔥 QUICK FIX: Use config constants for polling limits
+const MAX_POLL_ATTEMPTS = BASIC_SCAN_CONFIG.MAX_POLL_ATTEMPTS;
+const POLL_INTERVAL = BASIC_SCAN_CONFIG.POLL_INTERVAL;
+
 interface BasicScanContainerProps {
   /** Initial URL to scan (optional) */
   initialUrl?: string;
@@ -122,12 +126,38 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
   }, [state.scanId, progressTimer, onProgressUpdate]);
 
   /**
-   * Start progress monitoring
+   * Start progress monitoring with timeout protection
    */
   const startProgressMonitoring = useCallback(() => {
     if (progressTimer) return;
 
-    const timer = setInterval(updateProgress, 2000);
+    let pollCount = 0;
+    
+    const poll = async () => {
+      pollCount++;
+      
+      // Stop polling if max attempts reached
+      if (pollCount >= MAX_POLL_ATTEMPTS) {
+        if (progressTimer) {
+          clearInterval(progressTimer);
+          setProgressTimer(null);
+        }
+        setState(prev => ({
+          ...prev,
+          error: {
+            message: 'Basic scan timed out. Please try again.',
+            category: 'timeout'
+          },
+          isScanning: false
+        }));
+        return;
+      }
+      
+      await updateProgress();
+    };
+
+    const timer = setInterval(poll, POLL_INTERVAL);
+    setProgressTimer(timer);
     setProgressTimer(timer);
   }, [updateProgress, progressTimer]);
 
@@ -161,7 +191,8 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
       const scanOptions: BasicScanOptions = {
         url: state.url.trim(),
         config: state.config,
-        includeDiagnostics: false
+        includeDiagnostics: false,
+        scanMode: 'basic' // 📌 Pass scanMode to backend for optimized processing
       };
 
       const result = await executeBasicScan(scanOptions);

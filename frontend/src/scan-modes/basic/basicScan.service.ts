@@ -58,29 +58,11 @@ class BasicScanService {
    */
   public async executeScan(options: BasicScanOptions): Promise<BasicScanResult> {
     try {
-      // Simple URL validation
-      if (!options.url || typeof options.url !== 'string') {
-        throw this.createScanError(
-          'INVALID_URL',
-          'Please enter a valid URL',
-          'validation'
-        );
-      }
+      // Validate options
+      this.validateScanOptions(options);
 
-      try {
-        new URL(options.url);
-      } catch {
-        throw this.createScanError(
-          'MALFORMED_URL', 
-          'Please enter a valid URL including http:// or https://',
-          'validation'
-        );
-      }
-
-      // Prepare simple scan payload
-      const scanPayload = {
-        url: options.url.trim()
-      };
+      // Prepare optimized scan payload with scanMode
+      const scanPayload = this.prepareScanPayload(options);
 
       // Execute basic scan with 10 second timeout
       const response = await this.makeApiRequest('/api/basic-scan', {
@@ -186,6 +168,7 @@ class BasicScanService {
     return {
       url: options.url.trim(),
       mode: 'basic',
+      scanMode: options.scanMode || 'basic', // 📌 Pass scanMode for backend optimization
       options: {
         includeMobile: options.includeMobile ?? true,
         includePerformance: options.includePerformance ?? true,

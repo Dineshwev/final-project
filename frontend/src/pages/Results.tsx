@@ -285,6 +285,17 @@ const ResultsPage: React.FC = () => {
 
         console.log("Scan status response:", data);
 
+        // CRITICAL FIX: Only poll global scans in Results page
+        // Feature scans should stay in their respective containers
+        if (data.success && data.data && data.data.scanMode) {
+          const scanMode = data.data.scanMode;
+          if (scanMode !== 'global') {
+            console.log(`Ignoring ${scanMode} scan in Results page - only global scans allowed`);
+            setLoading(false);
+            return;
+          }
+        }
+
         if (data.success && data.data) {
           const scanData = data.data;
           setScanStatus(scanData.status);
@@ -388,6 +399,16 @@ const ResultsPage: React.FC = () => {
         try {
           const rRes = await fetch(`${API_BASE}/scan/${scanId}/results`);
           const rData = await rRes.json();
+
+          // CRITICAL FIX: Only process global scans in Results page
+          if (rData.success && rData.data && rData.data.scanMode) {
+            const scanMode = rData.data.scanMode;
+            if (scanMode !== 'global') {
+              console.log(`Ignoring ${scanMode} scan in legacy fallback - only global scans allowed`);
+              setLoading(false);
+              return;
+            }
+          }
 
           if (rData.success && rData.data && rData.data.services) {
             const scanData = rData.data;

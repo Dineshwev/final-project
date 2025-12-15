@@ -407,6 +407,19 @@ function AnimatedRoutes() {
         />
 
         {/* 404 Route */}
+        {/* Feature Results Routes - Protected */}
+        <Route
+          path="/feature/:featureKey/results/:scanId"
+          element={
+            <ProtectedRoute>
+              <Page>
+                <Results />
+              </Page>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 - Catch all route */}
         <Route
           path="*"
           element={

@@ -13,6 +13,8 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { 
   FeatureScanOptions, 
   FeatureScanResult, 
@@ -31,6 +33,8 @@ import {
 } from './featureScan.service';
 
 interface FeatureScanContainerProps {
+  /** Feature key identifying the specific feature to scan */
+  featureKey: string;
   /** Initial URL to scan (optional) */
   initialUrl?: string;
   /** Pre-selected feature to analyze */
@@ -81,6 +85,7 @@ interface FeatureScanState {
 }
 
 export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
+  featureKey,
   initialUrl = '',
   initialFeature,
   initialConfig = {},
@@ -92,6 +97,23 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
   allowMultiple = true,
   showHistory = false
 }) => {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  // ✅ CORRECT: Redirect unpaid users to pricing, not other scan modes
+  useEffect(() => {
+    // Check if user has premium access for feature scans
+    const isPaidUser = currentUser?.subscription?.plan === 'premium' || 
+                      currentUser?.subscription?.plan === 'professional' ||
+                      currentUser?.subscription?.status === 'active';
+    
+    if (!isPaidUser) {
+      console.log('Redirecting unpaid user to pricing page');
+      navigate('/pricing');
+      return;
+    }
+  }, [currentUser, navigate]);
+
   const [state, setState] = useState<FeatureScanState>({
     isScanning: false,
     progress: 0,
@@ -512,6 +534,14 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
       }
     };
   }, [progressTimer]);
+
+  // Handle feature-specific navigation on scan completion
+  useEffect(() => {
+    if (state.scanId && (state.singleResult || state.multipleResults) && state.currentPhase === 'completed') {
+      // Navigate to feature-specific results page
+      navigate(`/feature/${featureKey}/results/${state.scanId}`);
+    }
+  }, [state.scanId, state.singleResult, state.multipleResults, state.currentPhase, featureKey, navigate]);
 
   /**
    * Render tab navigation

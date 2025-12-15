@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 import { FeatureScanContainer } from "../scan-modes";
 import { motion } from "framer-motion";
 import {
@@ -16,6 +17,20 @@ import {
 const AccessibilityChecker: React.FC = () => {
   const [url, setUrl] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  // ✅ CORRECT: Redirect unpaid users to pricing, not global scan
+  useEffect(() => {
+    const isPaidUser = currentUser?.subscription?.plan === 'premium' || 
+                      currentUser?.subscription?.plan === 'professional' ||
+                      currentUser?.subscription?.status === 'active';
+    
+    if (!isPaidUser) {
+      navigate('/pricing');
+      return;
+    }
+  }, [currentUser, navigate]);
 
   const handleScanComplete = (result: any) => {
     setShowResults(true);

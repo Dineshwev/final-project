@@ -15,6 +15,12 @@ export interface BasicScanOptions {
   includePerformance?: boolean;
   /** Maximum scan timeout in milliseconds */
   timeout?: number;
+  /** Scan mode for backend optimization */
+  scanMode?: 'basic';
+  /** Scan configuration */
+  config?: BasicScanConfig;
+  /** Include diagnostic information */
+  includeDiagnostics?: boolean;
 }
 
 export interface BasicScanResult {
@@ -168,6 +174,9 @@ export const BASIC_SCAN_CONFIG = {
   TIMEOUT: 60000, // 1 minute
   /** Maximum concurrent checks */
   MAX_CONCURRENT: 3,
+  /** 🔥 Quick polling limits for basic scans */
+  MAX_POLL_ATTEMPTS: 5, // Stop after 5 attempts
+  POLL_INTERVAL: 2000, // Poll every 2 seconds
   /** Supported content types */
   SUPPORTED_CONTENT_TYPES: ['text/html', 'application/xhtml+xml'],
   /** Core checks performed */
