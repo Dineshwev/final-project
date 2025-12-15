@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldAlert, AlertTriangle } from 'lucide-react';
-import FeatureScanContainer from '../components/FeatureScanContainer';
+import FeatureScanContainer from '../scan-modes/feature/FeatureScanContainer';
 
 const ToxicBacklinkDetector: React.FC = () => {
   const [url, setUrl] = useState('');

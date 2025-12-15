@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Globe, Languages } from 'lucide-react';
-import FeatureScanContainer from '../components/FeatureScanContainer';
+import FeatureScanContainer from '../scan-modes/feature/FeatureScanContainer';
 
 const MultiLanguageSeoChecker: React.FC = () => {
   const [url, setUrl] = useState('');
