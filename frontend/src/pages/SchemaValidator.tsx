@@ -46,7 +46,7 @@ const SchemaValidator: React.FC = () => {
         </motion.div>
 
         <FeatureScanContainer
-          feature="schema-validation"
+          featureKey="schema-validation"
           initialUrl={url}
           onScanComplete={handleScanComplete}
           onScanError={handleScanError}

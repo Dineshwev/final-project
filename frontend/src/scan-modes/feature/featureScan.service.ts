@@ -412,7 +412,7 @@ class FeatureScanService {
    * @returns Formatted payload for API request
    */
   private prepareScanPayload(options: FeatureScanOptions): Record<string, any> {
-    const basePayload = {
+    const basePayload: Record<string, any> = {
       url: options.url.trim(),
       feature: options.feature,
       includeDiagnostics: options.includeDiagnostics ?? false,

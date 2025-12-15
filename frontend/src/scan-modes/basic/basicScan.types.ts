@@ -6,6 +6,38 @@
  * Features: Essential on-page SEO, basic accessibility, core performance metrics.
  */
 
+export type BasicScanType = 'quick' | 'full';
+
+export interface BasicScanConfig {
+  scanType?: BasicScanType;
+
+  includeImages?: boolean;
+  includeMeta?: boolean;
+  includeHeaders?: boolean;
+  includeLinks?: boolean;
+  includeMobile?: boolean;
+  includePerformance?: boolean;
+
+  timeout?: number;
+}
+
+export interface NewBasicScanOptions {
+  url: string;
+  config?: BasicScanConfig;
+}
+
+export interface BasicScanCategory {
+  name: string;
+  score: number;
+  issues: number;
+}
+
+export interface BasicScanResult {
+  score: number;
+  categories?: BasicScanCategory[];
+}
+
+// Legacy interfaces for backward compatibility
 export interface BasicScanOptions {
   /** Target URL to scan */
   url: string;
@@ -18,12 +50,21 @@ export interface BasicScanOptions {
   /** Scan mode for backend optimization */
   scanMode?: 'basic';
   /** Scan configuration */
-  config?: BasicScanConfig;
+  config?: LegacyBasicScanConfig;
   /** Include diagnostic information */
   includeDiagnostics?: boolean;
 }
 
-export interface BasicScanResult {
+export interface LegacyBasicScanConfig {
+  /** Include mobile-specific checks */
+  includeMobile?: boolean;
+  /** Include basic performance metrics */
+  includePerformance?: boolean;
+  /** Maximum scan timeout in milliseconds */
+  timeout?: number;
+}
+
+export interface LegacyBasicScanResult {
   /** Unique scan identifier */
   scanId: string;
   /** Target URL that was scanned */
@@ -135,6 +176,8 @@ export interface BasicRecommendation {
   description: string;
   /** Estimated impact on SEO */
   impact: 'high' | 'medium' | 'low';
+  /** Expected improvement description */
+  expectedImprovement: string;
 }
 
 export interface BasicScanProgress {

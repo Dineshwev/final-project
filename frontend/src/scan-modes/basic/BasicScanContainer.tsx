@@ -15,16 +15,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { 
   BasicScanOptions, 
-  BasicScanResult, 
+  BasicScanResult,
+  LegacyBasicScanResult,
   BasicScanProgress,
-  BasicScanType,
-  BasicScanConfig
+  BasicScanConfig,
+  BASIC_SCAN_CONFIG
 } from './basicScan.types';
 import { 
   executeBasicScan, 
   getBasicScanProgress, 
-  cancelBasicScan,
-  getBasicScanConfiguration 
+  cancelBasicScan
 } from './basicScan.service';
 
 // 🔥 QUICK FIX: Use config constants for polling limits
@@ -37,7 +37,7 @@ interface BasicScanContainerProps {
   /** Initial scan configuration */
   initialConfig?: Partial<BasicScanConfig>;
   /** Callback when scan completes successfully */
-  onScanComplete?: (result: BasicScanResult) => void;
+  onScanComplete?: (result: LegacyBasicScanResult) => void;
   /** Callback when scan fails */
   onScanError?: (error: any) => void;
   /** Callback when scan progress updates */
@@ -56,7 +56,7 @@ interface BasicScanState {
   currentPhase: string;
   
   // Results state
-  result?: BasicScanResult;
+  result?: LegacyBasicScanResult;
   error?: any;
   
   // Configuration state
@@ -83,11 +83,8 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
     currentPhase: 'ready',
     url: initialUrl,
     config: {
-      scanType: 'quick',
-      includeImages: true,
-      includeMeta: true,
-      includeHeaders: true,
-      includeLinks: true,
+      includeMobile: true,
+      includePerformance: true,
       timeout: 30000,
       ...initialConfig
     },
@@ -188,14 +185,10 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
     }));
 
     try {
-      const scanOptions: BasicScanOptions = {
+      const result = await executeBasicScan({
         url: state.url.trim(),
-        config: state.config,
-        includeDiagnostics: false,
-        scanMode: 'basic' // 📌 Pass scanMode to backend for optimized processing
-      };
-
-      const result = await executeBasicScan(scanOptions);
+        config: state.config
+      });
 
       setState(prev => ({
         ...prev,
@@ -318,10 +311,15 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
   /**
    * Load default configuration for scan type
    */
-  const loadDefaultConfig = useCallback(async (scanType: BasicScanType) => {
+  const loadDefaultConfig = useCallback(async (scanType?: string) => {
     try {
-      const config = await getBasicScanConfiguration(scanType);
-      updateConfig(config);
+      // Use default config from BASIC_SCAN_CONFIG
+      const defaultConfig = {
+        timeout: BASIC_SCAN_CONFIG.TIMEOUT,
+        includeMobile: true,
+        includePerformance: true
+      };
+      updateConfig(defaultConfig);
     } catch (error) {
       console.warn('Failed to load default configuration:', error);
     }
@@ -377,40 +375,6 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
         </div>
       </div>
 
-      <div className="scan-type-selector">
-        <label>Scan Type</label>
-        <div className="radio-group">
-          <label className="radio-option">
-            <input
-              type="radio"
-              value="quick"
-              checked={state.config.scanType === 'quick'}
-              onChange={() => {
-                updateConfig({ scanType: 'quick' });
-                loadDefaultConfig('quick');
-              }}
-              disabled={state.isScanning}
-            />
-            <span>Quick Check (30s)</span>
-            <small>Essential SEO fundamentals</small>
-          </label>
-          <label className="radio-option">
-            <input
-              type="radio"
-              value="standard"
-              checked={state.config.scanType === 'standard'}
-              onChange={() => {
-                updateConfig({ scanType: 'standard' });
-                loadDefaultConfig('standard');
-              }}
-              disabled={state.isScanning}
-            />
-            <span>Standard Check (60s)</span>
-            <small>Comprehensive basic analysis</small>
-          </label>
-        </div>
-      </div>
-
       <button
         onClick={toggleAdvancedOptions}
         className="toggle-advanced"
@@ -425,38 +389,20 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
             <label className="checkbox-option">
               <input
                 type="checkbox"
-                checked={state.config.includeImages}
-                onChange={(e) => updateConfig({ includeImages: e.target.checked })}
+                checked={state.config.includeMobile ?? false}
+                onChange={(e) => updateConfig({ includeMobile: e.target.checked })}
                 disabled={state.isScanning}
               />
-              <span>Include Image Analysis</span>
+              <span>Include Mobile Checks</span>
             </label>
             <label className="checkbox-option">
               <input
                 type="checkbox"
-                checked={state.config.includeMeta}
-                onChange={(e) => updateConfig({ includeMeta: e.target.checked })}
+                checked={state.config.includePerformance ?? false}
+                onChange={(e) => updateConfig({ includePerformance: e.target.checked })}
                 disabled={state.isScanning}
               />
-              <span>Include Meta Tag Analysis</span>
-            </label>
-            <label className="checkbox-option">
-              <input
-                type="checkbox"
-                checked={state.config.includeHeaders}
-                onChange={(e) => updateConfig({ includeHeaders: e.target.checked })}
-                disabled={state.isScanning}
-              />
-              <span>Include Header Structure</span>
-            </label>
-            <label className="checkbox-option">
-              <input
-                type="checkbox"
-                checked={state.config.includeLinks}
-                onChange={(e) => updateConfig({ includeLinks: e.target.checked })}
-                disabled={state.isScanning}
-              />
-              <span>Include Link Analysis</span>
+              <span>Include Performance Analysis</span>
             </label>
           </div>
 
@@ -467,7 +413,7 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
               type="number"
               min="10"
               max="300"
-              value={state.config.timeout / 1000}
+              value={(state.config.timeout ?? 60000) / 1000}
               onChange={(e) => updateConfig({ timeout: parseInt(e.target.value) * 1000 })}
               disabled={state.isScanning}
               className="timeout-input"
@@ -519,14 +465,14 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
   const renderResults = () => {
     if (!state.result) return null;
 
-    const { score, categories } = state.result;
+    const { score, results, recommendations } = state.result;
 
     return (
       <div className="basic-scan-results">
         <div className="results-header">
           <h3>Basic SEO Scan Results</h3>
           <div className="overall-score">
-            <span className="score-value">{score.overall}</span>
+            <span className="score-value">{score}</span>
             <span className="score-label">Overall Score</span>
           </div>
           <button
@@ -537,60 +483,43 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
           </button>
         </div>
 
-        <div className="score-breakdown">
-          <div className="score-item">
-            <span className="score-category">Technical SEO</span>
-            <span className={`score-value ${score.technical >= 80 ? 'good' : score.technical >= 60 ? 'warning' : 'poor'}`}>
-              {score.technical}
-            </span>
-          </div>
-          <div className="score-item">
-            <span className="score-category">Content Quality</span>
-            <span className={`score-value ${score.content >= 80 ? 'good' : score.content >= 60 ? 'warning' : 'poor'}`}>
-              {score.content}
-            </span>
-          </div>
-          <div className="score-item">
-            <span className="score-category">User Experience</span>
-            <span className={`score-value ${score.userExperience >= 80 ? 'good' : score.userExperience >= 60 ? 'warning' : 'poor'}`}>
-              {score.userExperience}
-            </span>
-          </div>
-        </div>
-
-        <div className="categories-results">
-          {Object.entries(categories).map(([category, data]) => (
-            <div key={category} className="category-result">
-              <div className="category-header">
-                <h4>{category.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                <span className={`category-status ${data.status}`}>
-                  {data.status.toUpperCase()}
-                </span>
-              </div>
-              
-              {data.issues.length > 0 && (
-                <div className="category-issues">
-                  <h5>Issues Found:</h5>
-                  <ul>
-                    {data.issues.map((issue, index) => (
-                      <li key={index} className={`issue-item ${issue.priority}`}>
-                        <strong>{issue.title}</strong>
-                        <p>{issue.description}</p>
-                        {issue.recommendation && (
-                          <p className="recommendation">
-                            <em>Recommendation: {issue.recommendation}</em>
-                          </p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+        <div className="results-sections">
+          <div className="result-section">
+            <h4>On-Page SEO</h4>
+            <div className="section-details">
+              <p>Title: {results.onPageSeo.title.present ? '✓' : '✗'} Present</p>
+              <p>Meta Description: {results.onPageSeo.metaDescription.present ? '✓' : '✗'} Present</p>
+              <p>Headers: {results.onPageSeo.headers.hasProperStructure ? '✓' : '✗'} Structured</p>
             </div>
-          ))}
+          </div>
+
+          <div className="result-section">
+            <h4>Technical SEO</h4>
+            <div className="section-details">
+              <p>SSL: {results.technicalSeo.sslStatus === 'valid' ? '✓' : '✗'} {results.technicalSeo.sslStatus}</p>
+              <p>Mobile Responsive: {results.technicalSeo.mobileResponsive ? '✓' : '✗'}</p>
+            </div>
+          </div>
+
+          <div className="result-section">
+            <h4>Accessibility</h4>
+            <div className="section-details">
+              <p>Compliance Level: {results.accessibility.complianceLevel}</p>
+              <p>Critical Violations: {results.accessibility.criticalViolations}</p>
+            </div>
+          </div>
+
+          <div className="result-section">
+            <h4>Performance</h4>
+            <div className="section-details">
+              <p>Load Speed: {results.performance.loadSpeed}</p>
+              <p>Mobile Score: {results.performance.mobileScore}</p>
+              <p>Desktop Score: {results.performance.desktopScore}</p>
+            </div>
+          </div>
         </div>
 
-        {state.result.recommendations.length > 0 && (
+        {recommendations.length > 0 && (
           <div className="priority-recommendations">
             <h4>Priority Recommendations</h4>
             <div className="recommendations-list">

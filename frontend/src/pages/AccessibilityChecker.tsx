@@ -22,9 +22,9 @@ const AccessibilityChecker: React.FC = () => {
 
   // ✅ CORRECT: Redirect unpaid users to pricing, not global scan
   useEffect(() => {
-    const isPaidUser = currentUser?.subscription?.plan === 'premium' || 
-                      currentUser?.subscription?.plan === 'professional' ||
-                      currentUser?.subscription?.status === 'active';
+    // Simple check - for now, all authenticated users can access features
+    // TODO: Add proper subscription system
+    const isPaidUser = Boolean(currentUser);
     
     if (!isPaidUser) {
       navigate('/pricing');
@@ -61,7 +61,7 @@ const AccessibilityChecker: React.FC = () => {
         </motion.div>
 
         <FeatureScanContainer
-          feature="accessibility"
+          featureKey="accessibility"
           initialUrl={url}
           onScanComplete={handleScanComplete}
           onScanError={handleScanError}

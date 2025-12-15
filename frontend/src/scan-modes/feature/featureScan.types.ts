@@ -32,6 +32,9 @@ export interface FeatureScanOptions {
 }
 
 export interface FeatureScanConfig {
+  /** Include detailed diagnostics */
+  includeDiagnostics?: boolean;
+  
   /** Schema-specific options */
   schema?: {
     validateAgainstGoogle: boolean;
@@ -63,6 +66,14 @@ export interface FeatureScanConfig {
     maxPagesToCheck: number;
   };
   
+  /** Duplicate content-specific options (kebab-case for URL compatibility) */
+  'duplicate-content'?: {
+    checkInternal: boolean;
+    checkExternal: boolean;
+    similarityThreshold: number;
+    maxPagesToCheck: number;
+  };
+  
   /** Multi-language-specific options */
   multiLanguage?: {
     validateHreflang: boolean;
@@ -70,8 +81,23 @@ export interface FeatureScanConfig {
     analyzeContentLocalization: boolean;
   };
   
+  /** Multi-language-specific options (kebab-case for URL compatibility) */
+  'multi-language'?: {
+    validateHreflang: boolean;
+    checkLanguageDeclaration: boolean;
+    analyzeContentLocalization: boolean;
+  };
+  
   /** Link checker-specific options */
   linkChecker?: {
+    checkInternal: boolean;
+    checkExternal: boolean;
+    followRedirects: boolean;
+    maxLinksToCheck: number;
+  };
+  
+  /** Link checker-specific options (kebab-case for URL compatibility) */
+  'link-checker'?: {
     checkInternal: boolean;
     checkExternal: boolean;
     followRedirects: boolean;
@@ -86,8 +112,24 @@ export interface FeatureScanConfig {
     language: string;
   };
   
+  /** Rank tracker-specific options (kebab-case for URL compatibility) */
+  'rank-tracker'?: {
+    keywords: string[];
+    searchEngine: 'google' | 'bing' | 'yahoo';
+    location: string;
+    language: string;
+  };
+  
   /** Security headers-specific options */
   securityHeaders?: {
+    checkCSP: boolean;
+    checkHSTS: boolean;
+    checkXFrameOptions: boolean;
+    includeRecommendations: boolean;
+  };
+  
+  /** Security headers-specific options (kebab-case for URL compatibility) */
+  'security-headers'?: {
     checkCSP: boolean;
     checkHSTS: boolean;
     checkXFrameOptions: boolean;
@@ -104,6 +146,14 @@ export interface FeatureScanConfig {
   
   /** Content analysis-specific options */
   contentAnalysis?: {
+    checkReadability: boolean;
+    analyzeKeywords: boolean;
+    checkStructure: boolean;
+    includeRecommendations: boolean;
+  };
+  
+  /** Content analysis-specific options (kebab-case for URL compatibility) */
+  'content-analysis'?: {
     checkReadability: boolean;
     analyzeKeywords: boolean;
     checkStructure: boolean;

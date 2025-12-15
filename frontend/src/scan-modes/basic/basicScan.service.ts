@@ -16,10 +16,12 @@
  * - Free user basic analysis
  * - No login required checks
  */
+import type { LegacyBasicScanResult } from './basicScan.types';
+import type { FeatureScanResult } from '../feature/featureScan.types';
 
 import axios from 'axios';
 import {
-  BasicScanOptions,
+  NewBasicScanOptions,
   BasicScanResult,
   BasicScanProgress,
   BasicScanError,
@@ -56,7 +58,7 @@ class BasicScanService {
    * @returns Promise resolving to scan result
    * @throws BasicScanError on validation or execution failures
    */
-  public async executeScan(options: BasicScanOptions): Promise<BasicScanResult> {
+  public async executeScan(options: NewBasicScanOptions): Promise<LegacyBasicScanResult> {
     try {
       // Validate options
       this.validateScanOptions(options);
@@ -127,7 +129,7 @@ class BasicScanService {
    * @param options - Scan options to validate
    * @throws BasicScanError on validation failures
    */
-  private validateScanOptions(options: BasicScanOptions): void {
+  private validateScanOptions(options: NewBasicScanOptions): void {
     if (!options.url || typeof options.url !== 'string') {
       throw this.createScanError(
         'INVALID_URL',
@@ -148,7 +150,11 @@ class BasicScanService {
     }
 
     // Timeout validation
-    if (options.timeout && (options.timeout < 10000 || options.timeout > 300000)) {
+    if (
+  options.config?.timeout &&
+  (options.config.timeout < 10000 || options.config.timeout > 300000)
+) {
+
       throw this.createScanError(
         'INVALID_TIMEOUT',
         'Timeout must be between 10 seconds and 5 minutes',
@@ -164,17 +170,18 @@ class BasicScanService {
    * @param options - Scan configuration options
    * @returns Formatted payload for API request
    */
-  private prepareScanPayload(options: BasicScanOptions): Record<string, any> {
+  private prepareScanPayload(options: NewBasicScanOptions): Record<string, any> {
+    const config = options.config ?? {};
     return {
       url: options.url.trim(),
       mode: 'basic',
-      scanMode: options.scanMode || 'basic', // 📌 Pass scanMode for backend optimization
+      scanMode: config.scanType || 'basic',
       options: {
-        includeMobile: options.includeMobile ?? true,
-        includePerformance: options.includePerformance ?? true,
+        includeMobile: config.includeMobile ?? true,
+        includePerformance: config.includePerformance ?? true,
         maxPages: BASIC_SCAN_CONFIG.MAX_PAGES,
         coreChecks: BASIC_SCAN_CONFIG.CORE_CHECKS,
-        timeout: options.timeout || BASIC_SCAN_CONFIG.TIMEOUT
+        timeout: config.timeout ?? BASIC_SCAN_CONFIG.TIMEOUT
       }
     };
   }
@@ -188,7 +195,7 @@ class BasicScanService {
    * @param rawResult - Raw result data from API
    * @returns Processed BasicScanResult
    */
-  private processScanResult(rawResult: SimplifiedBasicScanResponse): BasicScanResult {
+  private processScanResult(rawResult: SimplifiedBasicScanResponse): LegacyBasicScanResult {
     const data = rawResult.data;
     if (!data) {
       throw this.createScanError(
@@ -409,7 +416,10 @@ class BasicScanService {
   /**
    * Normalize raw results into standardized format
    */
-  private normalizeResults(rawResults: any): BasicScanResult['results'] {
+  private normalizeResults(
+  rawResults: any
+): LegacyBasicScanResult['results'] {
+
     return {
       onPageSeo: this.normalizeOnPageResults(rawResults?.onPageSeo),
       accessibility: this.normalizeAccessibilityResults(rawResults?.accessibility),
@@ -480,7 +490,7 @@ class BasicScanService {
   /**
    * Process and prioritize recommendations for basic scans
    */
-  private processRecommendations(recommendations: any[]): BasicScanResult['recommendations'] {
+  private processRecommendations(recommendations: any[]): LegacyBasicScanResult['recommendations'] {
     return recommendations
       .filter(rec => ['critical', 'high'].includes(rec.priority)) // Only show high-priority items
       .slice(0, 10) // Limit to top 10 recommendations
@@ -489,7 +499,8 @@ class BasicScanService {
         category: rec.category,
         title: rec.title,
         description: rec.description,
-        impact: rec.impact
+        impact: rec.impact,
+        expectedImprovement: rec.expectedImprovement || 'Minor improvement in SEO performance'
       }));
   }
 
@@ -601,12 +612,21 @@ export const basicScanService = new BasicScanService();
  */
 export async function executeBasicScan(
   url: string, 
-  options: Partial<BasicScanOptions> = {}
-): Promise<BasicScanResult> {
-  return basicScanService.executeScan({
-    url,
-    ...options
-  });
+  options?: Partial<NewBasicScanOptions>
+): Promise<LegacyBasicScanResult>;
+export async function executeBasicScan(
+  options: NewBasicScanOptions
+): Promise<LegacyBasicScanResult>;
+export async function executeBasicScan(
+  urlOrOptions: string | NewBasicScanOptions, 
+  options: Partial<NewBasicScanOptions> = {}
+): Promise<LegacyBasicScanResult> {
+  // Normalize arguments to single options object
+  const normalizedOptions = typeof urlOrOptions === 'string' 
+    ? { url: urlOrOptions, ...options }
+    : urlOrOptions;
+
+  return basicScanService.executeScan(normalizedOptions);
 }
 
 /**

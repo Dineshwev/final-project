@@ -5,6 +5,15 @@
  * This provides a single import point for the entire scan modes architecture.
  */
 
+import type { LegacyBasicScanResult } from './basic/basicScan.types';
+import type { GlobalScanResult } from './global/globalScan.types';
+import type { FeatureScanResult } from './feature/featureScan.types';
+import BasicScanContainer from './basic/BasicScanContainer';
+import GlobalScanContainer from './global/GlobalScanContainer';
+import FeatureScanContainer from './feature/FeatureScanContainer';
+import { basicScanService, executeBasicScan } from './basic/basicScan.service';
+import { featureScanService, executeFeatureScan, executeMultipleFeatureScans } from './feature/featureScan.service';
+
 // Basic Scan Mode Exports
 export { default as BasicScanContainer } from './basic/BasicScanContainer';
 
@@ -12,7 +21,7 @@ export { default as BasicScanContainer } from './basic/BasicScanContainer';
 export { default as GlobalScanContainer } from './global/GlobalScanContainer';
 export type {
   BasicScanOptions,
-  BasicScanResult,
+  LegacyBasicScanResult,
   BasicScanProgress,
   BasicScanType,
   BasicScanConfig,
@@ -23,21 +32,15 @@ export {
   executeBasicScan,
   getBasicScanProgress,
   cancelBasicScan,
-  getBasicScanConfiguration,
-  getBasicScanHistory,
   basicScanService
 } from './basic/basicScan.service';
 
-// Global Scan Mode Exports
-export { default as GlobalScanContainer } from './global/GlobalScanContainer';
+// Global Scan Mode Types
 export type {
   GlobalScanOptions,
   GlobalScanResult,
   GlobalScanProgress,
-  GlobalScanMode,
-  GlobalScanConfig,
-  GlobalScanService,
-  GlobalScanInsights
+  GlobalScanService
 } from './global/globalScan.types';
 
 // Global scan functions are NOT exported - GlobalScanContainer is fully isolated
@@ -51,7 +54,7 @@ export type {
   FeatureScanProgress,
   FeatureScanType,
   FeatureScanConfig,
-  FeatureScanRecommendation
+  FeatureRecommendation
 } from './feature/featureScan.types';
 
 export {
@@ -167,44 +170,60 @@ export function getRecommendedScanMode(useCase: 'quick-check' | 'comprehensive' 
 }
 
 /**
+ * Normalize status for unified result
+ */
+function normalizeUnifiedStatus(status: string): 'completed' | 'failed' | 'cancelled' {
+  if (status === 'failed' || status === 'cancelled') {
+    return status;
+  }
+  return 'completed';
+}
+
+/**
  * Convert unified result to scan-specific format
  */
-export function convertToUnifiedResult(result: BasicScanResult | GlobalScanResult | FeatureScanResult): UnifiedScanResult {
+export function convertToUnifiedResult(result: LegacyBasicScanResult | GlobalScanResult | FeatureScanResult): UnifiedScanResult {
   const baseResult = {
     scanId: result.scanId,
     url: result.url,
     timestamp: result.timestamp,
-    status: result.status,
+    status: normalizeUnifiedStatus(result.status),
     data: result
   };
 
   // Handle different scan result types
-  if ('score' in result && 'overall' in result.score) {
+  if (
+    'results' in result &&
+    'onPageSeo' in (result as LegacyBasicScanResult).results
+  ) {
     // Basic scan result
+    const basicResult = result as LegacyBasicScanResult;
     return {
       ...baseResult,
       mode: 'basic' as const,
-      score: result.score.overall,
-      summary: `Basic SEO analysis completed with ${result.score.overall}/100 score`,
-      recommendations: result.recommendations || []
+      score: basicResult.score,
+      summary: `Basic SEO analysis completed with ${basicResult.score}/100 score`,
+      recommendations: basicResult.recommendations || []
     };
   } else if ('overallScore' in result) {
     // Global scan result
+    const globalResult = result as GlobalScanResult;
     return {
       ...baseResult,
       mode: 'global' as const,
-      score: result.overallScore.total,
-      summary: `Global SEO analysis completed with ${result.overallScore.total}/100 score across ${Object.keys(result.services).length} services`,
-      recommendations: result.recommendations || []
+      score: globalResult.overallScore,
+      summary: `Global SEO analysis completed with ${globalResult.overallScore}/100 score`,
+      recommendations: globalResult.recommendations || []
     };
   } else if ('score' in result && typeof result.score === 'number') {
     // Feature scan result
+    const featureResult = result as FeatureScanResult;
     return {
       ...baseResult,
       mode: 'feature' as const,
-      score: result.score,
-      summary: `${result.feature} analysis completed with ${result.score}/100 score`,
-      recommendations: result.recommendations || []
+      score: featureResult.score,
+      summary: `Feature analysis completed with ${featureResult.score}/100 score`,
+      recommendations: featureResult.recommendations || []
     };
   }
 
@@ -224,9 +243,9 @@ export function convertToUnifiedResult(result: BasicScanResult | GlobalScanResul
  * Factory function to create scan mode instances
  */
 export interface ScanModeFactory {
-  createBasicScan: () => typeof BasicScanContainer;
-  createGlobalScan: () => typeof GlobalScanContainer;
-  createFeatureScan: () => typeof FeatureScanContainer;
+  createBasicScan: () => React.ComponentType<any>;
+  createGlobalScan: () => React.ComponentType<any>;
+  createFeatureScan: () => React.ComponentType<any>;
   createScanMode: (mode: ScanMode) => React.ComponentType<any>;
 }
 

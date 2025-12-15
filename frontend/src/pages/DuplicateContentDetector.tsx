@@ -43,7 +43,7 @@ const DuplicateContentDetector: React.FC = () => {
           </div>
 
           <FeatureScanContainer
-            feature="content-analysis"
+            featureKey="content-analysis"
             initialUrl={url}
             onScanComplete={handleScanComplete}
             onScanError={handleScanError}
