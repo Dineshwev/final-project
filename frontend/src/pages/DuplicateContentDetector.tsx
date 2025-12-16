@@ -42,13 +42,7 @@ const DuplicateContentDetector: React.FC = () => {
             </p>
           </div>
 
-          <FeatureScanContainer
-            featureKey="content-analysis"
-            initialUrl={url}
-            onScanComplete={handleScanComplete}
-            onScanError={handleScanError}
-            className="duplicate-content-scan"
-          />
+          <FeatureScanContainer />
         </motion.div>
       </div>
     </div>

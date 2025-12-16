@@ -58,7 +58,7 @@ const FeatureScanPage: React.FC<{ tool?: string }> = ({ tool }) => {
     );
   }
 
-  return <FeatureScanContainer featureKey={featureKey} className="w-full" />;
+  return <FeatureScanContainer />;
 };
 
 function AnimatedRoutes() {

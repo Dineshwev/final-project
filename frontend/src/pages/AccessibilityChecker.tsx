@@ -50,13 +50,7 @@ const AccessibilityChecker: React.FC = () => {
           </p>
         </motion.div>
 
-        <FeatureScanContainer
-          featureKey="accessibility"
-          initialUrl={url}
-          onScanComplete={handleScanComplete}
-          onScanError={handleScanError}
-          className="accessibility-scan"
-        />
+        <FeatureScanContainer />
       </div>
     </div>
   );
