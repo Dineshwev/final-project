@@ -40,20 +40,23 @@ const Navigation = () => {
 
   const featureLinks = [
     { path: "/compare", label: "Compare", icon: ChartBarIcon },
-    { path: "/features/readability", label: "Readability", icon: MagnifyingGlassIcon },
+    { path: "/features/schema", label: "Schema Validator", icon: ChartBarIcon },
     {
-      path: "/features/security-headers",
-      label: "Security Headers",
+      path: "/features/backlinks",
+      label: "Toxic Backlink Detector",
       icon: ChartBarIcon,
     },
     {
-      path: "/features/multi-language-seo",
+      path: "/features/accessibility",
+      label: "Accessibility (WCAG)",
+      icon: ChartBarIcon,
+    },
+    {
+      path: "/features/multilang",
       label: "Multi-Language SEO",
       icon: ChartBarIcon,
     },
     { path: "/charts", label: "Charts Gallery", icon: ChartBarIcon },
-    { path: "/features/link-checker", label: "Link Checker", icon: ChartBarIcon },
-    { path: "/features/schema-validator", label: "Schema", icon: ChartBarIcon },
     { path: "/rank-tracker", label: "Rank Tracker", icon: ChartBarIcon },
     { path: "/og-validator", label: "OG Validator", icon: ChartBarIcon },
     { path: "/twitter-card", label: "Twitter Card", icon: ChartBarIcon },
@@ -64,20 +67,6 @@ const Navigation = () => {
       label: "Pinterest Rich Pins",
       icon: ChartBarIcon,
     },
-    {
-      path: "/features/accessibility",
-      label: "Accessibility (WCAG)",
-      icon: ChartBarIcon,
-    },
-    {
-      path: "/features/toxic-backlinks",
-      label: "Toxic Backlink Detector",
-      icon: ChartBarIcon,
-    },
-    {
-      path: "/features/duplicate-content",
-      label: "Duplicate Content",
-      icon: ChartBarIcon,
     },
   ];
 
