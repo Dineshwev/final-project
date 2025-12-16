@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FeatureScanContainer } from "../scan-modes";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -278,7 +277,7 @@ const RankTracker: React.FC = () => {
           </p>
         </motion.div>
 
-        <FeatureScanContainer />
+        {/* Feature scan section removed - now using /features/rank-tracker route */}
         
         {/* Additional Rank Tracking Interface */}
         <div className='max-w-7xl mx-auto space-y-8 mt-8'>

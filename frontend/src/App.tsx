@@ -82,7 +82,7 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Root route - Basic Scan (Public Access) */}
+        {/* Core Scan Routes - ONLY */}
         <Route
           path="/"
           element={
@@ -91,24 +91,32 @@ function AnimatedRoutes() {
             </Page>
           }
         />
-        {/* Dashboard route */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <Dashboard />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-        {/* New Global Scan route */}
         <Route
           path="/dashboard/new-scan"
           element={
             <ProtectedRoute>
               <Page>
                 <GlobalScanContainer />
+              </Page>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/features/:tool"
+          element={
+            <Page>
+              <FeatureScanPage />
+            </Page>
+          }
+        />
+
+        {/* Essential App Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Page>
+                <Dashboard />
               </Page>
             </ProtectedRoute>
           }
@@ -161,46 +169,6 @@ function AnimatedRoutes() {
             </Page>
           }
         />
-        {/* Features route for individual tools */}
-        <Route
-          path="/features/:tool"
-          element={
-            <Page>
-              <FeatureScanPage />
-            </Page>
-          }
-        />
-        <Route
-          path="/compare"
-          element={
-            <Page>
-              <Compare />
-            </Page>
-          }
-        />
-        <Route
-          path="/link-checker"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="link-checker" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/rank-tracker"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <RankTracker />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Protected Routes */}
         <Route
           path="/history"
           element={
@@ -241,202 +209,6 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/readability"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="readability" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Security Headers Checker Route - Protected */}
-        <Route
-          path="/security-headers"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="security-headers" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Multi-Language SEO Checker Route - Protected */}
-        <Route
-          path="/multi-language-seo"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="multi-language-seo" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Open Graph Validator Route - Protected */}
-        <Route
-          path="/og-validator"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <OGValidator />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Twitter Card Validator Route - Protected */}
-        <Route
-          path="/twitter-card"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <TwitterCardValidator />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Social Share Tracker Route - Protected */}
-        <Route
-          path="/share-tracker"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <SocialShareTracker />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Social Presence Validator Route - Protected */}
-        <Route
-          path="/social-presence"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <SocialPresenceValidator />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Pinterest Rich Pin Validator Route - Protected */}
-        <Route
-          path="/pinterest-rich-pin"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <PinterestRichPinValidator />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Accessibility Checker Route - Protected */}
-        <Route
-          path="/accessibility"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="accessibility" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/toxic-backlinks"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="toxic-backlinks" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/duplicate-content"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="duplicate-content" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Pricing Page - Public */}
-        <Route
-          path="/charts"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <ChartsGallery />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Alert Settings Route - Protected */}
-        <Route
-          path="/alert-settings"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <AlertSettings />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Alerts Dashboard Route - Protected */}
-        <Route
-          path="/alerts"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <AlertsDashboard />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Pricing Page - Public */}
-        <Route
-          path="/pricing"
-          element={
-            <Page>
-              <PricingPremium />
-            </Page>
-          }
-        />
-
-        {/* Checkout Page - Protected */}
-        <Route
-          path="/checkout"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <Checkout />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Refund Policy Page - Public */}
-        <Route
-          path="/refund-policy"
-          element={
-            <Page>
-              <RefundPolicy />
-            </Page>
-          }
-        />
-
-        {/* Results route - Global Scan Only */}
 
         {/* 404 - Catch all route */}
         <Route
