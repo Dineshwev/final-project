@@ -20,17 +20,7 @@ const AccessibilityChecker: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
 
-  // ✅ CORRECT: Redirect unpaid users to pricing, not global scan
-  useEffect(() => {
-    // Simple check - for now, all authenticated users can access features
-    // TODO: Add proper subscription system
-    const isPaidUser = Boolean(currentUser);
-    
-    if (!isPaidUser) {
-      navigate('/pricing');
-      return;
-    }
-  }, [currentUser, navigate]);
+  // Removed auto-redirect - subscription check will happen on analyze button click
 
   const handleScanComplete = (result: any) => {
     setShowResults(true);

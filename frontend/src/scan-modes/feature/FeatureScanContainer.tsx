@@ -113,15 +113,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
    * Execute single feature scan with immediate results
    */
   const executeSingleScan = useCallback(async () => {
-    // Check subscription before executing scan
-    const isPaidUser = Boolean(currentUser);
-    
-    if (!isPaidUser) {
-      console.log('Redirecting unpaid user to pricing page');
-      window.location.href = '/pricing';
-      return;
-    }
-
     if (!state.url.trim() || !state.selectedFeature) {
       setState(prev => ({
         ...prev,
@@ -177,15 +168,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
    * Execute multiple feature scans with immediate results
    */
   const executeMultipleScan = useCallback(async () => {
-    // Check subscription before executing scan
-    const isPaidUser = Boolean(currentUser);
-    
-    if (!isPaidUser) {
-      console.log('Redirecting unpaid user to pricing page');
-      window.location.href = '/pricing';
-      return;
-    }
-
     if (!state.url.trim() || state.selectedFeatures.size === 0) {
       setState(prev => ({
         ...prev,

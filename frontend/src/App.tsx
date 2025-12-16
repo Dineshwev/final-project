@@ -149,11 +149,9 @@ function AnimatedRoutes() {
         <Route
           path="/features/:tool"
           element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="schema-validator" />
-              </Page>
-            </ProtectedRoute>
+            <Page>
+              <FeatureScanPage />
+            </Page>
           }
         />
         <Route
@@ -174,16 +172,7 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/schema-validator"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <FeatureScanPage tool="schema-validator" />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
+
         <Route
           path="/rank-tracker"
           element={

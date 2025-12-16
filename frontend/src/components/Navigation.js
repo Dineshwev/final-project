@@ -34,26 +34,26 @@ const Navigation = () => {
 
   const mainNavLinks = [
     { path: "/", label: "Dashboard", icon: HomeIcon },
-    { path: "/scan", label: "New Scan", icon: MagnifyingGlassIcon },
+    { path: "/dashboard/new-scan", label: "New Scan", icon: MagnifyingGlassIcon },
     { path: "/pricing", label: "Pricing", icon: SparklesIcon },
   ];
 
   const featureLinks = [
     { path: "/compare", label: "Compare", icon: ChartBarIcon },
-    { path: "/readability", label: "Readability", icon: MagnifyingGlassIcon },
+    { path: "/features/readability", label: "Readability", icon: MagnifyingGlassIcon },
     {
-      path: "/security-headers",
+      path: "/features/security-headers",
       label: "Security Headers",
       icon: ChartBarIcon,
     },
     {
-      path: "/multi-language-seo",
+      path: "/features/multi-language-seo",
       label: "Multi-Language SEO",
       icon: ChartBarIcon,
     },
     { path: "/charts", label: "Charts Gallery", icon: ChartBarIcon },
-    { path: "/link-checker", label: "Link Checker", icon: ChartBarIcon },
-    { path: "/schema-validator", label: "Schema", icon: ChartBarIcon },
+    { path: "/features/link-checker", label: "Link Checker", icon: ChartBarIcon },
+    { path: "/features/schema-validator", label: "Schema", icon: ChartBarIcon },
     { path: "/rank-tracker", label: "Rank Tracker", icon: ChartBarIcon },
     { path: "/og-validator", label: "OG Validator", icon: ChartBarIcon },
     { path: "/twitter-card", label: "Twitter Card", icon: ChartBarIcon },
@@ -65,17 +65,17 @@ const Navigation = () => {
       icon: ChartBarIcon,
     },
     {
-      path: "/accessibility",
+      path: "/features/accessibility",
       label: "Accessibility (WCAG)",
       icon: ChartBarIcon,
     },
     {
-      path: "/toxic-backlinks",
+      path: "/features/toxic-backlinks",
       label: "Toxic Backlink Detector",
       icon: ChartBarIcon,
     },
     {
-      path: "/duplicate-content",
+      path: "/features/duplicate-content",
       label: "Duplicate Content",
       icon: ChartBarIcon,
     },
