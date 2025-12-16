@@ -16,18 +16,15 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
-  FeatureScanOptions, 
   FeatureScanResult, 
-  FeatureScanProgress,
   FeatureScanType,
   FeatureScanConfig,
+  FeatureScanProgress,
   FEATURE_SCAN_CONFIG
 } from './featureScan.types';
 import { 
   executeFeatureScan, 
   executeMultipleFeatureScans,
-  getFeatureScanProgress, 
-  cancelFeatureScan,
   getFeatureConfiguration,
   getFeatureScanHistory
 } from './featureScan.service';
@@ -60,9 +57,6 @@ interface FeatureScanContainerProps {
 interface FeatureScanState {
   // Scan execution state
   isScanning: boolean;
-  scanId?: string;
-  progress: number;
-  currentPhase: string;
   
   // Results state
   singleResult?: FeatureScanResult;
@@ -115,8 +109,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
 
   const [state, setState] = useState<FeatureScanState>({
     isScanning: false,
-    progress: 0,
-    currentPhase: 'ready',
     url: initialUrl,
     selectedFeature: initialFeature,
     selectedFeatures: new Set(initialFeature ? [initialFeature] : []),
@@ -130,49 +122,10 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
     history: []
   });
 
-  const [progressTimer, setProgressTimer] = useState<NodeJS.Timeout | null>(null);
+  // Simplified feature scan execution without polling
 
   /**
-   * Update scan progress by polling the service
-   */
-  const updateProgress = useCallback(async () => {
-    if (!state.scanId) return;
-
-    try {
-      const progress = await getFeatureScanProgress(state.scanId);
-      
-      setState(prev => ({
-        ...prev,
-        progress: progress.progress,
-        currentPhase: progress.phase
-      }));
-
-      onProgressUpdate?.(progress);
-
-      // Stop polling when scan is complete
-      if (progress.progress >= 100 || progress.phase === 'completed') {
-        if (progressTimer) {
-          clearInterval(progressTimer);
-          setProgressTimer(null);
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to update progress:', error);
-    }
-  }, [state.scanId, progressTimer, onProgressUpdate]);
-
-  /**
-   * Start progress monitoring
-   */
-  const startProgressMonitoring = useCallback(() => {
-    if (progressTimer) return;
-
-    const timer = setInterval(updateProgress, 1500);
-    setProgressTimer(timer);
-  }, [updateProgress, progressTimer]);
-
-  /**
-   * Execute single feature scan
+   * Execute single feature scan with immediate results
    */
   const executeSingleScan = useCallback(async () => {
     if (!state.url.trim() || !state.selectedFeature) {
@@ -194,8 +147,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
       error: undefined,
       singleResult: undefined,
       multipleResults: undefined,
-      progress: 0,
-      currentPhase: 'initializing',
       activeTab: 'results'
     }));
 
@@ -210,41 +161,26 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
         ...prev,
         isScanning: false,
         singleResult: result,
-        progress: 100,
-        currentPhase: 'completed',
-        scanId: result.scanId,
         lastScanDuration: Date.now() - startTime,
         history: [result, ...prev.history].slice(0, 10)
       }));
 
       onScanComplete?.(result);
 
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
-
     } catch (error: any) {
       setState(prev => ({
         ...prev,
         isScanning: false,
         error,
-        progress: 0,
-        currentPhase: 'error',
         lastScanDuration: Date.now() - startTime
       }));
 
       onScanError?.(error);
-
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
     }
-  }, [state.url, state.selectedFeature, state.config, onScanComplete, onScanError, progressTimer]);
+  }, [state.url, state.selectedFeature, state.config, onScanComplete, onScanError]);
 
   /**
-   * Execute multiple feature scans
+   * Execute multiple feature scans with immediate results
    */
   const executeMultipleScan = useCallback(async () => {
     if (!state.url.trim() || state.selectedFeatures.size === 0) {
@@ -266,8 +202,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
       error: undefined,
       singleResult: undefined,
       multipleResults: undefined,
-      progress: 0,
-      currentPhase: 'initializing',
       activeTab: 'results'
     }));
 
@@ -282,8 +216,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
         ...prev,
         isScanning: false,
         multipleResults: results,
-        progress: 100,
-        currentPhase: 'completed',
         lastScanDuration: Date.now() - startTime
       }));
 
@@ -294,29 +226,17 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
         }
       });
 
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
-
     } catch (error: any) {
       setState(prev => ({
         ...prev,
         isScanning: false,
         error,
-        progress: 0,
-        currentPhase: 'error',
         lastScanDuration: Date.now() - startTime
       }));
 
       onScanError?.(error);
-
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
     }
-  }, [state.url, state.selectedFeatures, state.config, onScanComplete, onScanError, progressTimer]);
+  }, [state.url, state.selectedFeatures, state.config, onScanComplete, onScanError]);
 
   /**
    * Execute scan based on current mode
@@ -330,29 +250,14 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
   }, [state.mode, executeSingleScan, executeMultipleScan]);
 
   /**
-   * Cancel the current scan
+   * Stop the current scan
    */
-  const cancelScan = useCallback(async () => {
-    if (!state.isScanning || !state.scanId) return;
-
-    try {
-      await cancelFeatureScan(state.scanId);
-      
-      setState(prev => ({
-        ...prev,
-        isScanning: false,
-        progress: 0,
-        currentPhase: 'cancelled'
-      }));
-
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
-    } catch (error) {
-      console.warn('Failed to cancel scan:', error);
-    }
-  }, [state.isScanning, state.scanId, progressTimer]);
+  const stopScan = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isScanning: false
+    }));
+  }, []);
 
   /**
    * Update scan configuration
@@ -417,23 +322,15 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
    * Reset scan state
    */
   const resetScan = useCallback(() => {
-    if (progressTimer) {
-      clearInterval(progressTimer);
-      setProgressTimer(null);
-    }
-
     setState(prev => ({
       ...prev,
       isScanning: false,
-      scanId: undefined,
-      progress: 0,
-      currentPhase: 'ready',
       singleResult: undefined,
       multipleResults: undefined,
       error: undefined,
       activeTab: 'configuration'
     }));
-  }, [progressTimer]);
+  }, []);
 
   /**
    * Toggle advanced options visibility
@@ -511,13 +408,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
     }
   }, [autoStart, state.url, state.selectedFeature, state.selectedFeatures, state.isScanning, state.singleResult, state.multipleResults, executeScan]);
 
-  // Start progress monitoring when scan begins
-  useEffect(() => {
-    if (state.isScanning && state.scanId && !progressTimer) {
-      startProgressMonitoring();
-    }
-  }, [state.isScanning, state.scanId, progressTimer, startProgressMonitoring]);
-
   // Load configuration when feature selection changes
   useEffect(() => {
     if (state.selectedFeature && state.mode === 'single') {
@@ -525,22 +415,12 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
     }
   }, [state.selectedFeature, state.mode, loadFeatureConfig]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount - simplified for feature scans
   useEffect(() => {
     return () => {
-      if (progressTimer) {
-        clearInterval(progressTimer);
-      }
+      // No cleanup needed for simplified feature scan
     };
-  }, [progressTimer]);
-
-  // Handle feature-specific navigation on scan completion
-  useEffect(() => {
-    if (state.scanId && (state.singleResult || state.multipleResults) && state.currentPhase === 'completed') {
-      // Navigate to feature-specific results page
-      navigate(`/feature/${featureKey}/results/${state.scanId}`);
-    }
-  }, [state.scanId, state.singleResult, state.multipleResults, state.currentPhase, featureKey, navigate]);
+  }, []);
 
   /**
    * Render tab navigation
@@ -795,24 +675,23 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
           Running {state.mode === 'single' ? 'Feature' : 'Multi-Feature'} Analysis
         </h3>
         <button
-          onClick={cancelScan}
-          className="cancel-button"
+          onClick={stopScan}
+          className="stop-button"
           disabled={!state.isScanning}
         >
-          Cancel
+          Stop
         </button>
       </div>
 
       <div className="progress-bar">
         <div 
           className="progress-fill"
-          style={{ width: `${state.progress}%` }}
+          style={{ width: state.isScanning ? '50%' : '0%' }}
         />
       </div>
 
       <div className="progress-details">
-        <span className="progress-percentage">{Math.round(state.progress)}%</span>
-        <span className="current-phase">{state.currentPhase}</span>
+        <span className="current-phase">{state.isScanning ? 'Analyzing features...' : 'Ready to scan'}</span>
         {state.lastScanDuration && (
           <span className="scan-duration">
             {(state.lastScanDuration / 1000).toFixed(1)}s
@@ -977,7 +856,7 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
       ) : (
         <div className="history-list">
           {state.history.map((scan, index) => (
-            <div key={scan.scanId || index} className="history-item">
+            <div key={`scan-${index}`} className="history-item">
               <div className="history-header">
                 <span className="scan-feature">{getFeatureName(scan.feature)}</span>
                 <span className="scan-date">

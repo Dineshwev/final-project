@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   GlobalScanOptions, 
   GlobalScanResult, 
@@ -76,6 +77,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
   autoStart = false,
   showHistory = false
 }) => {
+  const navigate = useNavigate();
   const [state, setState] = useState<GlobalScanState>({
     isScanning: false,
     progress: 0,
@@ -103,6 +105,19 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
     expandedSections: new Set(),
     history: []
   });
+
+  // Check for URL query parameter on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlFromQuery = urlParams.get('url');
+    
+    if (urlFromQuery && !initialUrl) {
+      setState(prev => ({
+        ...prev,
+        url: decodeURIComponent(urlFromQuery)
+      }));
+    }
+  }, [initialUrl]);
 
   /**
    * Execute global scan using isolated API calls
@@ -259,6 +274,9 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
           if (onScanComplete) {
             onScanComplete(resultData.data);
           }
+
+          // Navigate to results page after successful completion
+          navigate(`/results/${scanId}`);
         } else {
           if (pollCount >= maxPolls) {
             throw new Error('Scan timed out. Please try again.');
@@ -285,7 +303,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
 
     // Start polling after 1 second
     setTimeout(poll, 1000);
-  }, [onScanComplete, onScanError]);
+  }, [onScanComplete, onScanError, navigate]);
 
   /**
    * Cancel the current scan - isolated implementation

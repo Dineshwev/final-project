@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useParams } from "react-router-dom";
 import "./App.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
@@ -25,14 +25,8 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import Scan from "./pages/Scan";
 import Compare from "./pages/Compare";
-import LinkChecker from "./pages/LinkChecker";
-import SchemaValidator from "./pages/SchemaValidator";
 import RankTracker from "./pages/RankTracker";
-import ReadabilityChecker from "./pages/ReadabilityChecker";
-import SecurityHeadersChecker from "./pages/SecurityHeadersChecker";
-import MultiLanguageSeoChecker from "./pages/MultiLanguageSeoChecker";
 import ChartsGallery from "./pages/ChartsGallery";
 import AlertSettings from "./pages/AlertSettings";
 import AlertsDashboard from "./pages/AlertsDashboard";
@@ -43,19 +37,47 @@ import TwitterCardValidator from "./pages/TwitterCardValidator";
 import SocialShareTracker from "./pages/SocialShareTracker";
 import SocialPresenceValidator from "./pages/SocialPresenceValidator";
 import PinterestRichPinValidator from "./pages/PinterestRichPinValidator";
-import AccessibilityChecker from "./pages/AccessibilityChecker";
-import ToxicBacklinkDetector from "./pages/ToxicBacklinkDetector";
-import DuplicateContentDetector from "./pages/DuplicateContentDetector";
 import RefundPolicy from "./pages/RefundPolicy";
+
+// Scan Mode Components
+import BasicScanContainer from "./scan-modes/basic/BasicScanContainer";
+import GlobalScanContainer from "./scan-modes/global/GlobalScanContainer";
+import FeatureScanContainer from "./scan-modes/feature/FeatureScanContainer";
+
+// Feature Scan Page Wrapper
+const FeatureScanPage: React.FC<{ tool?: string }> = ({ tool }) => {
+  const { tool: urlTool } = useParams<{ tool: string }>();
+  const featureKey = tool || urlTool;
+  
+  if (!featureKey) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold text-red-600 mb-4">Invalid Feature Tool</h1>
+        <p className="text-gray-600">No tool specified in the URL.</p>
+      </div>
+    );
+  }
+
+  return <FeatureScanContainer featureKey={featureKey} className="w-full" />;
+};
 
 function AnimatedRoutes() {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Dashboard at root - Protected Route */}
+        {/* Root route - Basic Scan (Public Access) */}
         <Route
           path="/"
+          element={
+            <Page>
+              <BasicScanContainer />
+            </Page>
+          }
+        />
+        {/* Dashboard route */}
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Page>
@@ -64,13 +86,13 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           }
         />
-        {/* Keep /dashboard as alias for compatibility */}
+        {/* New Global Scan route */}
         <Route
-          path="/dashboard"
+          path="/dashboard/new-scan"
           element={
             <ProtectedRoute>
               <Page>
-                <Dashboard />
+                <GlobalScanContainer />
               </Page>
             </ProtectedRoute>
           }
@@ -123,12 +145,15 @@ function AnimatedRoutes() {
             </Page>
           }
         />
+        {/* Features route for individual tools */}
         <Route
-          path="/scan"
+          path="/features/:tool"
           element={
-            <Page>
-              <Scan />
-            </Page>
+            <ProtectedRoute>
+              <Page>
+                <FeatureScanPage tool="schema-validator" />
+              </Page>
+            </ProtectedRoute>
           }
         />
         <Route
@@ -144,7 +169,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <LinkChecker />
+                <FeatureScanPage tool="link-checker" />
               </Page>
             </ProtectedRoute>
           }
@@ -154,7 +179,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <SchemaValidator />
+                <FeatureScanPage tool="schema-validator" />
               </Page>
             </ProtectedRoute>
           }
@@ -216,7 +241,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <ReadabilityChecker />
+                <FeatureScanPage tool="readability" />
               </Page>
             </ProtectedRoute>
           }
@@ -228,7 +253,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <SecurityHeadersChecker />
+                <FeatureScanPage tool="security-headers" />
               </Page>
             </ProtectedRoute>
           }
@@ -240,7 +265,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <MultiLanguageSeoChecker />
+                <FeatureScanPage tool="multi-language-seo" />
               </Page>
             </ProtectedRoute>
           }
@@ -312,7 +337,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <AccessibilityChecker />
+                <FeatureScanPage tool="accessibility" />
               </Page>
             </ProtectedRoute>
           }
@@ -322,7 +347,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <ToxicBacklinkDetector />
+                <FeatureScanPage tool="toxic-backlinks" />
               </Page>
             </ProtectedRoute>
           }
@@ -332,7 +357,7 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Page>
-                <DuplicateContentDetector />
+                <FeatureScanPage tool="duplicate-content" />
               </Page>
             </ProtectedRoute>
           }
@@ -406,18 +431,7 @@ function AnimatedRoutes() {
           }
         />
 
-        {/* 404 Route */}
-        {/* Feature Results Routes - Protected */}
-        <Route
-          path="/feature/:featureKey/results/:scanId"
-          element={
-            <ProtectedRoute>
-              <Page>
-                <Results />
-              </Page>
-            </ProtectedRoute>
-          }
-        />
+        {/* Results route - Global Scan Only */}
 
         {/* 404 - Catch all route */}
         <Route

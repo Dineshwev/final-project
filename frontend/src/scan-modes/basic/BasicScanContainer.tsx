@@ -22,14 +22,8 @@ import {
   BASIC_SCAN_CONFIG
 } from './basicScan.types';
 import { 
-  executeBasicScan, 
-  getBasicScanProgress, 
-  cancelBasicScan
+  executeBasicScan
 } from './basicScan.service';
-
-// 🔥 QUICK FIX: Use config constants for polling limits
-const MAX_POLL_ATTEMPTS = BASIC_SCAN_CONFIG.MAX_POLL_ATTEMPTS;
-const POLL_INTERVAL = BASIC_SCAN_CONFIG.POLL_INTERVAL;
 
 interface BasicScanContainerProps {
   /** Initial URL to scan (optional) */
@@ -51,9 +45,6 @@ interface BasicScanContainerProps {
 interface BasicScanState {
   // Scan execution state
   isScanning: boolean;
-  scanId?: string;
-  progress: number;
-  currentPhase: string;
   
   // Results state
   result?: LegacyBasicScanResult;
@@ -79,8 +70,6 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
 }) => {
   const [state, setState] = useState<BasicScanState>({
     isScanning: false,
-    progress: 0,
-    currentPhase: 'ready',
     url: initialUrl,
     config: {
       includeMobile: true,
@@ -91,75 +80,10 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
     showAdvancedOptions: false
   });
 
-  const [progressTimer, setProgressTimer] = useState<NodeJS.Timeout | null>(null);
+  // Simplified scan execution without polling
 
   /**
-   * Update scan progress by polling the service
-   */
-  const updateProgress = useCallback(async () => {
-    if (!state.scanId) return;
-
-    try {
-      const progress = await getBasicScanProgress(state.scanId);
-      
-      setState(prev => ({
-        ...prev,
-        progress: progress.progress,
-        currentPhase: progress.phase
-      }));
-
-      onProgressUpdate?.(progress);
-
-      // Stop polling when scan is complete
-      if (progress.progress >= 100 || progress.phase === 'completed') {
-        if (progressTimer) {
-          clearInterval(progressTimer);
-          setProgressTimer(null);
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to update progress:', error);
-    }
-  }, [state.scanId, progressTimer, onProgressUpdate]);
-
-  /**
-   * Start progress monitoring with timeout protection
-   */
-  const startProgressMonitoring = useCallback(() => {
-    if (progressTimer) return;
-
-    let pollCount = 0;
-    
-    const poll = async () => {
-      pollCount++;
-      
-      // Stop polling if max attempts reached
-      if (pollCount >= MAX_POLL_ATTEMPTS) {
-        if (progressTimer) {
-          clearInterval(progressTimer);
-          setProgressTimer(null);
-        }
-        setState(prev => ({
-          ...prev,
-          error: {
-            message: 'Basic scan timed out. Please try again.',
-            category: 'timeout'
-          },
-          isScanning: false
-        }));
-        return;
-      }
-      
-      await updateProgress();
-    };
-
-    const timer = setInterval(poll, POLL_INTERVAL);
-    setProgressTimer(timer);
-    setProgressTimer(timer);
-  }, [updateProgress, progressTimer]);
-
-  /**
-   * Execute basic scan with current configuration
+   * Execute basic scan with immediate results - no polling required
    */
   const executeScan = useCallback(async () => {
     if (!state.url.trim()) {
@@ -179,9 +103,7 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
       ...prev,
       isScanning: true,
       error: undefined,
-      result: undefined,
-      progress: 0,
-      currentPhase: 'initializing'
+      result: undefined
     }));
 
     try {
@@ -194,65 +116,32 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
         ...prev,
         isScanning: false,
         result,
-        progress: 100,
-        currentPhase: 'completed',
-        scanId: result.scanId,
         lastScanDuration: Date.now() - startTime
       }));
 
       onScanComplete?.(result);
-
-      // Clear progress timer
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
 
     } catch (error: any) {
       setState(prev => ({
         ...prev,
         isScanning: false,
         error,
-        progress: 0,
-        currentPhase: 'error',
         lastScanDuration: Date.now() - startTime
       }));
 
       onScanError?.(error);
-
-      // Clear progress timer
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
     }
-  }, [state.url, state.config, onScanComplete, onScanError, progressTimer]);
+  }, [state.url, state.config, onScanComplete, onScanError]);
 
   /**
-   * Cancel the current scan
+   * Stop the current scan
    */
-  const cancelScan = useCallback(async () => {
-    if (!state.isScanning || !state.scanId) return;
-
-    try {
-      await cancelBasicScan(state.scanId);
-      
-      setState(prev => ({
-        ...prev,
-        isScanning: false,
-        progress: 0,
-        currentPhase: 'cancelled'
-      }));
-
-      // Clear progress timer
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        setProgressTimer(null);
-      }
-    } catch (error) {
-      console.warn('Failed to cancel scan:', error);
-    }
-  }, [state.isScanning, state.scanId, progressTimer]);
+  const stopScan = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isScanning: false
+    }));
+  }, []);
 
   /**
    * Update scan configuration
@@ -282,21 +171,13 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
    * Reset scan state
    */
   const resetScan = useCallback(() => {
-    if (progressTimer) {
-      clearInterval(progressTimer);
-      setProgressTimer(null);
-    }
-
     setState(prev => ({
       ...prev,
       isScanning: false,
-      scanId: undefined,
-      progress: 0,
-      currentPhase: 'ready',
       result: undefined,
       error: undefined
     }));
-  }, [progressTimer]);
+  }, []);
 
   /**
    * Toggle advanced options visibility
@@ -332,21 +213,12 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
     }
   }, [autoStart, state.url, state.isScanning, state.result, executeScan]);
 
-  // Start progress monitoring when scan begins
-  useEffect(() => {
-    if (state.isScanning && state.scanId && !progressTimer) {
-      startProgressMonitoring();
-    }
-  }, [state.isScanning, state.scanId, progressTimer, startProgressMonitoring]);
-
-  // Cleanup on unmount
+  // Cleanup on unmount - no timers to clean up in simplified version
   useEffect(() => {
     return () => {
-      if (progressTimer) {
-        clearInterval(progressTimer);
-      }
+      // No cleanup needed for simplified basic scan
     };
-  }, [progressTimer]);
+  }, []);
 
   /**
    * Render scan configuration section
@@ -432,24 +304,23 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
       <div className="progress-header">
         <h3>Running Basic SEO Scan</h3>
         <button
-          onClick={cancelScan}
-          className="cancel-button"
+          onClick={stopScan}
+          className="stop-button"
           disabled={!state.isScanning}
         >
-          Cancel
+          Stop
         </button>
       </div>
 
       <div className="progress-bar">
         <div 
           className="progress-fill"
-          style={{ width: `${state.progress}%` }}
+          style={{ width: state.isScanning ? '50%' : '0%' }}
         />
       </div>
 
       <div className="progress-details">
-        <span className="progress-percentage">{Math.round(state.progress)}%</span>
-        <span className="current-phase">{state.currentPhase}</span>
+        <span className="current-phase">{state.isScanning ? 'Analyzing website...' : 'Ready to scan'}</span>
         {state.lastScanDuration && (
           <span className="scan-duration">
             {(state.lastScanDuration / 1000).toFixed(1)}s

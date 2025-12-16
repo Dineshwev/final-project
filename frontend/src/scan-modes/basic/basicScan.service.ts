@@ -205,8 +205,8 @@ class BasicScanService {
       );
     }
 
-    // Generate a simple scan ID
-    const scanId = `basic_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    // Simple inline scan - no persistent scanId needed
+    const scanId = 'basic_inline_scan';
 
     // Calculate overall score
     const overallScore = data.score || 75;

@@ -17,7 +17,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Sparkline from "components/Sparkline";
 import Ripple from "components/ui/Ripple";
 import { useAuth } from "../context/AuthContext";
-import apiService from "../services/api";
+
 
 export default function Dashboard() {
   const { loading, formatted } = useDashboardMetrics();
@@ -25,7 +25,6 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [scanUrl, setScanUrl] = useState("");
-  const [scanLoading, setScanLoading] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
 
   // Get user's display name or email
@@ -45,101 +44,11 @@ export default function Dashboard() {
         scanUrl.startsWith("http") ? scanUrl : `https://${scanUrl}`
       );
       setScanError(null);
-      setScanLoading(true);
-
-      const response = await apiService.scanWebsite(url.toString(), {
-        deepCrawl: false,
-        includeSecurity: true,
-        includeBacklinks: false,
-      });
-
-      console.log("Scan response from Dashboard:", response);
-
-      // Check if the request was successful and has proper data structure
-      if (!response.success) {
-        console.error("Scan API request failed:", response.error || "Unknown error");
-        
-        // If it's a 404 error, provide helpful fallback
-        if (response.fallback) {
-          console.log("🔄 Using fallback scan response due to API unavailability");
-          // Use the fallback data from the API service
-          const scanId = (response.data as any)?.scanId || `fallback-${Date.now()}`;
-          console.log("✅ Fallback scan started with scanId:", scanId);
-          navigate(`/results/${scanId}`);
-          return;
-        }
-        
-        setScanError(
-          typeof response.error === 'string' 
-            ? response.error 
-            : (response.error as any)?.message || "Failed to start scan. Please try again."
-        );
-        setScanLoading(false);
-        return;
-      }
-
-      // Backend returns nested structure: { success, data: { status, data: { scanId } } }
-      // After wrapResponse: { success, data: { scanId, url, status } }
-      const scanId = response.data?.scanId || response.data?.data?.scanId;
-
-      if (!scanId) {
-        console.error("No scanId found in response.data:", response.data);
-        setScanError("Failed to get scan ID from server. Please try again.");
-        setScanLoading(false);
-        return;
-      }
-
-      console.log("Scan started with scanId:", scanId);
-      console.log("Polling for scan completion...");
-
-        // Poll for scan completion before redirecting
-        const API_BASE =
-          process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
-        const maxPolls = 30; // 30 seconds max
-        let pollCount = 0;
-
-        while (pollCount < maxPolls) {
-          await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
-          pollCount++;
-
-          try {
-            const statusRes = await fetch(`${API_BASE}/scan/${scanId}/results`);
-            const statusData = await statusRes.json();
-
-            console.log(`Poll ${pollCount}: status =`, statusData.status);
-
-            if (statusData.status === "success") {
-              console.log("Scan completed! Navigating to results page");
-              navigate(`/results/${scanId}`);
-              return;
-            }
-
-            // If still pending or in-progress, continue polling
-            if (
-              statusData.status === "pending" ||
-              statusData.data?.status === "in-progress"
-            ) {
-              continue;
-            }
-
-            // If error, break and show error
-            if (statusData.status === "error") {
-              setScanError(statusData.message || "Scan failed");
-              setScanLoading(false);
-              return;
-            }
-          } catch (pollError) {
-            console.log("Poll error:", pollError);
-            // Continue polling even on error
-          }
-        }
-
-        // If we've exhausted polls, navigate anyway (Results page will handle polling)
-        console.log("Max polls reached, navigating to results page");
-        navigate(`/results/${scanId}`);
+      
+      // Navigate to Global Scan page with URL as query parameter
+      navigate(`/dashboard/new-scan?url=${encodeURIComponent(url.toString())}`);
     } catch (error) {
       setScanError("Invalid URL format");
-      setScanLoading(false);
     }
   };
   return (
@@ -191,45 +100,16 @@ export default function Dashboard() {
                   onChange={(e) => setScanUrl(e.target.value)}
                   placeholder="Enter website URL (e.g., https://example.com)"
                   className="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl border-2 border-white/10 bg-slate-900/50 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:bg-slate-900/70 transition-all backdrop-blur-sm text-sm sm:text-base touch-manipulation"
-                  disabled={scanLoading}
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="submit"
-                  disabled={scanLoading || !scanUrl.trim()}
+                  disabled={!scanUrl.trim()}
                   className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-500 hover:to-purple-500 hover:shadow-lg hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 min-h-[48px] sm:min-w-[160px] shadow-lg hover:-translate-y-0.5 touch-manipulation text-sm sm:text-base"
                 >
-                  {scanLoading ? (
-                    <>
-                      <svg
-                        className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      <span>Scanning...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>Analyze Now</span>
-                    </>
-                  )}
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Analyze Now</span>
                 </button>
               </div>
             </form>
@@ -423,7 +303,7 @@ export default function Dashboard() {
             Quick Actions
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 relative z-10">
-            <Link to="/scan" className="block">
+            <Link to="/dashboard/new-scan" className="block">
               <Ripple className="relative group rounded-xl bg-white/10 backdrop-blur border border-white/20 p-4 sm:p-5 hover:shadow-[0_0_0_2px_rgba(255,255,255,0.2),0_10px_25px_-5px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:-translate-y-0.5 touch-manipulation min-h-[72px] sm:min-h-[80px]">
                 <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gradient-to-br from-white/10 to-transparent"></div>
                 <div className="flex items-center justify-between h-full">
