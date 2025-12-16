@@ -3,15 +3,16 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd frontend && npm ci
+        - cd frontend
+        - rm -rf node_modules package-lock.json
+        - npm cache clean --force
+        - npm install
     build:
       commands:
-        - echo "Building with API URL ${REACT_APP_API_BASE_URL}"
         - npm run build
   artifacts:
     baseDirectory: frontend/build
     files:
       - '**/*'
   cache:
-    paths:
-      - frontend/node_modules/**/*
+    paths: []
