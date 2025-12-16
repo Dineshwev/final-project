@@ -67,7 +67,6 @@ const Navigation = () => {
       label: "Pinterest Rich Pins",
       icon: ChartBarIcon,
     },
-    },
   ];
 
   return (

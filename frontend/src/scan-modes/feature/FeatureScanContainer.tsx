@@ -222,7 +222,6 @@ export const FeatureScanContainer: React.FC<FeatureScanContainerProps> = ({
         </div>
       </div>
     );
-    }
   };
 
   return (

@@ -842,29 +842,6 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
       </div>
     </div>
   );
-      </div>
-
-      <div className="services-progress">
-        <h4>Service Progress</h4>
-        <div className="services-list">
-          {Object.entries(state.config.enabledServices)
-            .filter(([, enabled]) => enabled)
-            .map(([service]) => (
-              <div key={service} className="service-progress">
-                <span className="service-name">{service}</span>
-                <span className={`service-status ${
-                  state.completedServices.includes(service) ? 'completed' :
-                  state.currentService === service ? 'active' : 'pending'
-                }`}>
-                  {state.completedServices.includes(service) ? '✓ Complete' :
-                   state.currentService === service ? '⟳ Running' : '⏳ Pending'}
-                </span>
-              </div>
-            ))}
-        </div>
-      </div>
-    </div>
-  );
 
   /**
    * Render scan results section
