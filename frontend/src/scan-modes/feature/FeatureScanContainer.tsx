@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import SchemaChecker from '../../seo-tools/SchemaChecker';
-import ToxicBacklinkDetector from '../../seo-tools/ToxicBacklinkDetector';
-import AccessibilityChecker from '../../seo-tools/AccessibilityChecker';
-import MultiLanguageSeoChecker from '../../seo-tools/MultiLanguageSeoChecker';
+import SchemaChecker from 'seo-tools/SchemaChecker';
+import ToxicBacklinkDetector from 'seo-tools/ToxicBacklinkDetector';
+import AccessibilityChecker from 'seo-tools/AccessibilityChecker';
+import MultiLanguageSeoChecker from 'seo-tools/MultiLanguageSeoChecker';
 
 interface FeatureScanContainerProps {
   className?: string;
