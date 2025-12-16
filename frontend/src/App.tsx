@@ -51,9 +51,25 @@ const FeatureScanPage: React.FC<{ tool?: string }> = ({ tool }) => {
   
   if (!featureKey) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold text-red-600 mb-4">Invalid Feature Tool</h1>
-        <p className="text-gray-600">No tool specified in the URL.</p>
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-lg border border-red-100 p-8 text-center">
+          <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Feature Not Found</h1>
+          <p className="text-lg text-gray-600 mb-6">The requested feature tool is not available in the URL.</p>
+          <div className="bg-gray-50 rounded-xl p-6 text-left max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Available Features:</h3>
+            <div className="space-y-2">
+              <div className="text-sm text-gray-700"><strong className="text-blue-600">schema</strong> - Schema markup validation</div>
+              <div className="text-sm text-gray-700"><strong className="text-blue-600">backlinks</strong> - Toxic backlink detection</div>
+              <div className="text-sm text-gray-700"><strong className="text-blue-600">accessibility</strong> - Website accessibility checker</div>
+              <div className="text-sm text-gray-700"><strong className="text-blue-600">multilang</strong> - Multi-language SEO analysis</div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

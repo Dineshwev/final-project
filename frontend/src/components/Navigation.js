@@ -100,24 +100,32 @@ const Navigation = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-3 xl:space-x-4">
             {/* Main Nav Links */}
             {mainNavLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.path);
+              const isNewScan = link.label === "New Scan";
+              
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center space-x-1.5 px-3 xl:px-4 py-2 xl:py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-                    active
-                      ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-lg shadow-blue-500/40"
-                      : "text-slate-300 hover:bg-white/10 hover:text-white backdrop-blur-sm"
+                  className={`flex items-center space-x-2 px-4 xl:px-5 py-2.5 xl:py-3 rounded-xl text-sm xl:text-base font-semibold transition-all whitespace-nowrap ${
+                    isNewScan
+                      ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-lg shadow-blue-500/40 hover:shadow-blue-500/60 hover:scale-105 ring-2 ring-blue-500/20"
+                      : active
+                      ? "bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/30"
+                      : "text-slate-300 hover:bg-white/10 hover:text-white backdrop-blur-sm hover:scale-102"
                   }`}
                 >
                   <Icon className="h-4 w-4 xl:h-5 xl:w-5" />
-                  <span className="hidden xl:inline">{link.label}</span>
-                  <span className="xl:hidden text-xs">{link.label}</span>
+                  <span>{link.label}</span>
+                  {isNewScan && (
+                    <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  )}
                 </Link>
               );
             })}
@@ -126,31 +134,32 @@ const Navigation = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setFeaturesOpen(!featuresOpen)}
-                className={`flex items-center space-x-1.5 px-3 xl:px-4 py-2 xl:py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center space-x-2 px-4 xl:px-5 py-2.5 xl:py-3 rounded-xl text-sm xl:text-base font-semibold transition-all whitespace-nowrap ${
                   featureLinks.some((f) => isActive(f.path))
-                    ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-lg shadow-blue-500/40"
-                    : "text-slate-300 hover:bg-white/10 hover:text-white backdrop-blur-sm"
+                    ? "bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/30"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white backdrop-blur-sm hover:scale-102"
                 }`}
               >
                 <SparklesIcon className="h-4 w-4 xl:h-5 xl:w-5" />
-                <span className="hidden xl:inline">Features</span>
-                <span className="xl:hidden text-xs">Features</span>
+                <span>Features</span>
                 <ChevronDownIcon
-                  className={`h-3 w-3 xl:h-4 xl:w-4 transition-transform ${
+                  className={`h-3 w-3 xl:h-4 xl:w-4 transition-transform duration-300 ${
                     featuresOpen ? "rotate-180" : ""
                   }`}
                 />
               </button>
 
-              {/* Dropdown Menu */}
+              {/* Enhanced Dropdown Menu */}
               {featuresOpen && (
-                <div className="absolute top-full mt-3 right-0 w-64 bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 py-2 z-50 animate-scaleIn">
-                  <div className="px-4 py-2 border-b border-white/10">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      All Features
+                <div className="absolute top-full mt-4 right-0 w-80 bg-slate-800/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/20 py-3 z-50 animate-scaleIn">
+                  <div className="px-5 py-3 border-b border-white/10">
+                    <p className="text-sm font-bold text-white uppercase tracking-wider flex items-center">
+                      <SparklesIcon className="w-4 h-4 mr-2" />
+                      SEO Analysis Tools
                     </p>
+                    <p className="text-xs text-slate-400 mt-1">Professional website analysis features</p>
                   </div>
-                  <div className="max-h-[60vh] overflow-y-auto custom-scrollbar py-2">
+                  <div className="max-h-[70vh] overflow-y-auto custom-scrollbar py-2">
                     {featureLinks.map((link) => {
                       const Icon = link.icon;
                       const active = isActive(link.path);
@@ -159,17 +168,27 @@ const Navigation = () => {
                           key={link.path}
                           to={link.path}
                           onClick={() => setFeaturesOpen(false)}
-                          className={`flex items-center space-x-3 px-4 py-3 text-sm font-medium transition-all mx-2 rounded-xl ${
+                          className={`flex items-center space-x-3 px-5 py-3 text-sm font-medium transition-all mx-2 rounded-xl group ${
                             active
-                              ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-md"
-                              : "text-slate-300 hover:bg-white/10 hover:text-white"
+                              ? "bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 text-white shadow-lg"
+                              : "text-slate-300 hover:bg-white/15 hover:text-white hover:scale-102"
                           }`}
                         >
-                          <Icon className="h-5 w-5 flex-shrink-0" />
-                          <span>{link.label}</span>
+                          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                            <Icon className="h-4 w-4 flex-shrink-0" />
+                          </div>
+                          <span className="font-medium">{link.label}</span>
+                          {!active && (
+                            <svg className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          )}
                         </Link>
                       );
                     })}
+                  </div>
+                  <div className="px-5 py-3 border-t border-white/10">
+                    <p className="text-xs text-slate-400 text-center">More tools coming soon</p>
                   </div>
                 </div>
               )}

@@ -508,196 +508,340 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
    * Render scan configuration section
    */
   const renderConfiguration = () => (
-    <div className="global-scan-config">
-      <div className="url-input-section">
-        <label htmlFor="url-input">Website URL</label>
-        <div className="input-group">
-          <input
-            id="url-input"
-            type="url"
-            value={state.url}
-            onChange={(e) => updateUrl(e.target.value)}
-            placeholder="https://example.com"
-            disabled={state.isScanning}
-            className="url-input"
-          />
-          <button
-            onClick={executeScan}
-            disabled={state.isScanning || !state.url.trim()}
-            className="scan-button primary"
-          >
-            {state.isScanning ? 'Scanning...' : 'Start Global Scan'}
-          </button>
+    <div className="space-y-8">
+      {/* URL Input Section */}
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8 border border-purple-100">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Website Analysis Setup</h2>
+          <p className="text-gray-600">Configure your comprehensive SEO audit parameters</p>
         </div>
-      </div>
-
-      <div className="scan-mode-selector">
-        <label>Scan Mode</label>
-        <div className="radio-group">
-          <label className="radio-option">
-            <input
-              type="radio"
-              value="quick"
-              checked={state.config.mode === 'quick'}
-              onChange={() => {
-                updateConfig({ mode: 'quick' });
-                loadDefaultConfig('quick');
-              }}
-              disabled={state.isScanning}
-            />
-            <span>Quick Analysis (2-3 mins)</span>
-            <small>Essential checks across all categories</small>
-          </label>
-          <label className="radio-option">
-            <input
-              type="radio"
-              value="comprehensive"
-              checked={state.config.mode === 'comprehensive'}
-              onChange={() => {
-                updateConfig({ mode: 'comprehensive' });
-                loadDefaultConfig('comprehensive');
-              }}
-              disabled={state.isScanning}
-            />
-            <span>Comprehensive Analysis (5-10 mins)</span>
-            <small>Thorough multi-service investigation</small>
-          </label>
-          <label className="radio-option">
-            <input
-              type="radio"
-              value="deep"
-              checked={state.config.mode === 'deep'}
-              onChange={() => {
-                updateConfig({ mode: 'deep' });
-                loadDefaultConfig('deep');
-              }}
-              disabled={state.isScanning}
-            />
-            <span>Deep Analysis (10-15 mins)</span>
-            <small>Maximum depth professional audit</small>
-          </label>
-        </div>
-      </div>
-
-      <div className="services-selection">
-        <label>Analysis Services</label>
-        <div className="services-grid">
-          {Object.entries(state.config.enabledServices).map(([service, enabled]) => (
-            <label key={service} className="service-checkbox">
-              <input
-                type="checkbox"
-                checked={Boolean(enabled)}
-                onChange={(e) => updateEnabledServices(
-                  service,
-                  e.target.checked
-                )}
-                disabled={state.isScanning}
-              />
-              <span className="service-name">
-                {service.charAt(0).toUpperCase() + service.slice(1)}
-              </span>
+        
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div>
+            <label htmlFor="url-input" className="block text-base font-semibold text-gray-800 mb-3">
+              Target Website URL
             </label>
-          ))}
+            <div className="flex space-x-4">
+              <input
+                id="url-input"
+                type="url"
+                value={state.url}
+                onChange={(e) => updateUrl(e.target.value)}
+                placeholder="https://yourwebsite.com"
+                disabled={state.isScanning}
+                className="flex-1 px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500 focus:ring-opacity-20 focus:border-purple-500 transition-all duration-300 text-lg placeholder-gray-400 shadow-inner"
+              />
+              <button
+                onClick={executeScan}
+                disabled={state.isScanning || !state.url.trim()}
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl hover:from-purple-700 hover:to-indigo-700 focus:ring-4 focus:ring-purple-500 focus:ring-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
+              >
+                {state.isScanning ? (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Analyzing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Start Full Audit</span>
+                  </div>
+                )}
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              Enter your complete website URL for comprehensive SEO analysis across all factors
+            </p>
+          </div>
         </div>
       </div>
 
-      <button
-        onClick={toggleAdvancedOptions}
-        className="toggle-advanced"
-        type="button"
-      >
-        {state.showAdvancedOptions ? 'Hide' : 'Show'} Advanced Settings
-      </button>
+      {/* Scan Configuration Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Scan Mode Selection */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            <svg className="w-5 h-5 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Analysis Depth
+          </h3>
+          <div className="space-y-4">
+            {[
+              { value: 'quick', label: 'Quick Analysis', time: '2-3 mins', desc: 'Essential checks across all categories' },
+              { value: 'comprehensive', label: 'Comprehensive Analysis', time: '5-10 mins', desc: 'Thorough multi-service investigation' },
+              { value: 'deep', label: 'Deep Analysis', time: '10-15 mins', desc: 'Maximum depth professional audit' }
+            ].map((mode) => (
+              <label key={mode.value} className="flex items-start space-x-3 p-4 rounded-xl border-2 border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all duration-200 cursor-pointer">
+                <input
+                  type="radio"
+                  value={mode.value}
+                  checked={state.config.mode === mode.value}
+                  onChange={() => {
+                    updateConfig({ mode: mode.value });
+                    loadDefaultConfig(mode.value);
+                  }}
+                  disabled={state.isScanning}
+                  className="mt-1 w-5 h-5 text-purple-600 border-2 border-gray-300 focus:ring-2 focus:ring-purple-500"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-900">{mode.label}</span>
+                    <span className="text-sm font-medium text-purple-600 bg-purple-100 px-3 py-1 rounded-full">{mode.time}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{mode.desc}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Services Selection */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            <svg className="w-5 h-5 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Analysis Services
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(state.config.enabledServices).map(([service, enabled]) => (
+              <label key={service} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all duration-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(enabled)}
+                  onChange={(e) => updateEnabledServices(service, e.target.checked)}
+                  disabled={state.isScanning}
+                  className="w-4 h-4 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
+                />
+                <span className="text-sm font-medium text-gray-700 capitalize">
+                  {service.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Advanced Options */}
+      <div className="text-center">
+        <button
+          onClick={toggleAdvancedOptions}
+          className="text-sm text-purple-600 hover:text-purple-800 font-medium transition-colors duration-200 hover:underline flex items-center mx-auto space-x-2"
+          type="button"
+        >
+          <svg className={`w-4 h-4 transition-transform duration-200 ${state.showAdvancedOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+          <span>{state.showAdvancedOptions ? 'Hide' : 'Show'} Advanced Settings</span>
+        </button>
+      </div>
 
       {state.showAdvancedOptions && (
-        <div className="advanced-options">
-          <div className="depth-selector">
-            <label htmlFor="depth-select">Analysis Depth</label>
-            <select
-              id="depth-select"
-              value={state.config.depth}
-              onChange={(e) => updateConfig({ depth: e.target.value as any })}
-              disabled={state.isScanning}
-              className="depth-select"
-            >
-              <option value="surface">Surface Level</option>
-              <option value="standard">Standard Depth</option>
-              <option value="deep">Deep Analysis</option>
-              <option value="exhaustive">Exhaustive Investigation</option>
-            </select>
-          </div>
+        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">Advanced Configuration</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label htmlFor="depth-select" className="block text-sm font-semibold text-gray-700 mb-2">Analysis Depth</label>
+              <select
+                id="depth-select"
+                value={state.config.depth}
+                onChange={(e) => updateConfig({ depth: e.target.value as any })}
+                disabled={state.isScanning}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="surface">Surface Level</option>
+                <option value="standard">Standard Depth</option>
+                <option value="deep">Deep Analysis</option>
+                <option value="exhaustive">Exhaustive Investigation</option>
+              </select>
+            </div>
 
-          <div className="timeout-setting">
-            <label htmlFor="timeout-input">Maximum Timeout (minutes)</label>
-            <input
-              id="timeout-input"
-              type="number"
-              min="1"
-              max="30"
-              value={state.config.timeout / 60000}
-              onChange={(e) => updateConfig({ timeout: parseInt(e.target.value) * 60000 })}
-              disabled={state.isScanning}
-              className="timeout-input"
-            />
-          </div>
+            <div>
+              <label htmlFor="timeout-input" className="block text-sm font-semibold text-gray-700 mb-2">Timeout (minutes)</label>
+              <input
+                id="timeout-input"
+                type="number"
+                min="1"
+                max="30"
+                value={state.config.timeout / 60000}
+                onChange={(e) => updateConfig({ timeout: parseInt(e.target.value) * 60000 })}
+                disabled={state.isScanning}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
+            </div>
 
-          <div className="parallel-settings">
-            <label className="checkbox-option">
+            <div className="flex items-center space-x-3 pt-8">
               <input
                 type="checkbox"
+                id="parallel-processing"
                 checked={state.config.parallel}
                 onChange={(e) => updateConfig({ parallel: e.target.checked })}
                 disabled={state.isScanning}
+                className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
               />
-              <span>Enable Parallel Processing</span>
-              <small>Faster execution but higher server load</small>
-            </label>
+              <label htmlFor="parallel-processing" className="text-sm font-medium text-gray-700">
+                Enable Parallel Processing
+              </label>
+            </div>
           </div>
         </div>
       )}
-    </div>
-  );
 
   /**
    * Render scan progress section
    */
   const renderProgress = () => (
-    <div className="global-scan-progress">
-      <div className="progress-header">
-        <h3>Running Global SEO Analysis</h3>
-        <button
-          onClick={cancelScan}
-          className="cancel-button"
-          disabled={!state.isScanning}
-        >
-          Cancel Scan
-        </button>
+    <div className="space-y-8">
+      {/* Progress Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center">
+              <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Running Full SEO Audit</h2>
+              <p className="text-gray-600 mt-1">Analyzing your website across all SEO factors...</p>
+            </div>
+          </div>
+          <button
+            onClick={cancelScan}
+            disabled={!state.isScanning}
+            className="px-6 py-3 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-colors duration-200 font-semibold"
+          >
+            Cancel Analysis
+          </button>
+        </div>
       </div>
 
-      <div className="overall-progress">
-        <div className="progress-bar">
-          <div 
-            className="progress-fill"
-            style={{ width: `${state.progress}%` }}
-          />
+      {/* Progress Dashboard */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Progress */}
+        <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold text-gray-900">Overall Progress</h3>
+              <span className="text-2xl font-bold text-blue-600">{Math.round(state.progress)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                style={{ width: `${state.progress}%` }}
+              >
+                <div className="absolute inset-0 bg-white bg-opacity-20 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Current Activity */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-gray-800 font-medium">
+                Current Phase: <span className="text-blue-600 capitalize">{state.currentPhase.replace(/_/g, ' ')}</span>
+              </span>
+            </div>
+            
+            {state.currentService && (
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce"></div>
+                <span className="text-gray-800 font-medium">
+                  Analyzing: <span className="text-green-600 capitalize">{state.currentService}</span>
+                </span>
+              </div>
+            )}
+            
+            {state.lastScanDuration && (
+              <div className="flex items-center space-x-3">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-gray-600">
+                  Elapsed: {(state.lastScanDuration / 1000).toFixed(0)}s
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-        <span className="progress-percentage">{Math.round(state.progress)}%</span>
+
+        {/* Progress Stats */}
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Services Completed</p>
+                <p className="text-2xl font-bold text-gray-900">{state.completedServices.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Estimated Time</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {state.config.mode === 'quick' ? '2-3' : state.config.mode === 'comprehensive' ? '5-10' : '10-15'} min
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="progress-details">
-        <div className="current-phase">
-          <strong>Current Phase:</strong> {state.currentPhase}
+      {/* Services Progress */}
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Service Analysis Progress</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Object.entries(state.config.enabledServices).map(([service, enabled]) => {
+            const isCompleted = state.completedServices.includes(service);
+            const isCurrent = state.currentService === service;
+            
+            return enabled ? (
+              <div key={service} className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                isCompleted ? 'border-green-200 bg-green-50' :
+                isCurrent ? 'border-blue-200 bg-blue-50' :
+                'border-gray-200 bg-gray-50'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700 capitalize">
+                    {service.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                  </span>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    isCompleted ? 'bg-green-500' :
+                    isCurrent ? 'bg-blue-500' :
+                    'bg-gray-300'
+                  }`}>
+                    {isCompleted ? (
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : isCurrent ? (
+                      <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                    ) : (
+                      <div className="w-3 h-3 bg-white bg-opacity-60 rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : null;
+          })}
         </div>
-        {state.currentService && (
-          <div className="current-service">
-            <strong>Analyzing:</strong> {state.currentService}
-          </div>
-        )}
-        {state.lastScanDuration && (
-          <div className="elapsed-time">
-            <strong>Elapsed:</strong> {(state.lastScanDuration / 1000).toFixed(0)}s
-          </div>
-        )}
+      </div>
+    </div>
+  );
       </div>
 
       <div className="services-progress">
@@ -856,21 +1000,94 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
   };
 
   return (
-    <div className={`global-scan-container ${className}`}>
-      <div className="global-scan-header">
-        <h2>Global SEO Analysis</h2>
-        <p>Comprehensive multi-dimensional analysis of your website's SEO performance</p>
+    <div className="min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Professional Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl mb-6">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+            Full SEO Audit
+          </h1>
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Comprehensive analysis across all critical SEO factors including technical performance, content optimization, and competitive insights
+          </p>
+        </div>
+
+        {/* Dashboard Content */}
+        <div className="space-y-8">
+          {/* Tab Navigation */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="border-b border-gray-200">
+              <nav className="flex space-x-8 px-8" aria-label="Tabs">
+                <button
+                  onClick={() => setActiveTab('configuration')}
+                  className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${
+                    state.activeTab === 'configuration'
+                      ? 'border-purple-500 text-purple-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                  disabled={state.isScanning}
+                >
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                    </svg>
+                    <span>Configuration</span>
+                  </div>
+                </button>
+                {(state.result || state.isScanning) && (
+                  <button
+                    onClick={() => setActiveTab('results')}
+                    className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${
+                      state.activeTab === 'results'
+                        ? 'border-purple-500 text-purple-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <span>Results</span>
+                    </div>
+                  </button>
+                )}
+                {showHistory && (
+                  <button
+                    onClick={() => setActiveTab('history')}
+                    className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${
+                      state.activeTab === 'history'
+                        ? 'border-purple-500 text-purple-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>History</span>
+                    </div>
+                  </button>
+                )}
+              </nav>
+            </div>
+            
+            {/* Tab Content */}
+            <div className="p-8">
+              {state.activeTab === 'configuration' && renderConfiguration()}
+              {state.activeTab === 'results' && (state.isScanning ? renderProgress() : renderResults())}
+              {state.activeTab === 'history' && showHistory && renderHistory()}
+            </div>
+          </div>
+
+          {/* Error Display */}
+          {state.error && renderError()}
+        </div>
       </div>
-
-      {renderTabNavigation()}
-
-      <div className="tab-content">
-        {state.activeTab === 'configuration' && renderConfiguration()}
-        {state.activeTab === 'results' && renderResults()}
-        {state.activeTab === 'history' && showHistory && renderHistory()}
-      </div>
-
-      {state.error && renderError()}
     </div>
   );
 };
