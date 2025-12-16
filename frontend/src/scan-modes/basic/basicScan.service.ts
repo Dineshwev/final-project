@@ -81,7 +81,7 @@ class BasicScanService {
         );
       }
 
-      return this.processScanResult(response.data);
+      return response.data;
 
     } catch (error: any) {
       if (error.code && error.category) {

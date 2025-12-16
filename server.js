@@ -235,6 +235,15 @@ app.post("/api/scan", (req, res) => {
   }
 });
 
+// Basic scan endpoint - Health check
+app.get("/api/basic-scan", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Basic scan endpoint is available",
+    endpoint: "POST /api/basic-scan"
+  });
+});
+
 // Basic scan endpoint - Simplified for home page quick scans
 app.post("/api/basic-scan", (req, res) => {
   try {
@@ -257,21 +266,16 @@ app.post("/api/basic-scan", (req, res) => {
       });
     }
 
-    // Generate basic scan result immediately (no polling needed)
-    const basicResult = {
-      url: url,
-      title: url.includes('example') ? 'Example Website - Home Page' : 'Website Title',
-      metaDescription: url.includes('example') ? 
-        'This is an example website with a good meta description for SEO.' : 
-        'Website meta description',
-      h1Count: Math.floor(Math.random() * 3) + 1, // Random 1-3
-      httpsStatus: url.startsWith('https://'),
-      score: Math.floor(Math.random() * 40) + 60 // Random 60-100
-    };
-
+    // Return mock scan result as requested
     res.status(200).json({
-      success: true,
-      data: basicResult
+      status: "success",
+      url,
+      score: 85,
+      checks: {
+        title: "ok",
+        meta: "ok",
+        links: "ok"
+      }
     });
 
   } catch (error) {
