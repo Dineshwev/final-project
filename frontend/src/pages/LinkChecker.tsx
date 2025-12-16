@@ -74,7 +74,7 @@ const LinkChecker: React.FC = () => {
                 Showing results from scan: <strong>{scanResults.url}</strong>
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                <Link to="/scan" className="underline">Click here to run a new scan</Link>
+                <Link to="/dashboard/new-scan" className="underline">Click here to run a new scan</Link>
               </p>
             </div>
           )}

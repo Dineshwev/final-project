@@ -464,7 +464,7 @@ const Profile: React.FC = () => {
               <div className="grid grid-cols-1 gap-3">
                 {/* New Scan Button */}
                 <a
-                  href="/scan"
+                  href="/dashboard/new-scan"
                   className="flex items-center gap-4 px-5 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 group border border-green-400/50"
                 >
                   <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -867,7 +867,7 @@ const Profile: React.FC = () => {
                     comprehensive scan history
                   </p>
                   <a
-                    href="/scan"
+                    href="/dashboard/new-scan"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                   >
                     <svg

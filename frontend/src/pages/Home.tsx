@@ -221,7 +221,7 @@ const Home: React.FC = () => {
                   className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
                 >
                   <Link
-                    to="/scan"
+                    to="/dashboard/new-scan"
                     className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/50 hover:-translate-y-1"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -749,7 +749,7 @@ const Home: React.FC = () => {
 
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link
-                  to="/scan"
+                  to="/dashboard/new-scan"
                   className="group px-8 py-4 bg-white text-purple-600 hover:bg-gray-50 rounded-xl font-bold text-lg shadow-xl transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
                 >
                   <span className="flex items-center justify-center gap-2">
