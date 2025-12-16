@@ -689,6 +689,8 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
           </div>
         </div>
       )}
+    </div>
+  );
 
   /**
    * Render scan progress section
@@ -788,7 +790,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
               <div>
                 <p className="text-sm text-gray-600">Estimated Time</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {state.config.mode === 'quick' ? '2-3' : state.config.mode === 'comprehensive' ? '5-10' : '10-15'} min
+                  {state.config.mode === 'quick' ? '2-3' : state.config.mode === 'comprehensive' ? '5-10' : '10→15'} min
                 </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -843,9 +845,6 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
     </div>
   );
 
-  /**
-   * Render scan results section
-   */
   const renderResults = () => {
     if (!state.result) {
       if (state.isScanning) {
