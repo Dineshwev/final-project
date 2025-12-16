@@ -66,18 +66,15 @@ const NotificationBell: React.FC = () => {
       }
       
       const data = await response.json();
-      console.log('🔔 API Response:', data); // Temporary debug log
 
       if (data.success) {
         const count = data.count || data.unreadCount || 0;
         setUnreadCount(count);
-        console.log(`🔔 ${count} unread notifications`);
       } else {
         setUnreadCount(0);
-        console.log('🔔 API response not successful:', data);
       }
     } catch (error) {
-      console.error("Error loading unread count:", error);
+      // Silently handle backend offline - no console spam
       setUnreadCount(0);
     }
   };
@@ -106,7 +103,8 @@ const NotificationBell: React.FC = () => {
         setAlerts([]);
       }
     } catch (error) {
-      console.error("Error loading recent alerts:", error);
+      // Silently handle backend offline - just show empty state
+      setAlerts([]);
     } finally {
       setLoading(false);
     }
@@ -126,7 +124,9 @@ const NotificationBell: React.FC = () => {
       setAlerts((prev) => prev.filter((a) => a.id !== alertId));
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error("Error marking alert as read:", error);
+      // Silently handle failure, still update UI optimistically
+      setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     }
   };
 

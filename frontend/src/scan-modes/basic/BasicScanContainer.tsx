@@ -122,14 +122,20 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
       onScanComplete?.(result);
 
     } catch (error: any) {
+      const friendlyError = {
+        message: 'Unable to complete scan. Please check your internet connection and try again.',
+        category: 'connection',
+        resolution: 'Verify the URL is correct and your network connection is stable.'
+      };
+
       setState(prev => ({
         ...prev,
         isScanning: false,
-        error,
+        error: friendlyError,
         lastScanDuration: Date.now() - startTime
       }));
 
-      onScanError?.(error);
+      onScanError?.(friendlyError);
     }
   }, [state.url, state.config, onScanComplete, onScanError]);
 
