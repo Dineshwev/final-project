@@ -41,13 +41,7 @@ const ToxicBacklinkDetector: React.FC = () => {
           </p>
         </motion.div>
 
-        <FeatureScanContainer
-          featureKey="backlinks"
-          initialUrl={url}
-          onScanComplete={handleScanComplete}
-          onScanError={handleScanError}
-          className="backlink-scan"
-        />
+        <FeatureScanContainer />
       </div>
     </div>
   );

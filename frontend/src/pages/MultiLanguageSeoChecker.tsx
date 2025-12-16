@@ -41,13 +41,7 @@ const MultiLanguageSeoChecker: React.FC = () => {
           </p>
         </motion.div>
 
-        <FeatureScanContainer
-          featureKey="international-seo"
-          initialUrl={url}
-          onScanComplete={handleScanComplete}
-          onScanError={handleScanError}
-          className="multilang-seo-scan"
-        />
+        <FeatureScanContainer />
       </div>
     </div>
   );

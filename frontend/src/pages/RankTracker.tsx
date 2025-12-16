@@ -278,13 +278,7 @@ const RankTracker: React.FC = () => {
           </p>
         </motion.div>
 
-        <FeatureScanContainer
-          featureKey="rank-tracker"
-          initialUrl={url}
-          onScanComplete={handleScanComplete}
-          onScanError={handleScanError}
-          className="rank-tracker-scan"
-        />
+        <FeatureScanContainer />
         
         {/* Additional Rank Tracking Interface */}
         <div className='max-w-7xl mx-auto space-y-8 mt-8'>
