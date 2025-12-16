@@ -12,6 +12,11 @@ interface Alert {
 }
 
 const NotificationBell: React.FC = () => {
+  // Safety check: Avoid CSP errors during dev if backend is not configured
+  if (!process.env.REACT_APP_API_BASE_URL) {
+    return null;
+  }
+
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -52,19 +57,16 @@ const NotificationBell: React.FC = () => {
   const loadUnreadCount = async () => {
     try {
       const userId = user?.uid || "demo-user";
-      const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
-      
       // Add cache busting to force fresh data
       const response = await fetch(
-        `${API_BASE_URL}/alerts/unread-count?userId=${userId}&_=${Date.now()}`
+        `${process.env.REACT_APP_API_BASE_URL}/alerts/unread-count?userId=${userId}&_=${Date.now()}`
       );
-      
+
       if (response.status === 404) {
         setUnreadCount(0);
         return;
       }
-      
+
       const data = await response.json();
 
       if (data.success) {
@@ -83,18 +85,16 @@ const NotificationBell: React.FC = () => {
     try {
       setLoading(true);
       const userId = user?.uid || "demo-user";
-      const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
       const response = await fetch(
-        `${API_BASE_URL}/alerts?userId=${userId}&limit=10&isRead=false`
+        `${process.env.REACT_APP_API_BASE_URL}/alerts?userId=${userId}&limit=10&isRead=false`
       );
-      
+
       if (response.status === 404) {
         setAlerts([]);
         setLoading(false);
         return;
       }
-      
+
       const data = await response.json();
 
       if (data.success) {
@@ -113,9 +113,7 @@ const NotificationBell: React.FC = () => {
   const markAsRead = async (alertId: number) => {
     try {
       const userId = user?.uid || "demo-user";
-      const API_BASE_URL =
-        process.env.REACT_APP_API_BASE_URL || "https://bc-worker-env.eba-k8rrjwx.ap-southeast-2.elasticbeanstalk.com/api";
-      await fetch(`${API_BASE_URL}/alerts/${alertId}/read`, {
+      await fetch(`${process.env.REACT_APP_API_BASE_URL}/alerts/${alertId}/read`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),

@@ -14,14 +14,14 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  GlobalScanOptions, 
-  GlobalScanResult, 
+import {
+  GlobalScanOptions,
+  GlobalScanResult,
   GlobalScanProgress,
   GLOBAL_SCAN_CONFIG
 } from './globalScan.types';
 // Isolated global scan - no external service dependencies
-// Uses direct API calls: POST /api/scan, GET /api/scan/:scanId/results
+// LEGACY: Previously used POST /api/scan, GET /api/scan/:scanId/results (now removed)
 
 interface GlobalScanContainerProps {
   /** Initial URL to scan (optional) */
@@ -50,16 +50,16 @@ interface GlobalScanState {
   currentPhase: string;
   currentService?: string;
   completedServices: string[];
-  
+
   // Results state
   result?: GlobalScanResult;
   error?: any;
   history: GlobalScanResult[];
-  
+
   // Configuration state
   url: string;
   config: any;
-  
+
   // UI state
   showAdvancedOptions: boolean;
   activeTab: 'configuration' | 'results' | 'history';
@@ -110,7 +110,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlFromQuery = urlParams.get('url');
-    
+
     if (urlFromQuery && !initialUrl) {
       setState(prev => ({
         ...prev,
@@ -121,13 +121,13 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
 
   /**
    * Execute global scan using isolated API calls
-   * Uses POST /api/scan endpoint directly
+   * LEGACY: Previously used POST /api/scan endpoint (now removed)
    */
   const executeScan = useCallback(async () => {
     if (!state.url.trim()) {
       setState(prev => ({
         ...prev,
-        error: { 
+        error: {
           message: 'Please enter a valid URL to scan',
           category: 'validation'
         }
@@ -149,7 +149,9 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
     }));
 
     try {
-      // Step 1: Initiate scan via POST /api/scan
+      // LEGACY API REMOVED: The following /api/scan endpoint is obsolete
+      // Step 1: Initiate scan via POST /api/scan (DISABLED)
+      /*
       const scanResponse = await fetch('/api/scan', {
         method: 'POST',
         headers: {
@@ -181,6 +183,10 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
 
       // Step 2: Start polling for results
       startPolling(scanId);
+      */
+
+      // TODO: Replace with new scan endpoint
+      throw new Error('Legacy /api/scan endpoint has been removed. Please update to use new API.');
 
     } catch (error: any) {
       setState(prev => ({
@@ -196,16 +202,16 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
 
   /**
    * Polling logic to check scan results
-   * Uses GET /api/scan/:scanId/results endpoint
+   * LEGACY: Previously used GET /api/scan/:scanId/results endpoint (now removed)
    */
   const startPolling = useCallback((scanId: string) => {
     let pollCount = 0;
     const maxPolls = 40; // 2 minutes max (40 * 3 seconds)
-    
+
     const poll = async () => {
       try {
         pollCount++;
-        
+
         // Update progress based on polling count
         const progressValue = Math.min(95, 10 + (pollCount * 2));
         setState(prev => ({
@@ -214,8 +220,10 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
           currentPhase: pollCount < 10 ? 'analyzing' : 'generating_report'
         }));
 
-        const resultResponse = await fetch(`/api/scan/${scanId}/results`);
-        
+        // LEGACY API REMOVED: /api/scan endpoint is obsolete
+        // const resultResponse = await fetch(`/api/scan/${scanId}/results`);
+        throw new Error('Legacy /api/scan endpoint has been removed.');
+
         if (!resultResponse.ok) {
           if (pollCount >= maxPolls) {
             throw new Error('Scan timed out. Please try again.');
@@ -226,7 +234,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
         }
 
         const resultData = await resultResponse.json();
-        
+
         if (resultData.status === 'success' && resultData.data) {
           // Scan completed successfully
           setState(prev => ({
@@ -284,7 +292,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
           // Continue polling
           setTimeout(poll, 3000);
         }
-        
+
       } catch (error: any) {
         setState(prev => ({
           ...prev,
@@ -294,7 +302,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
             category: 'server'
           }
         }));
-        
+
         if (onScanError) {
           onScanError(error);
         }
@@ -515,7 +523,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Website Analysis Setup</h2>
           <p className="text-gray-600">Configure your comprehensive SEO audit parameters</p>
         </div>
-        
+
         <div className="max-w-2xl mx-auto space-y-6">
           <div>
             <label htmlFor="url-input" className="block text-base font-semibold text-gray-800 mb-3">
@@ -729,7 +737,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
               <span className="text-2xl font-bold text-blue-600">{Math.round(state.progress)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                 style={{ width: `${state.progress}%` }}
               >
@@ -737,7 +745,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
               </div>
             </div>
           </div>
-          
+
           {/* Current Activity */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
@@ -746,7 +754,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                 Current Phase: <span className="text-blue-600 capitalize">{state.currentPhase.replace(/_/g, ' ')}</span>
               </span>
             </div>
-            
+
             {state.currentService && (
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce"></div>
@@ -755,7 +763,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                 </span>
               </div>
             )}
-            
+
             {state.lastScanDuration && (
               <div className="flex items-center space-x-3">
                 <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -784,7 +792,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -810,22 +818,20 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
           {Object.entries(state.config.enabledServices).map(([service, enabled]) => {
             const isCompleted = state.completedServices.includes(service);
             const isCurrent = state.currentService === service;
-            
+
             return enabled ? (
-              <div key={service} className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                isCompleted ? 'border-green-200 bg-green-50' :
-                isCurrent ? 'border-blue-200 bg-blue-50' :
-                'border-gray-200 bg-gray-50'
-              }`}>
+              <div key={service} className={`p-4 rounded-xl border-2 transition-all duration-300 ${isCompleted ? 'border-green-200 bg-green-50' :
+                  isCurrent ? 'border-blue-200 bg-blue-50' :
+                    'border-gray-200 bg-gray-50'
+                }`}>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 capitalize">
                     {service.replace(/([A-Z])/g, ' $1').toLowerCase()}
                   </span>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                    isCompleted ? 'bg-green-500' :
-                    isCurrent ? 'bg-blue-500' :
-                    'bg-gray-300'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isCompleted ? 'bg-green-500' :
+                      isCurrent ? 'bg-blue-500' :
+                        'bg-gray-300'
+                    }`}>
                     {isCompleted ? (
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1001,11 +1007,10 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
               <nav className="flex space-x-8 px-8" aria-label="Tabs">
                 <button
                   onClick={() => setActiveTab('configuration')}
-                  className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${
-                    state.activeTab === 'configuration'
+                  className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${state.activeTab === 'configuration'
                       ? 'border-purple-500 text-purple-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                   disabled={state.isScanning}
                 >
                   <div className="flex items-center space-x-2">
@@ -1018,11 +1023,10 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                 {(state.result || state.isScanning) && (
                   <button
                     onClick={() => setActiveTab('results')}
-                    className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${
-                      state.activeTab === 'results'
+                    className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${state.activeTab === 'results'
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1035,11 +1039,10 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                 {showHistory && (
                   <button
                     onClick={() => setActiveTab('history')}
-                    className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${
-                      state.activeTab === 'history'
+                    className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${state.activeTab === 'history'
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1051,7 +1054,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                 )}
               </nav>
             </div>
-            
+
             {/* Tab Content */}
             <div className="p-8">
               {state.activeTab === 'configuration' && renderConfiguration()}

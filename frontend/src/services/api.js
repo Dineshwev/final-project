@@ -52,11 +52,9 @@ const apiService = {
     return wrapResponse(api.post('/scan', { url, options }));
   },
   getScanStatus: async (scanId) => {
-    // Backend status endpoint: GET /api/scan/:scanId
     return wrapResponse(api.get(`/scan/${scanId}`));
   },
   getScanResults: async (scanId) => {
-    // Backend results endpoint: GET /api/scan/:scanId/results
     return wrapResponse(api.get(`/scan/${scanId}/results`));
   },
 
