@@ -836,7 +836,7 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                   </div>
                 </div>
               </div>
-            ) : null;
+            ) : null
           })}
         </div>
       </div>
