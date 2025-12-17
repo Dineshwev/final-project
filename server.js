@@ -264,6 +264,8 @@ app.post("/api/basic-scan", (req, res) => {
     });
   }
 
+  console.log("🔥 REAL BASIC SCAN HANDLER HIT");
+
   return res.json({
     status: "success",
     url,
@@ -275,6 +277,7 @@ app.post("/api/basic-scan", (req, res) => {
     }
   });
 });
+
 
 // Scan results endpoint - Dynamic data based on scanId
 app.get("/api/scan/:scanId/results", (req, res) => {
