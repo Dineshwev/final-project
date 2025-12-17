@@ -246,46 +246,34 @@ app.get("/api/basic-scan", (req, res) => {
 
 // Basic scan endpoint - Simplified for home page quick scans
 app.post("/api/basic-scan", (req, res) => {
-  try {
-    const { url } = req.body || {};
+  const { url } = req.body || {};
 
-    // Validate URL existence and type
-    if (!url || typeof url !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'Valid URL is required for basic scan'
-      });
-    }
-
-    // Simple URL format validation
-    try {
-      new URL(url);
-    } catch {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid website URL (e.g., https://example.com)'
-      });
-    }
-
-    // Return mock scan result as requested
-    res.status(200).json({
-      status: "success",
-      url,
-      score: 85,
-      checks: {
-        title: "ok",
-        meta: "ok",
-        links: "ok"
-      }
-    });
-
-  } catch (error) {
-    console.error('Basic scan error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during scan. Please try again.'
+  if (!url || typeof url !== "string") {
+    return res.status(400).json({
+      status: "error",
+      message: "Valid URL is required"
     });
   }
+
+  try {
+    new URL(url);
+  } catch {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid URL"
+    });
+  }
+
+  return res.json({
+    status: "success",
+    url,
+    score: 85,
+    checks: {
+      title: "ok",
+      meta: "ok",
+      links: "ok"
+    }
+  });
 });
 
 // Scan results endpoint - Dynamic data based on scanId
@@ -417,17 +405,18 @@ app.get("/api/alerts", (req, res) => {
 });
 
 // Catch-all for undefined API routes
-app.all("/api/*", (req, res) => {
-  console.log(`🔧 Generic API handler for: ${req.path}`);
-  res.status(200).json({
-    status: 'ok',
-    message: 'API endpoint available',
-    path: req.path,
-    method: req.method,
-    timestamp: new Date().toISOString(),
-    data: []
-  });
-});
+// Catch-all for undefined API routes
+// app.all("/api/*", (req, res) => {
+//   console.log(`🔧 Generic API handler for: ${req.path}`);
+//   res.status(200).json({
+//     status: 'ok',
+//     message: 'API endpoint available',
+//     path: req.path,
+//     method: req.method,
+//     timestamp: new Date().toISOString(),
+//     data: []
+//   });
+// });
 
 // 404 handler for non-API routes
 app.all("*", (req, res) => {
