@@ -12,11 +12,7 @@ interface Alert {
 }
 
 const NotificationBell: React.FC = () => {
-  // Safety check: Avoid CSP errors during dev if backend is not configured
-  if (!process.env.REACT_APP_API_BASE_URL) {
-    return null;
-  }
-
+  // ALL HOOKS MUST BE AT THE TOP LEVEL - BEFORE ANY CONDITIONAL LOGIC
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -53,6 +49,12 @@ const NotificationBell: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]); // Only depend on isOpen
+
+  // Safety check: Avoid CSP errors during dev if backend is not configured
+  // MOVED AFTER ALL HOOKS TO COMPLY WITH REACT RULES
+  if (!process.env.REACT_APP_API_BASE_URL) {
+    return null;
+  }
 
   const loadUnreadCount = async () => {
     try {
