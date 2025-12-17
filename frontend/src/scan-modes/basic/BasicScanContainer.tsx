@@ -21,9 +21,7 @@ import {
   BasicScanConfig,
   BASIC_SCAN_CONFIG
 } from './basicScan.types';
-import {
-  executeBasicScan
-} from './basicScan.service';
+
 
 interface BasicScanContainerProps {
   /** Initial URL to scan (optional) */
@@ -85,7 +83,11 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
   /**
    * Execute basic scan with immediate results - no polling required
    */
+  /**
+   * Execute basic scan with immediate results - no polling required
+   */
   const executeScan = useCallback(async () => {
+    // Ensure URL is present
     if (!state.url.trim()) {
       setState(prev => ({
         ...prev,
@@ -107,25 +109,48 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
     }));
 
     try {
-      const result = await executeBasicScan({
-        url: state.url.trim(),
-        config: state.config
+      const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/basic-scan`;
+      console.log('Starting Basic Scan:', { url: state.url, apiUrl });
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: state.url.trim(),
+          config: state.config
+        })
       });
+
+      console.log('Basic Scan Response Status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`Scan failed with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Basic Scan Data:', data);
+
+      // Handle envelope structure if present (e.g. data.data or root)
+      const result = data.data || data;
 
       setState(prev => ({
         ...prev,
         isScanning: false,
-        result,
+        result: result,
         lastScanDuration: Date.now() - startTime
       }));
 
       onScanComplete?.(result);
 
     } catch (error: any) {
+      console.error('Basic Scan Error:', error);
+
       const friendlyError = {
-        message: 'Unable to complete scan. Please check your internet connection and try again.',
+        message: error.message || 'Unable to complete scan. Please try again.',
         category: 'connection',
-        resolution: 'Verify the URL is correct and your network connection is stable.'
+        resolution: 'Check console for details.'
       };
 
       setState(prev => ({

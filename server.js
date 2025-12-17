@@ -34,7 +34,7 @@ app.use(express.json());
 // Puppeteer configuration for AWS Linux
 const getPuppeteerConfig = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  
+
   if (isProduction) {
     return {
       headless: 'new',
@@ -54,7 +54,7 @@ const getPuppeteerConfig = () => {
       executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium-browser'
     };
   }
-  
+
   return {
     headless: 'new'
   };
@@ -75,10 +75,10 @@ function generateUrlFromScanId(scanId) {
 function generateDynamicScanData(scanId) {
   const url = generateUrlFromScanId(scanId);
   const timestamp = Date.now();
-  
+
   // Generate some variation based on scanId
   const variation = parseInt(scanId.split('-').pop() || '0') % 100;
-  
+
   const seoIssues = [
     {
       id: 'issue-0',
@@ -89,7 +89,7 @@ function generateDynamicScanData(scanId) {
       recommendation: 'Implement canonical tags on all blog pages'
     },
     {
-      id: 'issue-1', 
+      id: 'issue-1',
       type: 'info',
       title: 'Content',
       description: 'Increase content length on product pages',
@@ -99,13 +99,13 @@ function generateDynamicScanData(scanId) {
     {
       id: 'issue-2',
       type: 'error',
-      title: 'Performance', 
+      title: 'Performance',
       description: 'Optimize large images',
       impact: 80 - (variation % 25),
       recommendation: 'Compress and optimize images'
     }
   ];
-  
+
   // Add random issues based on URL
   if (url.includes('testsite')) {
     seoIssues.push({
@@ -117,7 +117,7 @@ function generateDynamicScanData(scanId) {
       recommendation: 'Add meta descriptions to all pages'
     });
   }
-  
+
   return {
     id: scanId,
     url: url,
@@ -129,7 +129,7 @@ function generateDynamicScanData(scanId) {
       loadTime: 1.5 + (variation % 30) / 10, // Load time 1.5-4.5s
       pageSize: 2048 + (variation * 50), // Page size variation
       requests: 25 + (variation % 20), // Request count
-      mobileScore: Math.max(30, 85 - (variation % 40)), 
+      mobileScore: Math.max(30, 85 - (variation % 40)),
       desktopScore: Math.max(40, 90 - (variation % 35))
     },
     securityChecks: [
@@ -138,7 +138,7 @@ function generateDynamicScanData(scanId) {
         status: url.startsWith('https') ? 'passed' : 'failed'
       },
       {
-        name: 'Security Headers', 
+        name: 'Security Headers',
         status: variation % 3 === 0 ? 'passed' : 'warning'
       }
     ]
@@ -147,8 +147,8 @@ function generateDynamicScanData(scanId) {
 
 // Health check route for Elastic Beanstalk
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
+  res.status(200).json({
+    status: 'ok',
     service: 'SEO Health Checker API',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
@@ -248,7 +248,8 @@ app.get("/api/basic-scan", (req, res) => {
 app.post("/api/basic-scan", (req, res) => {
   try {
     const { url } = req.body || {};
-    
+
+    // Validate URL existence and type
     if (!url || typeof url !== 'string') {
       return res.status(400).json({
         success: false,
@@ -256,7 +257,7 @@ app.post("/api/basic-scan", (req, res) => {
       });
     }
 
-    // Simple URL validation
+    // Simple URL format validation
     try {
       new URL(url);
     } catch {
@@ -291,10 +292,10 @@ app.post("/api/basic-scan", (req, res) => {
 app.get("/api/scan/:scanId/results", (req, res) => {
   const scanId = req.params.scanId;
   console.log(`📊 Scan results request for scanId: ${scanId}`);
-  
+
   // Generate dynamic scan data based on scanId
   const mockScanData = generateDynamicScanData(scanId);
-  
+
   res.status(200).json({
     status: 'success',
     data: mockScanData
@@ -305,7 +306,7 @@ app.get("/api/scan/:scanId/results", (req, res) => {
 app.get("/api/export/:scanId/pdf", (req, res) => {
   const scanId = req.params.scanId;
   console.log(`📄 PDF export request for scanId: ${scanId}`);
-  
+
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="scan-report-${scanId}.pdf"`);
   res.status(200).send('Mock PDF content - PDF generation not implemented yet');
@@ -315,9 +316,9 @@ app.get("/api/export/:scanId/pdf", (req, res) => {
 app.get("/api/export/:scanId/csv", (req, res) => {
   const scanId = req.params.scanId;
   console.log(`📊 CSV export request for scanId: ${scanId}`);
-  
+
   const csvContent = `URL,Score,Issues,Load Time\n"${generateUrlFromScanId(scanId)}",85,3,2.3s`;
-  
+
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', `attachment; filename="scan-report-${scanId}.csv"`);
   res.status(200).send(csvContent);
@@ -348,7 +349,7 @@ app.get("/api/user/api-keys", (req, res) => {
 app.get("/api/history/recent", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  
+
   res.status(200).json({
     success: true,
     data: {
@@ -362,7 +363,7 @@ app.get("/api/history/recent", (req, res) => {
           status: 'completed'
         },
         {
-          id: 'scan_122', 
+          id: 'scan_122',
           url: 'https://testsite.com',
           timestamp: '2024-01-14T15:20:00Z',
           score: 82,
@@ -393,7 +394,7 @@ app.get("/api/get-alerts", (req, res) => {
       {
         id: 2,
         type: 'missing_meta',
-        severity: 'medium', 
+        severity: 'medium',
         message: 'Missing meta description on homepage',
         url: 'https://example.com',
         detected_at: '2024-01-15T09:15:00Z',
@@ -439,7 +440,7 @@ app.all("*", (req, res) => {
     timestamp: new Date().toISOString(),
     availableRoutes: [
       'GET /',
-      'GET /health', 
+      'GET /health',
       'GET /api/status',
       'GET /api/alerts/unread-count',
       'GET /api/history/recent',
