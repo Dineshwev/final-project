@@ -481,6 +481,15 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
     };
   }, []);
 
+  // PATCH 1: Loading state guard - early return UI for scanning state
+  if (state?.isScanning) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <p className="text-gray-500 text-sm">Analyzing website…</p>
+      </div>
+    );
+  }
+
   /**
    * Render tab navigation
    */
@@ -821,16 +830,16 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
 
             return enabled ? (
               <div key={service} className={`p-4 rounded-xl border-2 transition-all duration-300 ${isCompleted ? 'border-green-200 bg-green-50' :
-                  isCurrent ? 'border-blue-200 bg-blue-50' :
-                    'border-gray-200 bg-gray-50'
+                isCurrent ? 'border-blue-200 bg-blue-50' :
+                  'border-gray-200 bg-gray-50'
                 }`}>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 capitalize">
                     {service.replace(/([A-Z])/g, ' $1').toLowerCase()}
                   </span>
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isCompleted ? 'bg-green-500' :
-                      isCurrent ? 'bg-blue-500' :
-                        'bg-gray-300'
+                    isCurrent ? 'bg-blue-500' :
+                      'bg-gray-300'
                     }`}>
                     {isCompleted ? (
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -852,11 +861,16 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
   );
 
   const renderResults = () => {
+    // PATCH 2: Null-safe result rendering with fallback
     if (!state.result) {
       if (state.isScanning) {
         return renderProgress();
       }
-      return null;
+      return (
+        <p className="text-gray-400 text-sm">
+          Enter a website URL and click Analyze.
+        </p>
+      );
     }
 
     const { overallScore, serviceScores } = state.result;
@@ -865,11 +879,11 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
       <div className="global-scan-results">
         <div className="results-header">
           <div className="overall-score">
-            <span className="score-value">{overallScore}</span>
+            <span className="score-value">{overallScore ?? "N/A"}</span>
             <span className="score-label">Global SEO Score</span>
           </div>
           <div className="scan-metadata">
-            <span>Scanned: {new Date(state.result.timestamp).toLocaleString()}</span>
+            <span>Scanned: {state.result?.timestamp ? new Date(state.result.timestamp).toLocaleString() : "—"}</span>
             <span>Services: {serviceScores ? Object.keys(serviceScores).length : 0}</span>
             <span>Duration: {state.lastScanDuration ? (state.lastScanDuration / 1000).toFixed(0) + 's' : 'N/A'}</span>
           </div>
@@ -885,8 +899,8 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
           {serviceScores && Object.entries(serviceScores).map(([category, score]) => (
             <div key={category} className="score-category">
               <span className="category-name">{category.replace(/([A-Z])/g, ' $1').trim()}</span>
-              <span className={`category-score ${(score as number) >= 80 ? 'excellent' : (score as number) >= 60 ? 'good' : (score as number) >= 40 ? 'warning' : 'poor'}`}>
-                {score}
+              <span className={`category-score ${((score as number) ?? 0) >= 80 ? 'excellent' : ((score as number) ?? 0) >= 60 ? 'good' : ((score as number) ?? 0) >= 40 ? 'warning' : 'poor'}`}>
+                {score ?? "—"}
               </span>
             </div>
           ))}
@@ -899,8 +913,8 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
               <div className="service-header">
                 <h4>{serviceName.charAt(0).toUpperCase() + serviceName.slice(1)} Score</h4>
                 <div className="service-summary">
-                  <span className={`service-score ${(serviceData as number) >= 80 ? 'excellent' : (serviceData as number) >= 60 ? 'good' : 'warning'}`}>
-                    {serviceData}
+                  <span className={`service-score ${((serviceData as number) ?? 0) >= 80 ? 'excellent' : ((serviceData as number) ?? 0) >= 60 ? 'good' : 'warning'}`}>
+                    {serviceData ?? "—"}
                   </span>
                 </div>
               </div>
@@ -942,8 +956,8 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                 <span className="scan-score">{scan.overallScore}</span>
               </div>
               <div className="history-summary">
-                <span>Services: {scan.serviceScores ? Object.keys(scan.serviceScores).length : 0}</span>
-                <span>Issues: {scan.recommendations.filter(r => r.priority === 'high').length} high priority</span>
+                <span>Services: {scan?.serviceScores ? Object.keys(scan.serviceScores).length : 0}</span>
+                <span>Issues: {(scan?.recommendations ?? []).filter(r => r?.priority === 'high').length} high priority</span>
               </div>
             </div>
           ))}
@@ -984,6 +998,13 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* PATCH 3: Error banner - only if error state exists */}
+        {state?.error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded text-sm mb-4">
+            {state.error.message ?? "An error occurred"}
+          </div>
+        )}
+
         {/* Professional Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl mb-6">
@@ -1008,8 +1029,8 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                 <button
                   onClick={() => setActiveTab('configuration')}
                   className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${state.activeTab === 'configuration'
-                      ? 'border-purple-500 text-purple-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                   disabled={state.isScanning}
                 >
@@ -1024,8 +1045,8 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                   <button
                     onClick={() => setActiveTab('results')}
                     className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${state.activeTab === 'results'
-                        ? 'border-purple-500 text-purple-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-purple-500 text-purple-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                       }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -1040,8 +1061,8 @@ export const GlobalScanContainer: React.FC<GlobalScanContainerProps> = ({
                   <button
                     onClick={() => setActiveTab('history')}
                     className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors duration-200 ${state.activeTab === 'history'
-                        ? 'border-purple-500 text-purple-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-purple-500 text-purple-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                       }`}
                   >
                     <div className="flex items-center space-x-2">

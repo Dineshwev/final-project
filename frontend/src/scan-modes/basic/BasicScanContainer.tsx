@@ -13,15 +13,15 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { 
-  BasicScanOptions, 
+import {
+  BasicScanOptions,
   BasicScanResult,
   LegacyBasicScanResult,
   BasicScanProgress,
   BasicScanConfig,
   BASIC_SCAN_CONFIG
 } from './basicScan.types';
-import { 
+import {
   executeBasicScan
 } from './basicScan.service';
 
@@ -45,15 +45,15 @@ interface BasicScanContainerProps {
 interface BasicScanState {
   // Scan execution state
   isScanning: boolean;
-  
+
   // Results state
   result?: LegacyBasicScanResult;
   error?: any;
-  
+
   // Configuration state
   url: string;
   config: BasicScanConfig;
-  
+
   // UI state
   showAdvancedOptions: boolean;
   lastScanDuration?: number;
@@ -89,7 +89,7 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
     if (!state.url.trim()) {
       setState(prev => ({
         ...prev,
-        error: { 
+        error: {
           message: 'Please enter a valid URL to scan',
           category: 'validation'
         }
@@ -226,6 +226,15 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
     };
   }, []);
 
+  // PATCH 1: Loading state guard - early return UI for scanning state
+  if (state.isScanning) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <p className="text-gray-500 text-sm">Analyzing website…</p>
+      </div>
+    );
+  }
+
   /**
    * Render scan configuration section
    */
@@ -319,7 +328,7 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
       </div>
 
       <div className="progress-bar">
-        <div 
+        <div
           className="progress-fill"
           style={{ width: state.isScanning ? '50%' : '0%' }}
         />
@@ -340,7 +349,14 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
    * Render scan results section
    */
   const renderResults = () => {
-    if (!state.result) return null;
+    // PATCH 2: Null-safe result rendering with fallback
+    if (!state.result) {
+      return (
+        <p className="text-gray-400 text-sm">
+          Enter a website URL and click Analyze.
+        </p>
+      );
+    }
 
     const { score, results, recommendations } = state.result;
 
@@ -349,7 +365,7 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
         <div className="results-header">
           <h3>Basic SEO Scan Results</h3>
           <div className="overall-score">
-            <span className="score-value">{score}</span>
+            <span className="score-value">{score ?? "N/A"}</span>
             <span className="score-label">Overall Score</span>
           </div>
           <button
@@ -364,51 +380,51 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
           <div className="result-section">
             <h4>On-Page SEO</h4>
             <div className="section-details">
-              <p>Title: {results.onPageSeo.title.present ? '✓' : '✗'} Present</p>
-              <p>Meta Description: {results.onPageSeo.metaDescription.present ? '✓' : '✗'} Present</p>
-              <p>Headers: {results.onPageSeo.headers.hasProperStructure ? '✓' : '✗'} Structured</p>
+              <p>Title: {results?.onPageSeo?.title?.present ? '✓' : '✗'} {results?.onPageSeo?.title?.present !== undefined ? 'Present' : '—'}</p>
+              <p>Meta Description: {results?.onPageSeo?.metaDescription?.present ? '✓' : '✗'} {results?.onPageSeo?.metaDescription?.present !== undefined ? 'Present' : '—'}</p>
+              <p>Headers: {results?.onPageSeo?.headers?.hasProperStructure ? '✓' : '✗'} {results?.onPageSeo?.headers?.hasProperStructure !== undefined ? 'Structured' : '—'}</p>
             </div>
           </div>
 
           <div className="result-section">
             <h4>Technical SEO</h4>
             <div className="section-details">
-              <p>SSL: {results.technicalSeo.sslStatus === 'valid' ? '✓' : '✗'} {results.technicalSeo.sslStatus}</p>
-              <p>Mobile Responsive: {results.technicalSeo.mobileResponsive ? '✓' : '✗'}</p>
+              <p>SSL: {results?.technicalSeo?.sslStatus === 'valid' ? '✓' : '✗'} {results?.technicalSeo?.sslStatus ?? "—"}</p>
+              <p>Mobile Responsive: {results?.technicalSeo?.mobileResponsive ? '✓' : '✗'}</p>
             </div>
           </div>
 
           <div className="result-section">
             <h4>Accessibility</h4>
             <div className="section-details">
-              <p>Compliance Level: {results.accessibility.complianceLevel}</p>
-              <p>Critical Violations: {results.accessibility.criticalViolations}</p>
+              <p>Compliance Level: {results?.accessibility?.complianceLevel ?? "—"}</p>
+              <p>Critical Violations: {results?.accessibility?.criticalViolations ?? "—"}</p>
             </div>
           </div>
 
           <div className="result-section">
             <h4>Performance</h4>
             <div className="section-details">
-              <p>Load Speed: {results.performance.loadSpeed}</p>
-              <p>Mobile Score: {results.performance.mobileScore}</p>
-              <p>Desktop Score: {results.performance.desktopScore}</p>
+              <p>Load Speed: {results?.performance?.loadSpeed ?? "—"}</p>
+              <p>Mobile Score: {results?.performance?.mobileScore ?? "—"}</p>
+              <p>Desktop Score: {results?.performance?.desktopScore ?? "—"}</p>
             </div>
           </div>
         </div>
 
-        {recommendations.length > 0 && (
+        {(recommendations?.length ?? 0) > 0 && (
           <div className="priority-recommendations">
             <h4>Priority Recommendations</h4>
             <div className="recommendations-list">
-              {state.result.recommendations
-                .filter(rec => rec.priority === 'high')
+              {(state.result?.recommendations ?? [])
+                .filter(rec => rec?.priority === 'high')
                 .slice(0, 3)
                 .map((rec, index) => (
                   <div key={index} className="recommendation-item">
-                    <h5>{rec.title}</h5>
-                    <p>{rec.description}</p>
+                    <h5>{rec?.title ?? "—"}</h5>
+                    <p>{rec?.description ?? "—"}</p>
                     <p className="expected-improvement">
-                      <strong>Expected improvement:</strong> {rec.expectedImprovement}
+                      <strong>Expected improvement:</strong> {rec?.expectedImprovement ?? "—"}
                     </p>
                   </div>
                 ))}
@@ -450,6 +466,13 @@ export const BasicScanContainer: React.FC<BasicScanContainerProps> = ({
 
   return (
     <div className={`basic-scan-container ${className}`}>
+      {/* PATCH 3: Error banner - only if error state exists */}
+      {state?.error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded text-sm mb-4">
+          {state.error.message ?? "An error occurred"}
+        </div>
+      )}
+
       <div className="basic-scan-header">
         <h2>Basic SEO Health Check</h2>
         <p>Quick analysis of your website's essential SEO fundamentals</p>
