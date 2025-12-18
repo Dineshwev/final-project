@@ -264,9 +264,7 @@ app.post("/api/basic-scan", (req, res) => {
     });
   }
 
-  console.log("🔥 REAL BASIC SCAN HANDLER HIT");
-
-  return res.json({
+  res.json({
     status: "success",
     url,
     score: 85,
@@ -274,7 +272,8 @@ app.post("/api/basic-scan", (req, res) => {
       title: "ok",
       meta: "ok",
       links: "ok"
-    }
+    },
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -317,11 +316,11 @@ app.get("/api/export/:scanId/csv", (req, res) => {
 
 // Alerts unread count endpoint
 app.get("/api/alerts/unread-count", (req, res) => {
-  const userId = req.query.userId || 'anonymous';
-  console.log(`🔔 Alerts unread count request for user: ${userId}`);
+  // Safe, non-blocking mock implementation
+  // Accepts optional userId query param but returns strictly static data
   res.status(200).json({
     success: true,
-    count: 2
+    count: 0
   });
 });
 
